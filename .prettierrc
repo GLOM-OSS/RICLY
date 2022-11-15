@@ -1,3 +1,6 @@
 {
-  "singleQuote": true
+  "singleQuote": true,
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
 }
