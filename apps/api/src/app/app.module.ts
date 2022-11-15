@@ -1,12 +1,64 @@
-import { Module } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
+import * as connectRedis from 'connect-redis';
+import * as session from 'express-session';
+import * as passport from 'passport';
+import { createClient } from 'redis';
+
+import { Logger } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { PassportModule } from '@nestjs/passport';
+import { randomUUID } from 'crypto';
+import { PrismaService } from '../prisma/prisma.service';
 import { AppController } from './app.controller';
+import { AppInterceptor } from './app.interceptor';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [
+    ConfigModule.forRoot(),
+    PassportModule.register({
+      session: true,
+    }),
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    PrismaService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AppInterceptor,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    const redisClient = createClient({ legacyMode: true });
+    redisClient.connect().catch((message) => Logger.error(message));
+    const RedisStore = connectRedis(session);
+
+    consumer
+      .apply(
+        session({
+          name: `Ricly${randomUUID().replace('-', '').toLocaleUpperCase()}`,
+          store: new RedisStore({
+            client: redisClient,
+            host: process.env.REDIS_HOST,
+            port: Number(process.env.REDIS_PORT),
+          }),
+          secret: process.env.SESSION_SECRET,
+          genid: () => randomUUID(),
+          saveUninitialized: false,
+          resave: false,
+          rolling: true,
+          cookie: {
+            maxAge: 10 * 60 * 1000, //10 minutes of inativity
+          },
+        }),
+        passport.initialize(),
+        passport.session()
+      )
+      .forRoutes('*');
+  }
+}
