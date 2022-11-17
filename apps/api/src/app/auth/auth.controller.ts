@@ -2,9 +2,10 @@ import {
   Controller,
   Get,
   Req,
+  Res,
   UseGuards
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthenticatedGuard } from './auth.guard';
 import { GoogleGuard } from './google/google.guard';
 
@@ -13,8 +14,8 @@ export class AuthController {
 
   @Get('')
   @UseGuards(GoogleGuard)
-  async register(@Req() request: Request) {
-    return request.user;
+  async register(@Res() res: Response) {
+    return res.redirect(`${process.env.RICLY_APP_SUCCESS_URL}`);
   }
   
   @Get('google-signin')
