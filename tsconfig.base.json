@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@ricly/dto": ["libs/dto/src/index.ts"],
       "@ricly/encrypter": ["libs/encrypter/src/index.ts"]
     }
   },
