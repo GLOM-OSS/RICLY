@@ -9,16 +9,18 @@ export class AuthenticatedGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
-    const { roles: userRoles } = request.user as User;
-    const roles = this.reflector.get<Role[]>('roles', context.getClass());
     const isPublic = this.reflector.get<boolean>(
       'isPublic',
       context.getHandler()
     );
-    return (
-      isPublic ||
-      (request.isAuthenticated() && this.userHasRightRoles(userRoles, roles))
-    );
+    if (isPublic) return isPublic;
+    const isAuthenticated = request.isAuthenticated();
+    if (isAuthenticated) {
+      const { roles: userRoles } = request.user as User;
+      const roles = this.reflector.get<Role[]>('roles', context.getClass());
+      return this.userHasRightRoles(userRoles, roles);
+    }
+    return isAuthenticated;
   }
 
   private userHasRightRoles(userRoles: UserRole[], roles: Role[]) {

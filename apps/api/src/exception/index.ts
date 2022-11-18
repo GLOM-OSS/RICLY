@@ -1,6 +1,6 @@
 export const sAUTH403 = {
-  en: `Your session is invalid. Please login!`,
-  fr: 'Votre session est non valide. Veuillez vous connecter !',
+  en: `Your session or role is invalid. Please login with the right role!`,
+  fr: 'Votre session ou role est non valide. Veuillez vous connecter avec le role approprié !',
 };
 export const AUTH01 = {
   en: `Your google access token or email has been invalidated`,
@@ -12,7 +12,7 @@ export const AUTH02 = {
 };
 export const AUTH03 = (message: string) => ({
   en: `Your login request failed with error: ${message}`,
-  fr: 'La demande de connexion a échoué avec une erreur :',
+  fr: `La demande de connexion a échoué avec l'erreur : ${message}`,
 });
 export const AUTH04 = {
   en: `Oops, you've recently triggered this action. Please try later`,
@@ -38,6 +38,14 @@ export const AUTH09 = {
   en: `API access are forbidden`,
   fr: `Accès d'API non authorisé`,
 };
+export const AUTH10 = {
+  en: `Incorrect password.`,
+  fr: 'Mot de passe incorrect.',
+};
+export const AUTH11 = {
+  en: `Sorry, we could not destroy your session`,
+  fr: `Désolé, nous avons pas pu deruire votre session`,
+};
 export const AUTH400 = {
   en: `Bad Request. Invalid grant`,
   fr: 'Mauvaise demande. Subvention non valide',
@@ -60,8 +68,8 @@ export const AUTH403 = (ressource: string) => ({
   fr: `Accès interdit pour ${ressource}`,
 });
 export const AUTH500 = {
-  en: `Sorry, we could not destroy your session`,
-  fr: `Désolé, nous avons pas pu deruire votre session`,
+  en: `Sorry, This error was not suppose to happen. Our team is working on it.`,
+  fr: `Désolé, Cette erreur n'est pas sensé arriver. Nos equipe travail dessus.`,
 };
 export const AUTH501 = (element: string) => ({
   en: `Sorry, <${element}> is not yet implemented`,
