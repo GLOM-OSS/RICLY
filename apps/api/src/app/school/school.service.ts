@@ -49,4 +49,16 @@ export class SchoolService {
       },
     });
   }
+
+  async findAll(developer_id: string) {
+    return this.prismaService.school.findMany({
+      where: { developer_id },
+    });
+  }
+
+  async findOne(school_id: string) {
+    return this.prismaService.school.findUnique({
+      where: { school_id },
+    });
+  }
 }
