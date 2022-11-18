@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Person } from '@prisma/client';
-import { IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class SchoolPostDto {
   @IsString()
@@ -10,12 +10,33 @@ export class SchoolPostDto {
   @IsString()
   @ApiProperty()
   school_acronym: string;
-}
 
-export class SignInDto {
   @IsString()
   @ApiProperty()
-  school_code: string;
+  school_domain: string;
+}
+
+export class NewPasswordDto {
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    required: false,
+    description: 'Password may not be provided for the first time only',
+  })
+  password?: string;
+
+  @IsString()
+  @ApiProperty()
+  new_password: string;
+}
+export class SignInDto {
+  @IsEmail()
+  @ApiProperty()
+  email: string;
+
+  @IsString()
+  @ApiProperty()
+  password: string;
 }
 
 export enum Role {

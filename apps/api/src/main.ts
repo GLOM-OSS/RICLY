@@ -26,8 +26,8 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new HttpExceptionFilter());
   const config = new DocumentBuilder()
-    .setTitle('Squoolr APIs')
-    .setDescription('Detailed description of the services used on Squoolr.')
+    .setTitle('Ricly APIs')
+    .setDescription('Detailed description of the services used on Ricly.')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
