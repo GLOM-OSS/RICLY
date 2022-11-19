@@ -13,11 +13,14 @@
 
 # Features
 
-- Admin dashboard
-- User settings and or user dashboard
-- send emails
-- recive emails
-- Connections through other parties ie discord, twitter, facebook etc..
+- Developer dashboard
+- School default UI
+- Bootstrap school by importing class halls, teachers, classrooms, subjects, students
+- School secretary dashboard
+- Timetable generation
+- Teacher timetable
+- Student timetable
+- Subscription paying with Binance
 
 # Setup
 
@@ -46,7 +49,7 @@ docker-compose up --build --env-file ./.env
 # Wanna join the team?
 
 - [Discord server](https://discord.gg/UHy7nTc5bC)
-- [Postman team](https://www.postman.com/multiemail/workspace/muti-email-rest-api/overview)
+- [Figma file](https://www.figma.com/file/VhtjscZ9QpvMMVmM2BEe8J/RICLY?node-id=0%3A1&t=Yu9Heut8hzfaQtbw-1)
 
 
 ##  Contributing
