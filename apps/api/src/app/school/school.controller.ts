@@ -58,8 +58,8 @@ export class SchoolController {
     );
   }
 
-  @Get(':school_id')
-  async getSchool(@Param('school_id') school_id: string) {
-    return await this.schoolService.findOne(school_id);
+  @Get(':school_code')
+  async getSchool(@Param('school_code') school_code: string) {
+    return await this.schoolService.findOne(school_code);
   }
 }

@@ -29,7 +29,7 @@ export class SchoolService {
     { school_acronym, school_domain, school_name }: SchoolPostDto
   ) {
     const school_code = await this.getSchoolCode(school_acronym as string);
-    return this.prismaService.school.create({
+    const { api_key, ...school } = await this.prismaService.school.create({
       data: {
         school_name,
         school_code,
@@ -43,17 +43,36 @@ export class SchoolService {
         Developer: { connect: { developer_id } },
       },
     });
+    return { ...school, api_key: school_domain ? api_key : null };
   }
 
   async findAll(developer_id: string) {
-    return this.prismaService.school.findMany({
+    return await this.prismaService.school.findMany({
+      select: {
+        school_domain: true,
+        school_code: true,
+        school_acronym: true,
+        school_name: true,
+      },
       where: { developer_id },
     });
   }
 
-  async findOne(school_id: string) {
-    return this.prismaService.school.findUnique({
-      where: { school_id },
+  async findOne(school_code: string) {
+    const { api_key, ...school } = await this.prismaService.school.findUnique({
+      select: {
+        school_name: true,
+        school_code: true,
+        school_acronym: true,
+        school_domain: true,
+        api_key: true,
+        api_test_key: true,
+        api_calls_used: true,
+        api_calls_left: true,
+        test_api_calls_left: true,
+      },
+      where: { school_code },
     });
+    return { ...school, api_key: school.school_domain ? api_key : null };
   }
 }
