@@ -9,9 +9,9 @@ import {
   Res,
   UseGuards
 } from '@nestjs/common';
-import { NewPasswordDto, Role, User } from '@ricly/dto';
 import { Request, Response } from 'express';
 import { IsPublic, Roles } from '../app.decorator';
+import { NewPasswordDto, Role, User } from '../app.dto';
 import { AuthenticatedGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { GoogleGuard } from './google/google.guard';

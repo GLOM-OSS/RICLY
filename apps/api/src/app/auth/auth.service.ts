@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { NewPasswordDto, Role, User } from '@ricly/dto';
+import { NewPasswordDto, Role, User } from '../app.dto';
 
 import * as bcrypt from 'bcrypt';
-import { AUTH10 } from '../../exception';
 import { randomUUID } from 'crypto';
+import { AUTH10 } from '../../exception';
 
 @Injectable()
 export class AuthService {

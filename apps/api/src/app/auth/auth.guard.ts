@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role, User, UserRole } from '@ricly/dto';
 import { Request } from 'express';
+import { Role, User, UserRole } from '../app.dto';
 
 @Injectable()
 export class AuthenticatedGuard implements CanActivate {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportSerializer } from '@nestjs/passport';
 import { Person } from '@prisma/client';
-import { User } from '@ricly/dto';
+import { User } from '../app.dto';
 import { AuthService } from './auth.service';
 
 @Injectable()

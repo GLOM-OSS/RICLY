@@ -7,13 +7,13 @@ import {
   Param,
   Post,
   Req,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Role, SchoolPostDto, User, UserRole } from '@ricly/dto';
 import { Request } from 'express';
 import { AUTH500 } from '../../exception';
 import { Roles } from '../app.decorator';
+import { Role, SchoolPostDto, User, UserRole } from '../app.dto';
 import { AuthenticatedGuard } from '../auth/auth.guard';
 import { SchoolService } from './school.service';
 

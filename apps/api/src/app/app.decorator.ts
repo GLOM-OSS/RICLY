@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { Role } from '@ricly/dto';
+import { Role } from './app.dto';
 
 export const IsPublic = () => SetMetadata('isPublic', true);
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { SchoolPostDto } from '@ricly/dto';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { SchoolPostDto } from '../app.dto';
 
 @Injectable()
 export class SchoolService {
