@@ -2,11 +2,17 @@ import { Reducer, useContext, useReducer } from 'react';
 import LanguageContext from './languageContext';
 
 import {
-  Action, Language,
-  LanguageContextProviderProps, State
+  Action,
+  Language,
+  LanguageContextProviderProps,
+  LanguageType,
+  State,
 } from './language.interface';
 
-const languageReducer: Reducer<Language, Action> = (state: State, action: Action) => {
+const languageReducer: Reducer<Language, Action> = (
+  state: State,
+  action: Action
+) => {
   switch (action.type) {
     case 'USE_ENGLISH': {
       localStorage.setItem('ricly_active_language', 'En');
@@ -25,7 +31,8 @@ function LanguageContextProvider({
   children,
 }: LanguageContextProviderProps): JSX.Element {
   const initialState: Language = {
-    activeLanguage:  'Fr',
+    activeLanguage:
+      (localStorage.getItem('ricly_active_language') as LanguageType) || 'Fr',
     languageDispatch: () => null,
   };
 
