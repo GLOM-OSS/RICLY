@@ -82,8 +82,6 @@ Thanks goes to these wonderful people ❤:
   <tbody>
     <tr>
       <td align="center"><a href="https://github.com/tchakoumi"><img src="https://avatars.githubusercontent.com/u/43315117?s=400&v=4?s=70" width="70px;" alt="Tchakoumi Lorrain"/><br /><sub><b>Tchakoumi Lorrain</b></sub></a><br /><a href="https://github.com/glom-oss/ricly/commits?author=tchakoumi" title="Code">💻</a> <a href="https://github.com/glom-oss/ricly/pulls?q=is%3Apr+reviewed-by%3Atchakoumi" title="Reviewed Pull Requests">👀</a> <a href="#projectManagement-tchakoumi" title="Project Management">📆</a> <a href="#design-tchakoumi" title="Design">🎨</a><a href="#ideas-tchakoumi" title="Ideas, Planning, & Feedback">🤔</a></td>
-    </tr>
-    <tr>
       <td align="center"><a href="https://github.com/marcjazz"><img src="https://avatars.githubusercontent.com/u/61763373?v=4?s=70" width="70px;" alt="Kuidja Marco"/><br /><sub><b>Kuidja Marco</b></sub></a><br /><a href="https://github.com/glom-oss/ricly/commits?author=marcjazz" title="Code">💻</a> <a href="https://github.com/glom-oss/ricly/pulls?q=is%3Apr+reviewed-by%3Amarcjazz" title="Reviewed Pull Requests">👀</a> <a href="#projectManagement-marcjazz" title="Project Management">📆</a><a href="#ideas-marcjazz" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
   </tbody>
