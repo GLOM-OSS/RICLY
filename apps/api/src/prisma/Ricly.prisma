@@ -37,12 +37,12 @@ model Person {
 }
 
 model Developer {
-    developer_id String   @id @default(uuid()) @db.VarChar(36)
-    password     String?  @db.VarChar(75)
-    person_id    String   @db.VarChar(36)
-    Person       Person   @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
-    
-    Schools       School[]
+    developer_id String  @id @default(uuid()) @db.VarChar(36)
+    password     String? @db.VarChar(75)
+    person_id    String  @db.VarChar(36)
+    Person       Person  @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
+
+    Schools School[]
 }
 
 model School {
@@ -71,6 +71,8 @@ model School {
 model Subscription {
     subscription_id String   @id @default(uuid()) @db.VarChar(36)
     number_of_apis  Int
+    total_paid      Int
+    unit_price      Int
     subscribed_at   DateTime @default(now()) @db.DateTime(0)
     school_id       String   @db.VarChar(36)
     School          School   @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)

@@ -17,6 +17,7 @@ import { AppInterceptor } from './app.interceptor';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { SchoolModule } from './school/school.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { SchoolModule } from './school/school.module';
     PrismaModule,
     AuthModule,
     SchoolModule,
+    SubscriptionModule
   ],
   controllers: [AppController],
   providers: [
