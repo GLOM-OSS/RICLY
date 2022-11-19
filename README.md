@@ -37,7 +37,11 @@ npx nx serve api
 
 # Docker
 
-For development server (http://localhost:3000)
+After executing the steps below, you'll access: 
+
+- frontend on (http://localhost:4000)
+- backend on (http://localhost:8080)
+
 ```bash
 git clone https://github.com/glom-oss/ricly.git
 cd ricly
