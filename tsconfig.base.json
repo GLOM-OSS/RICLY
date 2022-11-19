@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@ricly/auth": ["libs/auth/src/index.ts"],
       "@ricly/encrypter": ["libs/encrypter/src/index.ts"]
     }
   },
