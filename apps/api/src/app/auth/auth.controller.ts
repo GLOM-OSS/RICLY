@@ -7,9 +7,10 @@ import {
   Post,
   Req,
   Res,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { AUTH500 } from '../../exception';
 import { IsPublic, Roles } from '../app.decorator';
 import { NewPasswordDto, Role, User } from '../app.dto';
 import { AuthenticatedGuard } from './auth.guard';
@@ -49,14 +50,17 @@ export class AuthController {
     @Req() request: Request,
     @Body() newPassword: NewPasswordDto
   ) {
-    const { roles } = request.user as User;
+    const { preferred_lang, roles } = request.user as User;
     try {
       const { user_id: developer_id } = roles.find(
         ({ role }) => role === Role.DEVELOPER
       );
       return await this.authService.changePassword(developer_id, newPassword);
     } catch (error) {
-      throw new HttpException(error?.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        AUTH500[preferred_lang],
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 

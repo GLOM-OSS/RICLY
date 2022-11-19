@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { getRandomString } from '../../prisma/utils';
 import { SchoolPostDto } from '../app.dto';
 
 @Injectable()
@@ -29,22 +29,17 @@ export class SchoolService {
     { school_acronym, school_domain, school_name }: SchoolPostDto
   ) {
     const school_code = await this.getSchoolCode(school_acronym as string);
-    const api_test_key = `${randomUUID().replace('-', '')}`;
-    const api_key = `${randomUUID().replace('-', '')}${randomUUID().replace(
-      '-',
-      ''
-    )}`;
     return this.prismaService.school.create({
       data: {
-        api_key,
         school_name,
         school_code,
-        api_test_key,
         school_domain,
         school_acronym,
         api_calls_left: 0,
         api_calls_used: 0,
         test_api_calls_left: 500,
+        api_key: getRandomString(64),
+        api_test_key: getRandomString(32),
         Developer: { connect: { developer_id } },
       },
     });

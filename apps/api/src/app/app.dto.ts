@@ -34,8 +34,9 @@ export class SchoolPostDto {
   school_acronym: string;
 
   @IsString()
-  @ApiProperty()
-  school_domain: string;
+  @IsOptional()
+  @ApiProperty({ required: true })
+  school_domain?: string;
 }
 
 export class NewPasswordDto {

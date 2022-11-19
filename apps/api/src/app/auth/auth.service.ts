@@ -18,6 +18,7 @@ export class AuthService {
         Developers: {
           create: {
             developer_id: randomUUID(),
+            //For development purpose
             password: bcrypt.hashSync(
               'ricly-password',
               Number(process.env.SALT)
@@ -54,14 +55,17 @@ export class AuthService {
   }
 
   async signIn(email: string, password: string) {
-    const { password: hash_password, Person } =
-      await this.prismaService.developer.findFirst({
-        select: { password: true, Person: true },
-        where: {
-          Person: { email },
-        },
-      });
-    return bcrypt.compareSync(password, hash_password) ? Person : null;
+    const developer = await this.prismaService.developer.findFirst({
+      select: { password: true, Person: true },
+      where: {
+        Person: { email },
+      },
+    });
+    if (developer) {
+      const { password: hash_password, Person } = developer;
+      return bcrypt.compareSync(password, hash_password) ? Person : null;
+    }
+    return null;
   }
 
   async changePassword(
