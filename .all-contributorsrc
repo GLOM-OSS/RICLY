@@ -11,9 +11,16 @@
     {
       "login": "Tchakoumi",
       "name": "Tchakoumi Lorrain",
-      "avatar_url": "https://avatars.githubusercontent.com/u/69336518?v=4",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43315117?s=400&v=4",
       "profile": "https://github.com/tchakoumi",
       "contributions": ["code", "review", "projectManagement", "design", "mentoring", "ideas", "planning"]
+    },
+    {
+      "login": "marcjazz",
+      "name": "Kuidja Marco",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61763373?v=4",
+      "profile": "https://github.com/marcjazz",
+      "contributions": ["code", "review", "projectManagement", "mentoring", "ideas", "planning"]
     }
   ],
   "contributorsPerLine": 7,
