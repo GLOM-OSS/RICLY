@@ -20,7 +20,7 @@
 - Timetable generation
 - Teacher timetable
 - Student timetable
-- Subscription paying with Binance
+- API subscription through Binance
 
 # Setup
 
