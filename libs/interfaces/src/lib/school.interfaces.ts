@@ -7,6 +7,7 @@ export interface CreateSchoolInterface {
   school_name: string;
   school_acronym: string;
   school_domain?: string;
+  secretary_email: string;
 }
 
 export interface Subscription {

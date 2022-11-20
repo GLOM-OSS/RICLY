@@ -14,7 +14,7 @@ import { Box } from '@mui/system';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
-import { SchoolInterface } from 'libs/interfaces/src';
+import { CreateSchoolInterface, SchoolInterface } from 'libs/interfaces/src';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
@@ -22,9 +22,7 @@ import SchoolCard from '../../components/schools/schoolCard';
 import { useUser } from '../../contexts/UserContextProvider';
 import { Scrollbars } from 'rc-scrollbars';
 import ConfirmDeleteDialog from '../../components/schools/confirmDeleteDialog';
-import AddSchoolDialog, {
-  NewSchoolInterface,
-} from '../../components/schools/addSchool';
+import AddSchoolDialog from '../../components/schools/addSchool';
 
 export default function Schools() {
   const { formatMessage } = useIntl();
@@ -153,7 +151,7 @@ export default function Schools() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
   const [isCreatingSchool, setIsCreatingSchool] = useState<boolean>(false);
 
-  const createSchool = (school: NewSchoolInterface) => {
+  const createSchool = (school: CreateSchoolInterface) => {
     setIsCreatingSchool(true);
     const notif = new useNotification();
     const newNotifications = notifications.filter(({ notif, usage }) => {

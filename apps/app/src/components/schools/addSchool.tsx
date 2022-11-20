@@ -12,15 +12,9 @@ import {
 } from '@mui/material';
 import { theme } from '@ricly/theme';
 import { useFormik } from 'formik';
+import { CreateSchoolInterface } from 'libs/interfaces/src';
 import { useIntl } from 'react-intl';
 import * as Yup from 'yup';
-
-export interface NewSchoolInterface {
-  school_acronym: string;
-  school_name: string;
-  school_domain: string;
-  secretary_email: string;
-}
 
 export default function AddSchoolDialog({
   isDialogOpen,
@@ -29,10 +23,10 @@ export default function AddSchoolDialog({
 }: {
   isDialogOpen: boolean;
   closeDialog: () => void;
-  handleSubmit: (values: NewSchoolInterface) => void;
+  handleSubmit: (values: CreateSchoolInterface) => void;
 }) {
   const { formatMessage } = useIntl();
-  const initialValues: NewSchoolInterface = {
+  const initialValues: CreateSchoolInterface = {
     school_acronym: '',
     school_name: '',
     school_domain: '',
