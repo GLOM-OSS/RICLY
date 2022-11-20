@@ -1,9 +1,8 @@
-import { Box, Button, Typography, CircularProgress } from '@mui/material';
-import { theme } from '@ricly/theme'; 
 import { DoneAllRounded } from '@mui/icons-material';
-import { v4 as uuidv4 } from 'uuid';
+import { Box, Button, CircularProgress, Typography } from '@mui/material';
+import { theme } from '@ricly/theme';
 import { Id, toast } from 'react-toastify';
-import { useIntl } from 'react-intl';
+import { v4 as uuidv4 } from 'uuid';
 
 export class useNotification {
   toastId: Id;
@@ -62,14 +61,15 @@ export const ErrorMessage = ({
   retryFunction,
   notification,
   message,
+  retryValue = 'Retry',
+  closeValue = 'Close',
 }: {
   retryFunction: () => void;
   notification: useNotification;
   message: string;
+  retryValue?: string;
+  closeValue?: string;
 }) => {
-  const intl = useIntl();
-  const { formatMessage } = intl;
-
   return (
     <Box sx={{ textAlign: 'center' }}>
       <Typography variant="caption">{message}</Typography>
@@ -91,7 +91,7 @@ export const ErrorMessage = ({
           }}
           sx={{ ...theme.typography.caption }}
         >
-          {formatMessage({ id: 'retry' })}
+          {retryValue}
         </Button>
         <Button
           size="small"
@@ -108,7 +108,7 @@ export const ErrorMessage = ({
             },
           }}
         >
-          {formatMessage({ id: 'close' })}
+          {closeValue}
         </Button>
       </Box>
     </Box>
