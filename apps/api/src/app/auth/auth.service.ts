@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { NewPasswordDto, Role, User } from '../app.dto';
+import { NewPasswordDto, Role, User, UserRole } from '../app.dto';
+import { Request } from 'express';
 
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -39,17 +40,44 @@ export class AuthService {
       const developer = await this.prismaService.developer.findFirst({
         where: { Person: { email } },
       });
+      const userRoles: UserRole[] = [];
       if (developer) {
-        return {
-          ...person,
-          roles: [
-            {
-              user_id: developer.developer_id,
-              role: Role.DEVELOPER,
-            },
-          ],
-        };
+        userRoles.push({
+          user_id: developer.developer_id,
+          role: Role.DEVELOPER,
+        });
       }
+
+      const secretary = await this.prismaService.secretary.findFirst({
+        where: { Person: { email } },
+      });
+      if (secretary) {
+        userRoles.push({
+          user_id: secretary.secretary_id,
+          role: Role.SECRETARY,
+        });
+      }
+
+      const teacher = await this.prismaService.teacher.findFirst({
+        where: { Person: { email } },
+      });
+      if (teacher) {
+        userRoles.push({
+          user_id: teacher.teacher_id,
+          role: Role.TEACHER,
+        });
+
+        const coordinator = await this.prismaService.classroom.findFirst({
+          where: { coordinator: teacher.teacher_id },
+        });
+        if (coordinator) {
+          userRoles.push({
+            user_id: teacher.teacher_id,
+            role: Role.COORDINATOR,
+          });
+        }
+      }
+      return { ...person, roles: userRoles };
     }
     return null;
   }
@@ -86,5 +114,23 @@ export class AuthService {
       });
     }
     throw new HttpException(JSON.stringify(AUTH10), HttpStatus.UNAUTHORIZED);
+  }
+
+  async validateRequest(request: Request) {
+    const clientUrl = request.headers.origin;
+    const clientApiKey = request.get('RICLY-API-KEY');
+    const school = await this.prismaService.school.findFirst({
+      where: {
+        OR: [
+          { api_test_key: clientApiKey },
+          { AND: { school_domain: clientUrl ?? null, api_key: clientApiKey } },
+        ],
+      },
+    });
+    if (school)
+      return this.prismaService.person.findUnique({
+        where: { email: request.body.email },
+      });
+    return null;
   }
 }

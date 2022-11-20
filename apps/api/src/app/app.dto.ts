@@ -16,7 +16,7 @@ export class SubscribeDto {
   @IsUUID()
   @ApiProperty()
   school_id: string;
-  
+
   @IsString()
   @ApiProperty()
   transaction_id: string;
@@ -69,6 +69,10 @@ export class SignInDto {
 export enum Role {
   ADMIN = 'ADMIN',
   DEVELOPER = 'DEVELOPER',
+  
+  TEACHER = 'TEACHER',
+  SECRETARY = 'SECRETARY',
+  COORDINATOR = 'COORDINATOR',
 }
 export type UserRole = {
   user_id: string;
