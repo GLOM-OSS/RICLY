@@ -3,6 +3,7 @@ import { Auth } from '@ricly/auth';
 import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router';
 import Layout from '../pages/Layout';
+import Schools from '../pages/school';
 
 export const Test = () => {
   const { formatMessage } = useIntl();
@@ -21,10 +22,10 @@ export const routes = [
   {
     path: '-',
     element: <Layout />,
-    children: [{ path: 'schools', element: <Auth /> }],
+    children: [{ path: 'schools', element: <Schools /> }],
   },
-  {
-    path: '*',
-    element: <Navigate to="/" />,
-  },
+  //   {
+  //     path: '*',
+  //     element: <Navigate to="/" />,
+  //   },
 ];
