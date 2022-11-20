@@ -1,26 +1,38 @@
-import { User } from 'libs/interfaces/src';
-import { useReducer, useContext, Reducer } from 'react';
-import UserContext, { DispatchInterface, UserAction } from './userContext';
+import { Reducer, useContext, useReducer } from 'react';
+import UserContext, {
+  DispatchInterface,
+  SelectedSchool,
+  UserAction,
+  UserInterface,
+} from './userContext';
 
-const userReducer: Reducer<User & DispatchInterface, UserAction> = (
-  state: User & DispatchInterface,
+const userReducer: Reducer<
+  UserInterface & SelectedSchool & DispatchInterface,
+  UserAction
+> = (
+  state: UserInterface & SelectedSchool & DispatchInterface,
   action: UserAction
 ) => {
-  alert('combi');
   switch (action.type) {
     case 'CLEAR_USER': {
       return {
         ...state,
-        created_at: new Date(),
-        email: '',
-        fullname: '',
-        person_id: '',
-        preferred_lang: 'en',
-        roles: [],
+        user: {
+          created_at: new Date(),
+          email: '',
+          fullname: '',
+          person_id: '',
+          preferred_lang: 'en',
+          roles: [],
+        },
+        selected_school: undefined,
       };
     }
     case 'LOAD_USER': {
-      return { ...state, ...action.payload.user };
+      return { ...state, user: action.payload.user };
+    }
+    case 'SELECT_SCHOOL': {
+      return { ...state, selected_school: action.payload.selected_school };
     }
     default:
       return state;
@@ -32,21 +44,23 @@ function UserContextProvider({
 }: {
   children: JSX.Element | React.ReactNode;
 }): JSX.Element {
-  const initialState: User & DispatchInterface = {
-    created_at: new Date(),
-    email: 'lorraintchakoumi@gmail.com',
-    fullname: 'Lorrain Tchakoumi Kouatchoua',
-    person_id: 'lksikelsie',
-    preferred_lang: 'fr',
-    roles: [],
-    gender: 'Male',
-    phone_number: '657140183',
+  const initialState: UserInterface & SelectedSchool & DispatchInterface = {
+    user: {
+      created_at: new Date(),
+      email: 'lorraintchakoumi@gmail.com',
+      fullname: 'Lorrain Tchakoumi Kouatchoua',
+      person_id: 'lksikelsie',
+      preferred_lang: 'fr',
+      roles: [],
+      gender: 'Male',
+      phone_number: '657140183',
+    },
     userDispatch: () => null,
   };
 
   const [userState, userDispatch] = useReducer(userReducer, initialState);
   const value = {
-    ...(userState as User),
+    ...(userState as UserInterface & SelectedSchool),
     userDispatch,
   };
 
