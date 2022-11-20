@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { getRandomString } from '../../prisma/utils';
+import { getRandomString } from '../../utils';
 import { SchoolPostDto } from '../app.dto';
 
 @Injectable()
