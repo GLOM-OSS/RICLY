@@ -246,7 +246,7 @@ export default function Schools() {
               display: 'grid',
               gridTemplateColumns: 'auto 1fr',
               alignItems: 'center',
-              backgroundColor: theme.common.CSK50,
+              backgroundColor: theme.common.CSK200,
               padding: `0 ${theme.spacing(4.625)}`,
             }}
           >
