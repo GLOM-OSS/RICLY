@@ -14,7 +14,7 @@ import { HttpExceptionFilter } from './exception/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: {
-      origin: ['http://localhost:4200'],
+      origin: ['http://localhost:3000'],
       credentials: true,
     },
   });
@@ -26,8 +26,8 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new HttpExceptionFilter());
   const config = new DocumentBuilder()
-    .setTitle('Squoolr APIs')
-    .setDescription('Detailed description of the services used on Squoolr.')
+    .setTitle('Ricly APIs')
+    .setDescription('Detailed description of the services used on Ricly.')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);

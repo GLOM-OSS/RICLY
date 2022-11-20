@@ -24,12 +24,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     } catch (error) {
       errorMessage = message ?? exception.message;
     }
-    response.status(statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR).json({
-      error,
-      path: request.url,
-      timestamp: new Date().toISOString(),
-      message: errorMessage,
-      statusCode: statusCode ?? exception.getStatus(),
-    });
+    if (statusCode === 400)
+      response.redirect(`${process.env.RICLY_APP_ERR_URL}`);
+    else
+      response.status(statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR).json({
+        error,
+        path: request.url,
+        timestamp: new Date().toISOString(),
+        message: errorMessage,
+        statusCode: statusCode ?? exception.getStatus(),
+      });
   }
 }
