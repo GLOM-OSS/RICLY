@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import { theme } from '@ricly/theme';
 import { useState } from 'react';
 import { Navigate, Outlet } from 'react-router';
+import LogoutDialog from '../components/logout/logoutDialog';
 import Navbar from '../components/navbar/Navbar';
 import { useUser } from '../contexts/UserContextProvider';
 
@@ -15,18 +16,24 @@ export default function Layout() {
   return person_id === '' ? (
     <Navigate to="/" />
   ) : (
-    <Box
-      sx={{
-        display: 'grid',
-        gridTemplateRows: 'auto 1fr',
-        rowGap: theme.spacing(2),
-        backgroundColor: theme.common.lowerGray,
-      }}
-    >
-      <Navbar logout={() => setIsLogoutDialogOpen(true)} />
-      <Box>
-        <Outlet />
+    <>
+      <LogoutDialog
+        closeDialog={() => setIsLogoutDialogOpen(false)}
+        isDialogOpen={isLogoutDialogOpen}
+      />
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateRows: 'auto 1fr',
+          rowGap: theme.spacing(2),
+          backgroundColor: theme.common.lowerGray,
+        }}
+      >
+        <Navbar logout={() => setIsLogoutDialogOpen(true)} />
+        <Box>
+          <Outlet />
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }
