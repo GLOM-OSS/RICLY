@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@ricly/encrypter": ["libs/encrypter/src/index.ts"],
-      "@ricly/interfaces": ["libs/interfaces/src/index.ts"]
+      "@ricly/interfaces": ["libs/interfaces/src/index.ts"],
+      "@ricly/utils": ["libs/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
