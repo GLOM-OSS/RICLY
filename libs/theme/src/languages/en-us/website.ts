@@ -9,4 +9,17 @@ export const website = {
   authenticatingUser: 'Authenticating User',
   authenticationFailed:
     'Something went wrong when getting your information. Please try again',
+  loggingOut: 'Logging out...',
+  errorLoggingOut: 'Something went wrong when logging out. Please try again',
+  areYouSureToLogout: 'Logout?',
+  logoutDialogMessage:
+    'Are you sure you want to logout? Confirming will close this work session. Do you still want to continue?',
+  cancel: 'Cancel',
+  logout: 'Logout',
+  loadingSchools: '',
+  failedLoadingSchools:
+    'Something went wrong while loading your schools. Please try again!',
+  loading: 'Loading...',
+  dashboard: 'Dashboard',
+  integrations: 'Integrations',
 };
