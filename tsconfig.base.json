@@ -17,6 +17,9 @@
     "paths": {
       "@ricly/encrypter": ["libs/encrypter/src/index.ts"],
       "@ricly/interfaces": ["libs/interfaces/src/index.ts"],
+      "@ricly/auth": ["libs/auth/src/index.ts"],
+      "@ricly/theme": ["libs/theme/src/index.ts"],
+      "@ricly/toast": ["libs/toast/src/index.ts"],
       "@ricly/utils": ["libs/utils/src/index.ts"]
     }
   },
