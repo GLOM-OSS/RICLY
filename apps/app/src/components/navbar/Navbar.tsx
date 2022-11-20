@@ -178,7 +178,7 @@ export default function Navbar({ logout }: { logout: () => void }) {
                       type: 'SELECT_SCHOOL',
                       payload: { selected_school: school },
                     });
-                    navigate(`/-/schools/${school.school_code}`);
+                    navigate(`/-/${school.school_code}`);
                     setIsSchoolMenuOpen(false);
                     setAnchorEl(null);
                   }}
@@ -188,8 +188,10 @@ export default function Navbar({ logout }: { logout: () => void }) {
               );
             })}
           </Menu>
-          <NavItem to="dashboard">{formatMessage({ id: 'dashboard' })}</NavItem>
-          <NavItem to="integrations">
+          <NavItem to={`/-/${selected_school.school_code}/dashboard`}>
+            {formatMessage({ id: 'dashboard' })}
+          </NavItem>
+          <NavItem to={`/-/${selected_school.school_code}/integrations`}>
             {formatMessage({ id: 'integrations' })}
           </NavItem>
           <Tooltip arrow title={formatMessage({ id: 'logout' })}>
