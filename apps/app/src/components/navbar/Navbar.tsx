@@ -11,10 +11,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import { SchoolInterface } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
-import { SchoolInterface } from 'libs/interfaces/src';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
