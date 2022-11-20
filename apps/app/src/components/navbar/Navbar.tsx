@@ -17,7 +17,6 @@ import { random } from '@ricly/utils';
 import { SchoolInterface } from 'libs/interfaces/src';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
 import Logo from '../../assets/Logo.png';
 import { useUser } from '../../contexts/UserContextProvider';
 import NavItem from './navItem';
@@ -72,6 +71,7 @@ export default function Navbar({ logout }: { logout: () => void }) {
             <ErrorMessage
               retryFunction={loadSchools}
               notification={notif}
+              // TODO: message should come from backend api
               message={formatMessage({ id: 'failedLoadingSchools' })}
             />
           ),
@@ -82,11 +82,10 @@ export default function Navbar({ logout }: { logout: () => void }) {
     }, 3000);
   };
 
-  const navigate = useNavigate();
   useEffect(() => {
-    if (person_id) {
+    if (selected_school) {
       loadSchools();
-    } else navigate('/');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
