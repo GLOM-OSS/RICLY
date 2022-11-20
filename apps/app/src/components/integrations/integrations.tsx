@@ -97,9 +97,9 @@ export default function Integrations() {
     setTimeout(() => {
       setIsChangingDomain(false);
       //TODO: CALL API HERE TO CHANGE DOMAIN
-      if (random() > 5)
+      if (random() > 5) {
         notif.update({ render: formatMessage({ id: 'updatedSuccessfully' }) });
-      else {
+      } else {
         notif.update({
           type: 'ERROR',
           render: (
@@ -121,9 +121,8 @@ export default function Integrations() {
     initialValues,
     validationSchema,
     enableReinitialize: true,
-    onSubmit: (values, { resetForm }) => {
+    onSubmit: (values) => {
       changeDomain(values.school_domain);
-      resetForm();
     },
   });
 
@@ -234,13 +233,19 @@ export default function Integrations() {
           justifyItems: 'start',
           columnGap: theme.spacing(2),
         }}
+        component="form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          formik.handleSubmit();
+        }}
       >
         <TextField
-          placeholder={formatMessage({ id: 'domain' })}
+          placeholder={formatMessage({ id: 'domain.com' })}
           label={formatMessage({ id: 'schoolSecureDomain' })}
           fullWidth
           required
           size="small"
+          disabled={isSchoolLoading}
           error={
             formik.touched.school_domain && Boolean(formik.errors.school_domain)
           }
