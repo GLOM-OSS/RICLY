@@ -14,7 +14,6 @@ import { Box } from '@mui/system';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
-import { CreateSchoolInterface, SchoolInterface } from 'libs/interfaces/src';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
@@ -23,6 +22,7 @@ import { useUser } from '../../contexts/UserContextProvider';
 import { Scrollbars } from 'rc-scrollbars';
 import ConfirmDeleteDialog from '../../components/schools/confirmDeleteDialog';
 import AddSchoolDialog from '../../components/schools/addSchool';
+import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
 
 export default function Schools() {
   const { formatMessage } = useIntl();
