@@ -3,7 +3,13 @@ import {
   ReportRounded,
   SearchOutlined,
 } from '@mui/icons-material';
-import { Button, InputAdornment, TextField, Typography } from '@mui/material';
+import {
+  Button,
+  InputAdornment,
+  Skeleton,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Box } from '@mui/system';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
@@ -16,7 +22,9 @@ import SchoolCard from '../../components/schools/schoolCard';
 import { useUser } from '../../contexts/UserContextProvider';
 import { Scrollbars } from 'rc-scrollbars';
 import ConfirmDeleteDialog from '../../components/schools/confirmDeleteDialog';
-import AddSchoolDialog, { NewSchoolInterface } from '../../components/schools/addSchool';
+import AddSchoolDialog, {
+  NewSchoolInterface,
+} from '../../components/schools/addSchool';
 
 export default function Schools() {
   const { formatMessage } = useIntl();
@@ -263,11 +271,18 @@ export default function Schools() {
           <Scrollbars style={{ height: '100%' }}>
             <Box>
               {areSchoolsLoading ? (
-                <Typography
-                  sx={{ textAlign: 'center', marginTop: theme.spacing(5) }}
-                >
-                  {formatMessage({ id: 'loadingSchools' })}
-                </Typography>
+                <Box sx={{ display: 'grid', rowGap: theme.spacing(0.5) }}>
+                  {[...new Array(5)].map((_, index) => (
+                    <Skeleton
+                      key={index}
+                      height={50}
+                      animation="wave"
+                      sx={{
+                        '&.MuiSkeleton-root': { transform: 'scale(1, 1)' },
+                      }}
+                    />
+                  ))}
+                </Box>
               ) : displaySchools.length === 0 ? (
                 <Typography
                   sx={{ textAlign: 'center', marginTop: theme.spacing(5) }}
