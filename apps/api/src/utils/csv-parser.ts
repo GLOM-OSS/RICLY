@@ -3,7 +3,7 @@ import { parse } from 'csv-parse';
 import { finished } from 'stream/promises';
 
 // Read and process the CSV file
-export async function processFile<T>(
+export async function readAndProcessFile<T>(
   columns: string[],
   csvStream: fs.ReadStream
 ) {
