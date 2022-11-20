@@ -1,4 +1,4 @@
-import { SchoolInterface, User } from 'libs/interfaces/src';
+import { SchoolInterface, User } from '@ricly/interfaces';
 import React, { createContext } from 'react';
 
 export type UserAction =
