@@ -25,13 +25,13 @@ export default function Layout() {
         sx={{
           display: 'grid',
           gridTemplateRows: 'auto 1fr',
-          rowGap: theme.spacing(2),
+          rowGap: theme.spacing(6.25),
           backgroundColor: theme.common.lowerGray,
-          minHeight: '100vh',
+          height: '100vh',
         }}
       >
         <Navbar logout={() => setIsLogoutDialogOpen(true)} />
-        <Box>
+        <Box sx={{ padding: `${theme.spacing(2)} ${theme.spacing(12)}` }}>
           <Outlet />
         </Box>
       </Box>
