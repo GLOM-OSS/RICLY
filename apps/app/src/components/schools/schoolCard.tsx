@@ -1,8 +1,8 @@
 import { DeleteOutline } from '@mui/icons-material';
 import { IconButton, Tooltip, Typography } from '@mui/material';
 import { Box } from '@mui/system';
+import { SchoolInterface } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
-import { SchoolInterface } from 'libs/interfaces/src';
 import { useIntl } from 'react-intl';
 
 export default function SchoolCard({
