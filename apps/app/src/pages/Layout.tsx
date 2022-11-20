@@ -27,6 +27,7 @@ export default function Layout() {
           gridTemplateRows: 'auto 1fr',
           rowGap: theme.spacing(2),
           backgroundColor: theme.common.lowerGray,
+          minHeight: '100vh',
         }}
       >
         <Navbar logout={() => setIsLogoutDialogOpen(true)} />
