@@ -17,6 +17,7 @@ import { random } from '@ricly/utils';
 import { SchoolInterface } from 'libs/interfaces/src';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
+import { useNavigate } from 'react-router';
 import Logo from '../../assets/Logo.png';
 import { useUser } from '../../contexts/UserContextProvider';
 import NavItem from './navItem';
@@ -62,6 +63,7 @@ export default function Navbar({ logout }: { logout: () => void }) {
           },
         ];
         setSchools(newSchools);
+        setAreSchoolsLoading(false);
       } else {
         const notif = new useNotification();
         notif.notify({ render: formatMessage({ id: 'loadingSchools' }) });
@@ -90,6 +92,7 @@ export default function Navbar({ logout }: { logout: () => void }) {
   }, []);
 
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -175,6 +178,7 @@ export default function Navbar({ logout }: { logout: () => void }) {
                       type: 'SELECT_SCHOOL',
                       payload: { selected_school: school },
                     });
+                    navigate(`/-/schools/${school.school_code}`);
                     setIsSchoolMenuOpen(false);
                     setAnchorEl(null);
                   }}
