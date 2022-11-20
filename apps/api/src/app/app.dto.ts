@@ -16,6 +16,10 @@ export class SubscribeDto {
   @IsUUID()
   @ApiProperty()
   school_id: string;
+  
+  @IsString()
+  @ApiProperty()
+  transaction_id: string;
 }
 
 export class SubscribeQueryDto {
