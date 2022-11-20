@@ -18,6 +18,8 @@ export default function SchoolCard({
   return (
     <Box
       sx={{
+        borderBottom: `1px solid ${theme.common.lighterPrimary}`,
+        borderTop: `1px solid ${theme.common.lighterPrimary}`,
         backgroundColor: theme.common.CSK50,
         transition: '0.3s',
         padding: `0 ${theme.spacing(4.625)}`,
