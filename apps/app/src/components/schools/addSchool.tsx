@@ -10,9 +10,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { CreateSchoolInterface } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { useFormik } from 'formik';
-import { CreateSchoolInterface } from 'libs/interfaces/src';
 import { useIntl } from 'react-intl';
 import * as Yup from 'yup';
 
