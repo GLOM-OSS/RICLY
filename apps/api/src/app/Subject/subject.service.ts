@@ -64,6 +64,14 @@ export class SubjectService {
       where: { OR: subjectIds.map((id) => ({ subject_id: id })) },
     });
   }
+  
+  async removeClassrooms(subject_id: string, classroomIds: string[]) {
+    return this.prismaService.classroomHasSubject.updateMany({
+      data: { is_deleted: true },
+      where: { OR: classroomIds.map((id) => ({ classroom_id: id, subject_id })) },
+    });
+  }
+
 
   async findAll(where: Prisma.SubjectWhereInput, take?: number) {
     const subjects = await this.prismaService.subject.findMany({

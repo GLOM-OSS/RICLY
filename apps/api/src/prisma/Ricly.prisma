@@ -201,6 +201,7 @@ model Subject {
 
 model ClassroomHasSubject {
     classroom_has_subject_id String    @id @default(uuid()) @db.VarChar(36)
+    is_deleted               Boolean   @default(false) @db.TinyInt
     subject_id               String
     Subject                  Subject   @relation(fields: [subject_id], references: [subject_id], onDelete: Cascade, onUpdate: Cascade)
     classroom_id             String
