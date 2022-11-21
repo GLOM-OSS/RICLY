@@ -5,6 +5,7 @@ import { useParams } from 'react-router';
 import Buildings from '../pages/buildings';
 import Dashboard from '../pages/dashboard';
 import Layout from '../pages/layout';
+import Teachers from '../pages/teachers';
 
 export const Test = () => {
   const { school_code } = useParams();
@@ -27,6 +28,7 @@ export const routes = [
     children: [
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'halls', element: <Buildings /> },
+      { path: 'teachers', element: <Teachers /> },
     ],
   },
   //   {
