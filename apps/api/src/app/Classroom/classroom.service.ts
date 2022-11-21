@@ -18,17 +18,21 @@ export class ClassroomService {
     const classrooms: Prisma.ClassroomCreateManyInput[] = [];
     const weekdays: Prisma.WeekdayCreateManyInput[] = [];
     for (let i = 0; i < csvClassrooms.length; i++) {
-      const { email, classroom_session, ...classroom } = csvClassrooms[i];
+      const { email, classroom_session, classroom_code, classroom_name } =
+        csvClassrooms[i];
       const teacher = await this.prismaService.teacher.findFirst({
-        where: { Person: { email } },
+        where: { Person: { email }, School: { school_id } },
+        select: { teacher_id: true, School: { select: { school_code: true } } },
       });
       if (teacher) {
         const classroom_id = randomUUID();
         classrooms.push({
           school_id,
           classroom_id,
-          ...classroom,
+          classroom_name,
           coordinator: teacher.teacher_id,
+          classroom_acronym: classroom_code,
+          classroom_code: `${teacher.School.school_code}${classroom_code}`,
         });
         const dayStartTime = new Date(new Date().setHours(8, 30));
         const dayEndTime = new Date(new Date().setHours(17, 30));
@@ -76,7 +80,7 @@ export class ClassroomService {
       select: {
         classroom_id: true,
         classroom_name: true,
-        classroom_code: true,
+        classroom_acronym: true,
         Coordinator: { select: { Person: { select: { email: true } } } },
       },
       where: { school_id, is_deleted: false },
@@ -86,10 +90,12 @@ export class ClassroomService {
         Coordinator: {
           Person: { email },
         },
+        classroom_acronym,
         ...teacher
       }) => ({
         ...teacher,
         teacher_email: email,
+        classroom_code: classroom_acronym,
       })
     );
   }
