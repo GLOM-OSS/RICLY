@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NewPasswordDto, Role, User, UserRole } from '../app.dto';
-import { Request } from 'express';
 
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -12,7 +12,34 @@ import { AUTH10 } from '../../exception';
 export class AuthService {
   constructor(private prismaService: PrismaService) {}
 
-  async validateUser(personCreateInput: Prisma.PersonCreateInput) {
+  async validateUser(
+    personCreateInput: Prisma.PersonCreateInput,
+    options?: {
+      client_urL: string;
+      client_api_key: string;
+    }
+  ) {
+    if (options) {
+      const { client_urL, client_api_key } = options;
+      const some = {
+        School: {
+          OR: [
+            { api_test_key: client_api_key },
+            {
+              AND: { school_domain: client_urL, api_key: client_api_key },
+            },
+          ],
+        },
+      };
+      const person = await this.prismaService.person.findFirst({
+        where: {
+          email: personCreateInput.email,
+          Secretaries: { some },
+          Teachers: { some },
+        },
+      });
+      return person
+    }
     return this.prismaService.person.upsert({
       create: {
         ...personCreateInput,
@@ -32,52 +59,57 @@ export class AuthService {
     });
   }
 
-  async deserializeUser(email: string): Promise<User> {
-    const person = await this.prismaService.person.findUnique({
+  async deserializeUser(email: string, school_id: string): Promise<User> {
+    const userRoles: UserRole[] = [];
+    const person = await this.prismaService.person.findFirst({
       where: { email },
     });
     if (person) {
       const developer = await this.prismaService.developer.findFirst({
         where: { Person: { email } },
       });
-      const userRoles: UserRole[] = [];
       if (developer) {
-        userRoles.push({
-          user_id: developer.developer_id,
-          role: Role.DEVELOPER,
+        return {
+          ...person,
+          roles: [
+            {
+              user_id: developer.developer_id,
+              role: Role.DEVELOPER,
+            },
+          ],
+        };
+      } else {
+        const secretary = await this.prismaService.secretary.findFirst({
+          where: { Person: { email }, School: { school_id } },
         });
-      }
-
-      const secretary = await this.prismaService.secretary.findFirst({
-        where: { Person: { email } },
-      });
-      if (secretary) {
-        userRoles.push({
-          user_id: secretary.secretary_id,
-          role: Role.SECRETARY,
-        });
-      }
-
-      const teacher = await this.prismaService.teacher.findFirst({
-        where: { Person: { email } },
-      });
-      if (teacher) {
-        userRoles.push({
-          user_id: teacher.teacher_id,
-          role: Role.TEACHER,
-        });
-
-        const coordinator = await this.prismaService.classroom.findFirst({
-          where: { coordinator: teacher.teacher_id },
-        });
-        if (coordinator) {
+        if (secretary) {
           userRoles.push({
-            user_id: teacher.teacher_id,
-            role: Role.COORDINATOR,
+            user_id: secretary.secretary_id,
+            role: Role.SECRETARY,
           });
         }
+
+        const teacher = await this.prismaService.teacher.findFirst({
+          where: { Person: { email }, School: { school_id } },
+        });
+        if (teacher) {
+          userRoles.push({
+            user_id: teacher.teacher_id,
+            role: Role.TEACHER,
+          });
+
+          const coordinator = await this.prismaService.classroom.findFirst({
+            where: { coordinator: teacher.teacher_id, School: { school_id } },
+          });
+          if (coordinator) {
+            userRoles.push({
+              user_id: teacher.teacher_id,
+              role: Role.COORDINATOR,
+            });
+          }
+        }
+        return { ...person, roles: userRoles };
       }
-      return { ...person, roles: userRoles };
     }
     return null;
   }
