@@ -30,7 +30,7 @@ export default function Teachers() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [displayTeachers, setDisplayTeachers] = useState<Teacher[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [areBuildingsLoading, setAreTeachersLoading] = useState<boolean>(false);
+  const [areTeachersLoading, setAreTeachersLoading] = useState<boolean>(false);
 
   const loadTeachers = () => {
     setAreTeachersLoading(true);
@@ -232,7 +232,7 @@ export default function Teachers() {
         <Scrollbars>
           <Table sx={{ minWidth: 650 }}>
             <TableBody>
-              {areBuildingsLoading ? (
+              {areTeachersLoading ? (
                 [...new Array(10)].map((_, index) => (
                   <Skeleton
                     key={index}
