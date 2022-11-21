@@ -28,13 +28,13 @@ export class SubscriptionController {
   async subscribe(@Req() request: Request, @Body() subcription: SubscribeDto) {
     const { preferred_lang } = request.user as User;
     try {
-      const { school_id, total_paid, transaction_id } = subcription;
+      const { school_code, total_paid, transaction_id } = subcription;
       const unit_price = Number(process.env.NX_API_UNIT_PRICE);
       return await this.subscriptionService.create({
         total_paid,
         unit_price,
         transaction_id,
-        School: { connect: { school_id } },
+        School: { connect: { school_code } },
         number_of_apis: Math.floor(total_paid / unit_price),
       });
     } catch (error) {
@@ -46,7 +46,7 @@ export class SubscriptionController {
   }
 
   @Get('all')
-  async getSubscriptions(@Query() { school_id }: SubscribeQueryDto) {
-    return await this.subscriptionService.findAll(school_id);
+  async getSubscriptions(@Query() { school_code }: SubscribeQueryDto) {
+    return await this.subscriptionService.findAll(school_code);
   }
 }
