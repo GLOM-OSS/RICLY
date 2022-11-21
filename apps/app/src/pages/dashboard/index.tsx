@@ -1,6 +1,6 @@
 import { FileDownloadOutlined, ReportRounded } from '@mui/icons-material';
 import { Box, Button, Skeleton, Typography } from '@mui/material';
-import { Subscription } from '@ricly/interfaces';
+import { SubscribeInterface, Subscription } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
@@ -172,6 +172,13 @@ export default function Dashboard() {
           render: formatMessage({ id: 'subscribedSuccessfully' }),
         });
         setNotifications([]);
+        const submitData: SubscribeInterface = {
+          school_id: String(selected_school?.school_code),
+          total_paid: total_payable,
+          // TODO: replace data below with transaction_id from binance
+          transaction_id: 'sring',
+        };
+        //TODO: call backend api here to register subscription with submitData
       } else {
         notif.update({
           type: 'ERROR',
