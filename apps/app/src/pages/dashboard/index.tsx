@@ -8,6 +8,7 @@ import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate, useParams } from 'react-router';
+import Graph, { UsageInterface } from '../../components/dashboard/graph';
 import SubscriptionCard from '../../components/dashboard/subscriptionCard';
 import { useUser } from '../../contexts/UserContextProvider';
 
@@ -21,86 +22,122 @@ export default function Dashboard() {
   const [isSchoolLoading, setIsSchoolLoading] = useState<boolean>(false);
 
   const loadSchoolData = () => {
-    if (!selected_school) navigate('/-/schools');
-    else {
-      setIsSchoolLoading(true);
-      setTimeout(() => {
-        // TODO: CALL API TO GET SCHOOL DATA HERE with data school_code
-        if (random() > 5) {
-          const newSchool = {
-            api_calls_left: 20,
-            api_calls_used: 200,
-            api_key: 'kskdksis',
-            api_test_key: 'kdksowkekd',
-            school_acronym: 'IAI',
-            school_code: 'skdk',
-            school_name: 'Universite des montagnes',
-            test_api_calls_left: 10,
-          };
-          userDispatch({
-            type: 'SELECT_SCHOOL',
-            payload: { selected_school: newSchool },
-          });
-          setIsSchoolLoading(false);
-        } else {
-          const notif = new useNotification();
-          notif.notify({ render: formatMessage({ id: 'loadingSchoolData' }) });
-          notif.update({
-            type: 'ERROR',
-            render: (
-              <ErrorMessage
-                retryFunction={loadSchoolData}
-                notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'failedLoadingSchoolData' })}
-              />
-            ),
-            autoClose: false,
-            icon: () => <ReportRounded fontSize="medium" color="error" />,
-          });
-        }
-      }, 3000);
-    }
+    setIsSchoolLoading(true);
+    setTimeout(() => {
+      // TODO: CALL API TO GET SCHOOL DATA HERE with data school_code
+      if (random() > 5) {
+        const newSchool = {
+          api_calls_left: 20,
+          api_calls_used: 200,
+          api_key: 'kskdksis',
+          api_test_key: 'kdksowkekd',
+          school_acronym: 'IAI',
+          school_code: 'skdk',
+          school_name: 'Universite des montagnes',
+          test_api_calls_left: 10,
+        };
+        userDispatch({
+          type: 'SELECT_SCHOOL',
+          payload: { selected_school: newSchool },
+        });
+        setIsSchoolLoading(false);
+      } else {
+        const notif = new useNotification();
+        notif.notify({ render: formatMessage({ id: 'loadingSchoolData' }) });
+        notif.update({
+          type: 'ERROR',
+          render: (
+            <ErrorMessage
+              retryFunction={loadSchoolData}
+              notification={notif}
+              // TODO: message should come from backend api
+              message={formatMessage({ id: 'failedLoadingSchoolData' })}
+            />
+          ),
+          autoClose: false,
+          icon: () => <ReportRounded fontSize="medium" color="error" />,
+        });
+      }
+    }, 3000);
   };
 
   const [areSubscriptionsLoading, setAreSubscriptionsLoading] =
     useState<boolean>(false);
   const loadSubscriptions = () => {
-    if (!selected_school) navigate('/-/schools');
-    else {
-      setAreSubscriptionsLoading(true);
-      setTimeout(() => {
-        // TODO: CALL API TO GET SCHOOL SUBSCRIPTIONS HERE with data school_code
-        if (random() > 5) {
-          const newSubscriptions: Subscription[] = [];
-          setSubscriptions(newSubscriptions);
-          setAreSubscriptionsLoading(false);
-        } else {
-          const notif = new useNotification();
-          notif.notify({
-            render: formatMessage({ id: 'loadingSubscriptions' }),
-          });
-          notif.update({
-            type: 'ERROR',
-            render: (
-              <ErrorMessage
-                retryFunction={loadSubscriptions}
-                notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'failedLoadingSubscriptions' })}
-              />
-            ),
-            autoClose: false,
-            icon: () => <ReportRounded fontSize="medium" color="error" />,
-          });
-        }
-      }, 3000);
-    }
+    setAreSubscriptionsLoading(true);
+    setTimeout(() => {
+      // TODO: CALL API TO GET SCHOOL SUBSCRIPTIONS HERE with data school_code
+      if (random() > 5) {
+        const newSubscriptions: Subscription[] = [];
+        setSubscriptions(newSubscriptions);
+        setAreSubscriptionsLoading(false);
+      } else {
+        const notif = new useNotification();
+        notif.notify({
+          render: formatMessage({ id: 'loadingSubscriptions' }),
+        });
+        notif.update({
+          type: 'ERROR',
+          render: (
+            <ErrorMessage
+              retryFunction={loadSubscriptions}
+              notification={notif}
+              // TODO: message should come from backend api
+              message={formatMessage({ id: 'failedLoadingSubscriptions' })}
+            />
+          ),
+          autoClose: false,
+          icon: () => <ReportRounded fontSize="medium" color="error" />,
+        });
+      }
+    }, 3000);
+  };
+
+  const [usageGraphData, setUsageGraphData] = useState<UsageInterface[]>([]);
+
+  const [isGraphDataLoading, setIsGraphDataLoading] = useState(false);
+
+  const loadGraphData = () => {
+    setIsGraphDataLoading(true);
+    setTimeout(() => {
+      // TODO: CALL API TO GET SCHOOL SUBSCRIPTIONS HERE with data school_code
+      if (random() > 5) {
+        const newUsageData: UsageInterface[] = [
+          { calls: 15, date: new Date() },
+          { calls: 10, date: new Date('2022/11/12') },
+          { calls: 72, date: new Date('2022/11/15') },
+        ];
+        setUsageGraphData(newUsageData);
+        setIsGraphDataLoading(false);
+      } else {
+        const notif = new useNotification();
+        notif.notify({
+          render: formatMessage({ id: 'loadingGraphData' }),
+        });
+        notif.update({
+          type: 'ERROR',
+          render: (
+            <ErrorMessage
+              retryFunction={loadGraphData}
+              notification={notif}
+              // TODO: message should come from backend api
+              message={formatMessage({ id: 'failedLoadingGraphData' })}
+            />
+          ),
+          autoClose: false,
+          icon: () => <ReportRounded fontSize="medium" color="error" />,
+        });
+      }
+    }, 3000);
   };
 
   useEffect(() => {
-    loadSchoolData();
-    loadSubscriptions();
+    if (!selected_school) navigate('/-/schools');
+    else {
+      loadSchoolData();
+      loadSubscriptions();
+      loadGraphData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -114,6 +151,7 @@ export default function Dashboard() {
       unit_price: 350,
     },
   ]);
+
   return (
     <Box sx={{ height: '100%', display: 'grid', gridTemplateRows: 'auto 1fr' }}>
       <Box
@@ -133,7 +171,7 @@ export default function Dashboard() {
           color="primary"
           endIcon={<FileDownloadOutlined sx={{ color: 'white' }} />}
           sx={{ textTransform: 'none' }}
-          //   disabled={isCreatingSchool}
+            disabled={isSchoolLoading}
           //   onClick={() => setIsCreateDialogOpen(true)}
         >
           {formatMessage({ id: 'getNewBundle' })}
@@ -149,13 +187,12 @@ export default function Dashboard() {
       >
         <Box
           sx={{
-            backgroundColor: 'green',
             display: 'grid',
             gridTemplateRows: '1fr auto',
           }}
         >
-          <Typography>Hello world</Typography>
-          <Box sx={{ display: 'grid', gridAutoFlow: 'column' }}>
+          <Graph data={usageGraphData} isDataLoading={isGraphDataLoading} />
+          <Box sx={{ display: 'grid', gridAutoFlow: 'column',marginTop: theme.spacing(5) }}>
             <Typography variant="h6">{`${formatMessage({
               id: 'callsUsed',
             })}: ${formatNumber(
