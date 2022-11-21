@@ -37,3 +37,9 @@ export interface Subject {
   subject_id: string;
   subject_acronym: string;
 }
+export interface Student {
+  email: string;
+  fullname: string;
+  student_id: string;
+  classroom_code: string;
+}
