@@ -10,6 +10,7 @@ import { useIntl } from 'react-intl';
 import { useNavigate, useParams } from 'react-router';
 import Graph, { UsageInterface } from '../../components/dashboard/graph';
 import SubscriptionCard from '../../components/dashboard/subscriptionCard';
+import SubscriptionDialog from '../../components/dashboard/subscriptionDialog';
 import { useUser } from '../../contexts/UserContextProvider';
 
 export default function Dashboard() {
@@ -152,106 +153,158 @@ export default function Dashboard() {
     },
   ]);
 
+  const [isSubscriptionDialogOpen, setIsSubscriptionDialogOpen] =
+    useState<boolean>(false);
+
+  const [notifications, setNotifications] = useState<useNotification[]>([]);
+  const [isSubscribing, setIsSubscribing] = useState<boolean>(false);
+  const handleNewSubscription = (total_payable: number) => {
+    setIsSubscribing(true);
+    notifications.forEach((_) => _.dismiss);
+    const notif = new useNotification();
+    setNotifications([notif]);
+    notif.notify({ render: formatMessage({ id: 'subscribing' }) });
+    setTimeout(() => {
+      setIsSubscribing(false);
+      //TODO call api here for binance payment
+      if (random() > 5) {
+        notif.update({
+          render: formatMessage({ id: 'subscribedSuccessfully' }),
+        });
+        setNotifications([]);
+      } else {
+        notif.update({
+          type: 'ERROR',
+          render: (
+            <ErrorMessage
+              retryFunction={() => handleNewSubscription(total_payable)}
+              notification={notif}
+              // TODO: message should come from backend api
+              message={formatMessage({ id: 'subscriptionFailed' })}
+            />
+          ),
+          autoClose: false,
+          icon: () => <ReportRounded fontSize="medium" color="error" />,
+        });
+      }
+    }, 4000);
+  };
+
   return (
-    <Box sx={{ height: '100%', display: 'grid', gridTemplateRows: 'auto 1fr' }}>
+    <>
+      <SubscriptionDialog
+        isDialogOpen={isSubscriptionDialogOpen}
+        closeDialog={() => setIsSubscriptionDialogOpen(false)}
+        handleSubmit={handleNewSubscription}
+      />
       <Box
-        sx={{
-          display: 'grid',
-          alignItems: 'end',
-          gridTemplateColumns: 'auto 1fr',
-          justifyItems: 'end',
-          marginBottom: theme.spacing(3.75),
-        }}
-      >
-        <Typography variant="h4">
-          {formatMessage({ id: 'dashboard' })}
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          endIcon={<FileDownloadOutlined sx={{ color: 'white' }} />}
-          sx={{ textTransform: 'none' }}
-            disabled={isSchoolLoading}
-          //   onClick={() => setIsCreateDialogOpen(true)}
-        >
-          {formatMessage({ id: 'getNewBundle' })}
-        </Button>
-      </Box>
-      <Box
-        sx={{
-          height: '100%',
-          display: 'grid',
-          gridTemplateColumns: '4.5fr 1fr',
-          columnGap: theme.spacing(1),
-        }}
+        sx={{ height: '100%', display: 'grid', gridTemplateRows: 'auto 1fr' }}
       >
         <Box
           sx={{
             display: 'grid',
-            gridTemplateRows: '1fr auto',
+            alignItems: 'end',
+            gridTemplateColumns: 'auto 1fr',
+            justifyItems: 'end',
+            marginBottom: theme.spacing(3.75),
           }}
         >
-          <Graph data={usageGraphData} isDataLoading={isGraphDataLoading} />
-          <Box sx={{ display: 'grid', gridAutoFlow: 'column',marginTop: theme.spacing(5) }}>
-            <Typography variant="h6">{`${formatMessage({
-              id: 'callsUsed',
-            })}: ${formatNumber(
-              selected_school?.api_calls_used || 0
-            )}`}</Typography>
-            <Typography
-              variant="h6"
-              sx={{ justifySelf: 'end' }}
-            >{`${formatMessage({ id: 'callsLeft' })}: ${formatNumber(
-              selected_school?.api_calls_left || 0
-            )}`}</Typography>
-          </Box>
+          <Typography variant="h4">
+            {formatMessage({ id: 'dashboard' })}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            endIcon={<FileDownloadOutlined sx={{ color: 'white' }} />}
+            sx={{ textTransform: 'none' }}
+            disabled={isSchoolLoading || isSubscribing}
+            onClick={() => setIsSubscriptionDialogOpen(true)}
+          >
+            {formatMessage({ id: 'getNewBundle' })}
+          </Button>
         </Box>
         <Box
           sx={{
-            backgroundColor: theme.common.CSK50,
             height: '100%',
             display: 'grid',
-            gridTemplateRows: 'auto 1fr',
-            padding: theme.spacing(1),
+            gridTemplateColumns: '4.5fr 1fr',
+            columnGap: theme.spacing(1),
           }}
         >
-          <Typography
-            variant="h4"
+          <Box
             sx={{
-              color: theme.palette.primary.main,
-              marginBottom: theme.spacing(6.875),
-              justifySelf: 'center',
+              display: 'grid',
+              gridTemplateRows: '1fr auto',
             }}
           >
-            {formatMessage({ id: 'subscriptions' })}
-          </Typography>
-          <Scrollbars>
-            {areSubscriptionsLoading ? (
-              [...new Array(10)].map((_, index) => (
-                <Skeleton
-                  key={index}
-                  height={50}
-                  animation="wave"
-                  sx={{
-                    marginBottom: theme.spacing(0.5),
-                    '&.MuiSkeleton-root': { transform: 'scale(1, 1)' },
-                  }}
-                />
-              ))
-            ) : subscriptions.length > 0 ? (
-              subscriptions
-                .sort((a, b) => (a.subscribed_at > b.subscribed_at ? 1 : -1))
-                .map((subscription, index) => (
-                  <SubscriptionCard subscription={subscription} key={index} />
+            <Graph data={usageGraphData} isDataLoading={isGraphDataLoading} />
+            <Box
+              sx={{
+                display: 'grid',
+                gridAutoFlow: 'column',
+                marginTop: theme.spacing(5),
+              }}
+            >
+              <Typography variant="h6">{`${formatMessage({
+                id: 'callsUsed',
+              })}: ${formatNumber(
+                selected_school?.api_calls_used || 0
+              )}`}</Typography>
+              <Typography
+                variant="h6"
+                sx={{ justifySelf: 'end' }}
+              >{`${formatMessage({ id: 'callsLeft' })}: ${formatNumber(
+                selected_school?.api_calls_left || 0
+              )}`}</Typography>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              backgroundColor: theme.common.CSK50,
+              height: '100%',
+              display: 'grid',
+              gridTemplateRows: 'auto 1fr',
+              padding: theme.spacing(1),
+            }}
+          >
+            <Typography
+              variant="h4"
+              sx={{
+                color: theme.palette.primary.main,
+                marginBottom: theme.spacing(6.875),
+                justifySelf: 'center',
+              }}
+            >
+              {formatMessage({ id: 'subscriptions' })}
+            </Typography>
+            <Scrollbars>
+              {areSubscriptionsLoading ? (
+                [...new Array(10)].map((_, index) => (
+                  <Skeleton
+                    key={index}
+                    height={50}
+                    animation="wave"
+                    sx={{
+                      marginBottom: theme.spacing(0.5),
+                      '&.MuiSkeleton-root': { transform: 'scale(1, 1)' },
+                    }}
+                  />
                 ))
-            ) : (
-              <Typography sx={{ textAlign: 'center' }} variant="h6">
-                {formatMessage({ id: 'noSubscriptionsYet' })}
-              </Typography>
-            )}
-          </Scrollbars>
+              ) : subscriptions.length > 0 ? (
+                subscriptions
+                  .sort((a, b) => (a.subscribed_at > b.subscribed_at ? 1 : -1))
+                  .map((subscription, index) => (
+                    <SubscriptionCard subscription={subscription} key={index} />
+                  ))
+              ) : (
+                <Typography sx={{ textAlign: 'center' }} variant="h6">
+                  {formatMessage({ id: 'noSubscriptionsYet' })}
+                </Typography>
+              )}
+            </Scrollbars>
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </>
   );
 }
