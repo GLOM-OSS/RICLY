@@ -19,7 +19,8 @@ import 'multer';
 import { Readable } from 'stream';
 import { AUTH500 } from '../../exception';
 import { readAndProcessFile } from '../../utils/csv-parser';
-import { DeleteBuildingDto, DeleteHallDto, User } from '../app.dto';
+import { Roles } from '../app.decorator';
+import { DeleteBuildingDto, DeleteHallDto, Role, User } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { BuildingService } from './building.service';
 
@@ -28,7 +29,7 @@ export interface Hall {
   hall_capacity: number;
   building_code: string;
 }
-
+@Roles(Role.SECRETARY)
 @Controller('buildings')
 @UseGuards(AuthenticatedGuard)
 export class BuildingController {

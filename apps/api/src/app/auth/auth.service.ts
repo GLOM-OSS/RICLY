@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NewPasswordDto, Role, User, UserRole } from '../app.dto';
 
@@ -21,36 +20,18 @@ export class AuthService {
   ) {
     if (options) {
       const { client_urL, client_api_key } = options;
-      const some = {
-        School: {
-          OR: [
-            { api_test_key: client_api_key },
-            {
-              AND: { school_domain: client_urL, api_key: client_api_key },
-            },
-          ],
-        },
-      };
-      const person = await this.prismaService.person.findFirst({
-        select: {
-          Secretaries: { select: { school_id: true } },
-          Teachers: { select: { school_id: true } },
-        },
-        where: {
-          email: personCreateInput.email,
-          Secretaries: { some },
-          Teachers: { some },
-        },
-      });
-      if (person) {
-        const { Secretaries, Teachers } = person;
-        let school_id: string;
-        if (Secretaries.length > 0) {
-          school_id = Secretaries[0].school_id;
-        } else school_id = Teachers[0].school_id;
-        return { school_id, ...person };
+      const user = await this.validateRequest(
+        personCreateInput.email,
+        client_urL,
+        client_api_key
+      );
+      if (user) {
+        await this.prismaService.person.update({
+          data: personCreateInput,
+          where: { email: personCreateInput.email },
+        });
       }
-      return null;
+      return user;
     }
     return this.prismaService.person.upsert({
       create: {
@@ -160,22 +141,42 @@ export class AuthService {
     throw new HttpException(JSON.stringify(AUTH10), HttpStatus.UNAUTHORIZED);
   }
 
-  async validateRequest(request: Request) {
-    const clientUrl = request.headers.origin;
-    const clientApiKey = request.get('RICLY-API-KEY');
-    const school = await this.prismaService.school.findFirst({
-      where: {
+  async validateRequest(
+    email: string,
+    clientUrl: string,
+    clientApiKey: string
+  ) {
+    const some = {
+      School: {
         OR: [
           { api_test_key: clientApiKey },
-          { AND: { school_domain: clientUrl ?? null, api_key: clientApiKey } },
+          {
+            AND: { school_domain: clientUrl ?? null, api_key: clientApiKey },
+          },
         ],
       },
+    };
+    const person = await this.prismaService.person.findFirst({
+      select: {
+        person_id: true,
+        email: true,
+        fullname: true,
+        preferred_lang: true,
+        Secretaries: { select: { school_id: true } },
+        Teachers: { select: { school_id: true } },
+      },
+      where: {
+        email,
+        OR: [{ Teachers: { some } }, { Secretaries: { some } }],
+      },
     });
-    if (school) {
-      const person = await this.prismaService.person.findUnique({
-        where: { email: request.body.email },
-      });
-      return { ...person, school_id: school.school_id };
+    if (person) {
+      const { Secretaries, Teachers, ...user } = person;
+      let school_id: string;
+      if (Secretaries.length > 0) {
+        school_id = Secretaries[0].school_id;
+      } else school_id = Teachers[0].school_id;
+      return { school_id, ...user };
     }
     return null;
   }

@@ -9,8 +9,14 @@ export class CustomStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super();
   }
-  
+
   async validate(request: Request) {
-    return this.authService.validateRequest(request);
+    const clientUrl = request.headers.origin;
+    const clientApiKey = request.get('RICLY-API-KEY');
+    return this.authService.validateRequest(
+      request.body.email,
+      clientUrl,
+      clientApiKey
+    );
   }
 }

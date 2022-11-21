@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { getRandomString } from '../../utils';
 import { SchoolPostDto } from '../app.dto';
@@ -26,7 +27,12 @@ export class SchoolService {
 
   async create(
     developer_id: string,
-    { school_acronym, school_domain, school_name }: SchoolPostDto
+    {
+      school_acronym,
+      school_domain,
+      school_name,
+      secretary_email,
+    }: SchoolPostDto
   ) {
     const school_code = await this.getSchoolCode(school_acronym as string);
     const { api_key, ...school } = await this.prismaService.school.create({
@@ -41,6 +47,16 @@ export class SchoolService {
         api_key: getRandomString(64),
         api_test_key: getRandomString(32),
         Developer: { connect: { developer_id } },
+        Secretaries: {
+          create: {
+            Person: {
+              connectOrCreate: {
+                create: { email: secretary_email },
+                where: { email: secretary_email },
+              },
+            },
+          },
+        },
       },
     });
     return { ...school, api_key: school_domain ? api_key : null };
@@ -58,8 +74,8 @@ export class SchoolService {
     });
   }
 
-  async findOne(school_code: string) {
-    const { api_key, ...school } = await this.prismaService.school.findUnique({
+  async findOne(where: Prisma.SchoolWhereInput) {
+    const school = await this.prismaService.school.findFirst({
       select: {
         school_name: true,
         school_code: true,
@@ -71,8 +87,12 @@ export class SchoolService {
         api_calls_left: true,
         test_api_calls_left: true,
       },
-      where: { school_code },
+      where,
     });
-    return { ...school, api_key: school.school_domain ? api_key : null };
+    if (school) {
+      const { api_key, ...data } = school;
+      return { ...data, api_key: data.school_domain ? api_key : null };
+    }
+    return null;
   }
 }
