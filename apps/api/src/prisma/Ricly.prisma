@@ -160,25 +160,34 @@ model Hall {
     Classrooms Classroom[]
 }
 
+model Weekday {
+    weekday_id   String    @id @default(uuid()) @db.VarChar(36)
+    weekday      Int
+    start_time   DateTime  @db.Time(0)
+    end_time     DateTime  @db.Time(0)
+    classroom_id String    @db.VarChar(36)
+    Classroom    Classroom @relation(fields: [classroom_id], references: [classroom_id], onDelete: Cascade, onUpdate: Cascade)
+}
+
 model Classroom {
-    classroom_id      String   @id @default(uuid()) @db.VarChar(36)
-    classroom_name    String   @db.VarChar(45)
-    classroom_code    String   @unique @db.VarChar(45)
-    classroom_acronym String   @db.VarChar(45)
-    day_start_time    DateTime @db.DateTime(0)
-    day_end_time      DateTime @db.DateTime(0)
-    is_deleted        Boolean  @default(false) @db.TinyInt
-    created_at        DateTime @default(now()) @db.DateTime(0)
-    school_id         String
-    School            School   @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
-    coordinator       String
-    Coordinator       Teacher  @relation(fields: [coordinator], references: [teacher_id], onDelete: Cascade, onUpdate: Cascade)
-    hall_id           String?
-    Hall              Hall?    @relation(fields: [hall_id], references: [hall_id], onDelete: Cascade, onUpdate: Cascade)
+    classroom_id   String    @id @default(uuid()) @db.VarChar(36)
+    classroom_name String    @db.VarChar(45)
+    classroom_code String    @unique @db.VarChar(45)
+    day_start_time DateTime? @db.DateTime(0)
+    day_end_time   DateTime? @db.DateTime(0)
+    is_deleted     Boolean   @default(false) @db.TinyInt
+    created_at     DateTime  @default(now()) @db.DateTime(0)
+    school_id      String
+    School         School    @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
+    coordinator    String
+    Coordinator    Teacher   @relation(fields: [coordinator], references: [teacher_id], onDelete: Cascade, onUpdate: Cascade)
+    hall_id        String?
+    Hall           Hall?     @relation(fields: [hall_id], references: [hall_id], onDelete: Cascade, onUpdate: Cascade)
 
     Breaks               Break[]
     Students             Student[]
     ClassroomHasSubjects ClassroomHasSubject[]
+    Weekdays             Weekday[]
 }
 
 model Subject {
