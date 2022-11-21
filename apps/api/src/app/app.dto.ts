@@ -1,11 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Person } from '@prisma/client';
 import {
+  ArrayMinSize,
+  IsArray,
   IsEmail,
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
+  IsUUID
 } from 'class-validator';
 
 export class SubscribeDto {
@@ -66,10 +68,27 @@ export class SignInDto {
   password: string;
 }
 
+export class DeleteBuildingDto {
+  @ApiProperty({
+    description: `A list of all building's id you want to delete`,
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  buildings: string[];
+}
+export class DeleteHallDto {
+  @ApiProperty({
+    description: `A list of all hall's id you want to delete`,
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  halls: string[];
+}
+
 export enum Role {
   ADMIN = 'ADMIN',
   DEVELOPER = 'DEVELOPER',
-  
+
   TEACHER = 'TEACHER',
   SECRETARY = 'SECRETARY',
   COORDINATOR = 'COORDINATOR',

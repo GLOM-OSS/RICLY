@@ -37,10 +37,11 @@ model Person {
 }
 
 model Developer {
-    developer_id String  @id @default(uuid()) @db.VarChar(36)
-    password     String? @db.VarChar(75)
-    person_id    String  @db.VarChar(36)
-    Person       Person  @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
+    developer_id String   @id @default(uuid()) @db.VarChar(36)
+    password     String?  @db.VarChar(75)
+    created_at   DateTime @default(now()) @db.DateTime(0)
+    person_id    String   @db.VarChar(36)
+    Person       Person   @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
 
     Schools School[]
 }
@@ -57,6 +58,7 @@ model School {
     api_calls_left           Int
     test_api_calls_left      Int       @default(30)
     course_period_in_minutes Int?
+    is_deleted               Boolean   @default(false) @db.TinyInt
     created_at               DateTime  @default(now()) @db.DateTime(0)
     developer_id             String    @db.VarChar(36)
     Developer                Developer @relation(fields: [developer_id], references: [developer_id], onDelete: Cascade, onUpdate: Cascade)
@@ -73,23 +75,27 @@ model Subscription {
     number_of_apis  Int
     total_paid      Int
     unit_price      Int
+    transaction_id  String   @db.VarChar(45)
     subscribed_at   DateTime @default(now()) @db.DateTime(0)
     school_id       String   @db.VarChar(36)
     School          School   @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Secretary {
-    secretary_id String @id @default(uuid()) @db.VarChar(36)
-    matricule    String @db.VarChar(36)
-    school_id    String @db.VarChar(36)
-    School       School @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
-    person_id    String @db.VarChar(36)
-    Person       Person @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
+    secretary_id String   @id @default(uuid()) @db.VarChar(36)
+    matricule    String   @db.VarChar(36)
+    created_at   DateTime @default(now()) @db.DateTime(0)
+    school_id    String   @db.VarChar(36)
+    School       School   @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
+    person_id    String   @db.VarChar(36)
+    Person       Person   @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Student {
     student_id   String    @id @default(uuid()) @db.VarChar(36)
     matricule    String    @db.VarChar(45)
+    is_deleted   Boolean   @default(false) @db.TinyInt
+    created_at   DateTime  @default(now()) @db.DateTime(0)
     classroom_id String    @db.VarChar(36)
     Classroom    Classroom @relation(fields: [classroom_id], references: [classroom_id], onDelete: Cascade, onUpdate: Cascade)
     person_id    String    @db.VarChar(36)
@@ -107,6 +113,8 @@ enum TeacherTypeEnum {
 model Teacher {
     teacher_id   String          @id @default(uuid()) @db.VarChar(36)
     teacher_type TeacherTypeEnum
+    is_deleted   Boolean         @default(false) @db.TinyInt
+    created_at   DateTime        @default(now()) @db.DateTime(0)
     person_id    String          @db.VarChar(36)
     Person       Person          @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
     school_id    String          @db.VarChar(36)
@@ -122,23 +130,29 @@ model Availability {
     starts_at       DateTime
     ends_time       DateTime
     is_used         Boolean  @db.TinyInt
+    is_deleted      Boolean  @default(false) @db.TinyInt
+    created_at      DateTime @default(now()) @db.DateTime(0)
     teacher_id      String   @db.VarChar(36)
     Teacher         Teacher  @relation(fields: [teacher_id], references: [teacher_id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Building {
-    building_id   String @id @default(uuid()) @db.VarChar(36)
-    building_code String @db.VarChar(30)
-    school_id     String @db.VarChar(36)
-    School        School @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
+    building_id   String   @id @default(uuid()) @db.VarChar(36)
+    building_code String   @unique @db.VarChar(30)
+    is_deleted    Boolean  @default(false) @db.TinyInt
+    created_at    DateTime @default(now()) @db.DateTime(0)
+    school_id     String   @db.VarChar(36)
+    School        School   @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
 
     Halls Hall[]
 }
 
 model Hall {
     hall_id       String   @id @default(uuid()) @db.VarChar(36)
-    hall_code     String   @db.VarChar(30)
+    hall_code     String   @unique @db.VarChar(30)
     hall_capacity Int
+    is_deleted    Boolean  @default(false) @db.TinyInt
+    created_at    DateTime @default(now()) @db.DateTime(0)
     building_id   String   @db.VarChar(36)
     Building      Building @relation(fields: [building_id], references: [building_id], onDelete: Cascade, onUpdate: Cascade)
 
@@ -153,6 +167,7 @@ model Classroom {
     classroom_acronym String   @db.VarChar(45)
     day_start_time    DateTime @db.DateTime(0)
     day_end_time      DateTime @db.DateTime(0)
+    is_deleted        Boolean  @default(false) @db.TinyInt
     created_at        DateTime @default(now()) @db.DateTime(0)
     school_id         String
     School            School   @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
@@ -167,8 +182,10 @@ model Classroom {
 }
 
 model Subject {
-    subject_id   String @id @default(uuid()) @db.VarChar(36)
-    subject_name String @db.VarChar(45)
+    subject_id   String   @id @default(uuid()) @db.VarChar(36)
+    subject_name String   @db.VarChar(45)
+    is_deleted   Boolean  @default(false) @db.TinyInt
+    created_at   DateTime @default(now()) @db.DateTime(0)
 
     ClassroomHasSubject ClassroomHasSubject[]
 }
@@ -189,6 +206,8 @@ model Break {
     break_id     String    @id @default(uuid()) @db.VarChar(36)
     start_time   DateTime  @default(now()) @db.DateTime(0)
     end_time     DateTime  @default(now()) @db.DateTime(0)
+    is_deleted   Boolean   @default(false) @db.TinyInt
+    created_at   DateTime  @default(now()) @db.DateTime(0)
     classroom_id String    @db.VarChar(36)
     Classroom    Classroom @relation(fields: [classroom_id], references: [classroom_id], onDelete: Cascade, onUpdate: Cascade)
 }
@@ -198,6 +217,7 @@ model Program {
     starts_at                DateTime            @db.DateTime(0)
     ends_time                DateTime            @db.DateTime(0)
     is_published             Boolean             @default(false) @db.TinyInt
+    is_deleted               Boolean             @default(false) @db.TinyInt
     created_at               DateTime            @default(now()) @db.DateTime(0)
     hall_id                  String
     Hall                     Hall                @relation(fields: [hall_id], references: [hall_id], onDelete: Cascade, onUpdate: Cascade)

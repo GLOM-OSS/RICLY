@@ -1,11 +1,12 @@
-import * as fs from 'fs';
 import { parse } from 'csv-parse';
+import { Readable } from 'stream';
 import { finished } from 'stream/promises';
+import { ERR05 } from '../exception';
 
 // Read and process the CSV file
 export async function readAndProcessFile<T>(
   columns: string[],
-  csvStream: fs.ReadStream
+  csvStream: Readable
 ) {
   const records: T[] = [];
   const parser = csvStream.pipe(
@@ -18,10 +19,19 @@ export async function readAndProcessFile<T>(
   parser.on('readable', function () {
     let record: T;
     while ((record = parser.read()) !== null) {
-      // Work with each record
+      if (records.length === 0) {
+        const csvHasCorrectHead = Object.keys(record).reduce(
+          (hasCorrectHead, key) => hasCorrectHead && key === record[key],
+          true
+        );
+        if (!csvHasCorrectHead)
+          throw new Error(
+            JSON.stringify(ERR05(`{${Object.keys(record)}}`, `{${columns}}`))
+          );
+      } 
       records.push(record);
     }
   });
   await finished(parser);
-  return records;
+  return records.slice(1);
 }

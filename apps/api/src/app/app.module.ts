@@ -18,6 +18,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './Auth/auth.module';
 import { SchoolModule } from './School/school.module';
 import { SubscriptionModule } from './Subscription/subscription.module';
+import { BuildingModule } from './Building/building.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { SubscriptionModule } from './Subscription/subscription.module';
     PrismaModule,
     AuthModule,
     SchoolModule,
-    SubscriptionModule
+    SubscriptionModule,
+    BuildingModule,
   ],
   controllers: [AppController],
   providers: [
