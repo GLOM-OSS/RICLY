@@ -55,6 +55,16 @@ function UserContextProvider({
       gender: 'Male',
       phone_number: '657140183',
     },
+    selected_school: {
+      api_calls_left: 20,
+      api_calls_used: 200,
+      api_key: 'kskdksis',
+      api_test_key: 'kdksowkekd',
+      school_acronym: 'UdM',
+      school_code: 'skdk',
+      school_name: 'Universite des montagnes',
+      test_api_calls_left: 10,
+    },
     userDispatch: () => null,
   };
 
