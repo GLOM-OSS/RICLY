@@ -19,6 +19,7 @@ import { AuthModule } from './Auth/auth.module';
 import { SchoolModule } from './School/school.module';
 import { SubscriptionModule } from './Subscription/subscription.module';
 import { BuildingModule } from './Building/building.module';
+import { TeacherModule } from './Teacher/teacher.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { BuildingModule } from './Building/building.module';
     SchoolModule,
     SubscriptionModule,
     BuildingModule,
+    TeacherModule,
   ],
   controllers: [AppController],
   providers: [
