@@ -184,8 +184,8 @@ model Classroom {
 
     Breaks               Break[]
     Students             Student[]
-    ClassroomHasSubjects ClassroomHasSubject[]
     Weekdays             Weekday[]
+    ClassroomHasSubjects ClassroomHasSubject[]
 }
 
 model Subject {
@@ -196,7 +196,7 @@ model Subject {
     is_deleted      Boolean  @default(false) @db.TinyInt
     created_at      DateTime @default(now()) @db.DateTime(0)
 
-    ClassroomHasSubject ClassroomHasSubject[]
+    ClassroomHasSubjects ClassroomHasSubject[]
 }
 
 model ClassroomHasSubject {

@@ -21,6 +21,7 @@ import { SubscriptionModule } from './Subscription/subscription.module';
 import { BuildingModule } from './Building/building.module';
 import { TeacherModule } from './Teacher/teacher.module';
 import { ClassroomModule } from './Classroom/classrrom.module';
+import { SubjectModule } from './Subject/subject.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ClassroomModule } from './Classroom/classrrom.module';
     BuildingModule,
     TeacherModule,
     ClassroomModule,
+    SubjectModule,
   ],
   controllers: [AppController],
   providers: [
