@@ -6,6 +6,7 @@ import Buildings from '../pages/buildings';
 import Classrooms from '../pages/classrooms';
 import Dashboard from '../pages/dashboard';
 import Layout from '../pages/layout';
+import SubjectClassrooms from '../pages/subject/[subject_id]';
 import Teachers from '../pages/teachers';
 
 export const Test = () => {
@@ -31,6 +32,8 @@ export const routes = [
       { path: 'halls', element: <Buildings /> },
       { path: 'teachers', element: <Teachers /> },
       { path: 'classrooms', element: <Classrooms /> },
+      { path: 'subjects', element: <Classrooms /> },
+      { path: 'subjects/:subject_id', element: <SubjectClassrooms /> },
     ],
   },
   //   {
