@@ -34,7 +34,7 @@ export default function Buildings() {
   const loadBuildings = () => {
     setAreBuildingsLoading(true);
     setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL SUBSCRIPTIONS HERE with data school_code
+      // TODO: CALL API TO GET SCHOOL buildings HERE with data school_code
       if (random() > 5) {
         const newBuildings: Building[] = [
           {
