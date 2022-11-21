@@ -94,7 +94,7 @@ export class ClassroomService {
         ...teacher
       }) => ({
         ...teacher,
-        teacher_email: email,
+        coordinator_email: email,
         classroom_code: classroom_acronym,
       })
     );
