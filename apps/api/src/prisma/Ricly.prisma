@@ -15,8 +15,8 @@ enum Gender {
 }
 
 enum Lang {
-    En
-    Fr
+    en
+    fr
 
     @@map("lang_enum")
 }
@@ -24,29 +24,58 @@ enum Lang {
 model Person {
     person_id      String   @id @default(uuid()) @db.VarChar(36)
     fullname       String   @db.VarChar(50)
-    phone_number   String   @db.VarChar(15)
-    gender         Gender
+    phone_number   String?  @db.VarChar(15)
+    gender         Gender?
     email          String   @unique @db.VarChar(50)
-    preferred_lang Lang     @default(Fr)
+    preferred_lang Lang     @default(fr)
     created_at     DateTime @default(now()) @db.DateTime(0)
 
     Secretaries Secretary[]
     Students    Student[]
     Teachers    Teacher[]
+    Developers  Developer[]
+}
+
+model Developer {
+    developer_id String  @id @default(uuid()) @db.VarChar(36)
+    password     String? @db.VarChar(75)
+    person_id    String  @db.VarChar(36)
+    Person       Person  @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
+
+    Schools School[]
 }
 
 model School {
-    school_id                         String      @id @default(uuid()) @db.VarChar(36)
-    access_key_id                     String      @db.VarChar(45)
-    school_name                       String      @db.VarChar(50)
-    school_code                       String      @unique @db.VarChar(45)
-    secrect_access_key                String      @db.VarChar(45)
-    course_period_duration_in_minutes String      @unique @db.VarChar(50)
-    created_at                        DateTime    @default(now()) @db.DateTime(0)
-    
-    Secretaries                       Secretary[]
-    Buildings                         Building[]
-    Classrooms                        Classroom[]
+    school_id                String    @id @default(uuid()) @db.VarChar(36)
+    school_name              String    @db.VarChar(50)
+    school_acronym           String    @db.VarChar(50)
+    school_domain            String?   @unique @db.VarChar(50)
+    school_code              String    @unique @db.VarChar(45)
+    api_key                  String    @db.VarChar(75)
+    api_test_key             String    @db.VarChar(45)
+    api_calls_used           Int
+    api_calls_left           Int
+    test_api_calls_left      Int       @default(30)
+    course_period_in_minutes Int?
+    created_at               DateTime  @default(now()) @db.DateTime(0)
+    developer_id             String    @db.VarChar(36)
+    Developer                Developer @relation(fields: [developer_id], references: [developer_id], onDelete: Cascade, onUpdate: Cascade)
+
+    Secretaries   Secretary[]
+    Buildings     Building[]
+    Classrooms    Classroom[]
+    Subscriptions Subscription[]
+    Teachers      Teacher[]
+}
+
+model Subscription {
+    subscription_id String   @id @default(uuid()) @db.VarChar(36)
+    number_of_apis  Int
+    total_paid      Int
+    unit_price      Int
+    subscribed_at   DateTime @default(now()) @db.DateTime(0)
+    school_id       String   @db.VarChar(36)
+    School          School   @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Secretary {
@@ -80,6 +109,8 @@ model Teacher {
     teacher_type TeacherTypeEnum
     person_id    String          @db.VarChar(36)
     Person       Person          @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
+    school_id    String          @db.VarChar(36)
+    School       School          @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
 
     Availabilities       Availability[]
     Classrooms           Classroom[]
@@ -100,8 +131,8 @@ model Building {
     building_code String @db.VarChar(30)
     school_id     String @db.VarChar(36)
     School        School @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
-    
-    Halls         Hall[]
+
+    Halls Hall[]
 }
 
 model Hall {
@@ -136,8 +167,8 @@ model Classroom {
 }
 
 model Subject {
-    subject_id          String                @id @default(uuid()) @db.VarChar(36)
-    subject_name        String                @db.VarChar(45)
+    subject_id   String @id @default(uuid()) @db.VarChar(36)
+    subject_name String @db.VarChar(45)
 
     ClassroomHasSubject ClassroomHasSubject[]
 }

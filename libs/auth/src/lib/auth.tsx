@@ -83,6 +83,7 @@ export function Auth({ app = 'app' }: { app?: string }) {
               <ErrorMessage
                 retryFunction={authenticateUser}
                 notification={notif}
+                // TODO: message should come from backend api
                 message={formatMessage({ id: 'authenticationFailed' })}
               />
             ),
@@ -103,6 +104,7 @@ export function Auth({ app = 'app' }: { app?: string }) {
               <ErrorMessage
                 retryFunction={authenticateUser}
                 notification={notif}
+                // TODO: message should come from backend api
                 message={formatMessage({ id: 'authenticationFailed' })}
               />
             ),

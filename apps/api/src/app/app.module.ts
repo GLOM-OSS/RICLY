@@ -10,10 +10,14 @@ import { Logger } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
 import { randomUUID } from 'crypto';
+import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { AppController } from './app.controller';
 import { AppInterceptor } from './app.interceptor';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { SchoolModule } from './school/school.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -21,6 +25,10 @@ import { AppService } from './app.service';
     PassportModule.register({
       session: true,
     }),
+    PrismaModule,
+    AuthModule,
+    SchoolModule,
+    SubscriptionModule
   ],
   controllers: [AppController],
   providers: [
@@ -41,7 +49,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(
         session({
-          name: `Ricly${randomUUID().replace('-', '').toLocaleUpperCase()}`,
+          name: 'RICLY-5BB35922144F',
           store: new RedisStore({
             client: redisClient,
             host: process.env.REDIS_HOST,
@@ -53,7 +61,7 @@ export class AppModule implements NestModule {
           resave: false,
           rolling: true,
           cookie: {
-            maxAge: 10 * 60 * 1000, //10 minutes of inativity
+            maxAge: 15 * 60 * 1000, //15 minutes of inativity
           },
         }),
         passport.initialize(),
