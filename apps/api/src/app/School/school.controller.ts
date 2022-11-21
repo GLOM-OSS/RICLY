@@ -7,20 +7,18 @@ import {
   Param,
   Post,
   Req,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { AUTH500 } from '../../exception';
+import { ERR03 } from '../../exception';
 import { Roles } from '../app.decorator';
 import { Role, SchoolPostDto, User, UserRole } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { SchoolService } from './school.service';
 
-@ApiTags('School')
 @Controller('school')
-@Roles(Role.DEVELOPER)
 @UseGuards(AuthenticatedGuard)
+@Roles(Role.DEVELOPER, Role.SECRETARY)
 export class SchoolController {
   constructor(private schoolService: SchoolService) {}
 
@@ -38,16 +36,37 @@ export class SchoolController {
   ) {
     const { preferred_lang, roles } = request.user as User;
     try {
+      const existingSchool = await this.schoolService.findOne({
+        school_domain: newSchool.school_domain,
+      });
+      if (existingSchool)
+        throw new HttpException(
+          ERR03('school')[preferred_lang],
+          HttpStatus.NOT_ACCEPTABLE
+        );
+
       return await this.schoolService.create(
         this.getRoleId(roles, Role.DEVELOPER),
         newSchool
       );
     } catch (error) {
-      throw new HttpException(
-        AUTH500[preferred_lang],
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @Get('profile')
+  async getSchoolProfile(@Req() request: Request) {
+    const clientUrl = request.headers.origin;
+    const clientApiKey = request.get('RICLY-API-KEY');
+    return await this.schoolService.findOne({
+      OR: {
+        api_test_key: clientApiKey,
+        AND: {
+          api_key: clientApiKey,
+          school_domain: clientUrl,
+        },
+      },
+    });
   }
 
   @Get('/all')
@@ -60,6 +79,6 @@ export class SchoolController {
 
   @Get(':school_code')
   async getSchool(@Param('school_code') school_code: string) {
-    return await this.schoolService.findOne(school_code);
+    return await this.schoolService.findOne({ school_code });
   }
 }

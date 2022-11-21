@@ -23,7 +23,7 @@ enum Lang {
 
 model Person {
     person_id      String   @id @default(uuid()) @db.VarChar(36)
-    fullname       String   @db.VarChar(50)
+    fullname       String?  @db.VarChar(50)
     phone_number   String?  @db.VarChar(15)
     gender         Gender?
     email          String   @unique @db.VarChar(50)
@@ -83,7 +83,6 @@ model Subscription {
 
 model Secretary {
     secretary_id String   @id @default(uuid()) @db.VarChar(36)
-    matricule    String   @db.VarChar(36)
     created_at   DateTime @default(now()) @db.DateTime(0)
     school_id    String   @db.VarChar(36)
     School       School   @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
@@ -111,14 +110,15 @@ enum TeacherTypeEnum {
 }
 
 model Teacher {
-    teacher_id   String          @id @default(uuid()) @db.VarChar(36)
-    teacher_type TeacherTypeEnum
-    is_deleted   Boolean         @default(false) @db.TinyInt
-    created_at   DateTime        @default(now()) @db.DateTime(0)
-    person_id    String          @db.VarChar(36)
-    Person       Person          @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
-    school_id    String          @db.VarChar(36)
-    School       School          @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
+    teacher_id     String          @id @default(uuid()) @db.VarChar(36)
+    hours_per_week Int
+    teacher_type   TeacherTypeEnum
+    is_deleted     Boolean         @default(false) @db.TinyInt
+    created_at     DateTime        @default(now()) @db.DateTime(0)
+    person_id      String          @db.VarChar(36)
+    Person         Person          @relation(fields: [person_id], references: [person_id], onDelete: Cascade, onUpdate: Cascade)
+    school_id      String          @db.VarChar(36)
+    School         School          @relation(fields: [school_id], references: [school_id], onDelete: Cascade, onUpdate: Cascade)
 
     Availabilities       Availability[]
     Classrooms           Classroom[]

@@ -17,7 +17,7 @@ export class SubscribeDto {
 
   @IsUUID()
   @ApiProperty()
-  school_id: string;
+  school_code: string;
 
   @IsString()
   @ApiProperty()
@@ -27,7 +27,7 @@ export class SubscribeDto {
 export class SubscribeQueryDto {
   @IsUUID()
   @ApiProperty()
-  school_id: string;
+  school_code: string;
 }
 
 export class SchoolPostDto {
@@ -38,6 +38,10 @@ export class SchoolPostDto {
   @IsString()
   @ApiProperty()
   school_acronym: string;
+  
+  @IsEmail()
+  @ApiProperty()
+  secretary_email: string;
 
   @IsString()
   @IsOptional()
@@ -83,6 +87,15 @@ export class DeleteHallDto {
   @IsArray()
   @ArrayMinSize(1)
   halls: string[];
+}
+
+export class DeleteTeacherDto {
+  @ApiProperty({
+    description: `A list of all teacher's id you want to delete`,
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  teachers: string[];
 }
 
 export enum Role {
