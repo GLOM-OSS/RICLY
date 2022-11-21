@@ -1,6 +1,7 @@
 export interface SubscribeInterface {
   total_paid: number;
   school_id: string;
+  transaction_id: string;
 }
 
 export interface CreateSchoolInterface {
