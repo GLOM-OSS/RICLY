@@ -30,12 +30,12 @@ export interface Subject {
   classrooms: {
     classroom_id: string;
     classroom_name: string;
-    classroom_acronym: string;
+    classroom_code: string;
   }[];
   teacher_email: string;
   subject_name: string;
   subject_id: string;
-  subject_acronym: string;
+  subject_code: string;
 }
 export interface Student {
   email: string;
