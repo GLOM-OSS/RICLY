@@ -5,6 +5,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
@@ -20,7 +21,7 @@ import { Readable } from 'stream';
 import { AUTH500 } from '../../exception';
 import { readAndProcessFile } from '../../utils/csv-parser';
 import { Roles } from '../app.decorator';
-import { DeleteSubjectDto, Role, User } from '../app.dto';
+import { DeleteClassroomDto, DeleteSubjectDto, Role, User } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { SubjectCsvModel, SubjectService } from './subject.service';
 
@@ -75,6 +76,11 @@ export class SubjectController {
     });
   }
 
+  @Get(':subject_id')
+  async getSubject(@Param('subject_id') subject_id: string) {
+    return this.subjectService.findOne(subject_id);
+  }
+
   @Delete('delete')
   async deleteSubjects(
     @Req() request: Request,
@@ -83,6 +89,23 @@ export class SubjectController {
     const { preferred_lang } = request.user as User;
     try {
       return await this.subjectService.deleteMany(subjects);
+    } catch (error) {
+      throw new HttpException(
+        AUTH500[preferred_lang],
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  @Delete(':subject_id/classrooms')
+  async removeClassrooms(
+    @Req() request: Request,
+    @Param('subject_id') subject_id: string,
+    @Body() { classrooms }: DeleteClassroomDto
+  ) {
+    const { preferred_lang } = request.user as User;
+    try {
+      return await this.subjectService.removeClassrooms(subject_id, classrooms);
     } catch (error) {
       throw new HttpException(
         AUTH500[preferred_lang],

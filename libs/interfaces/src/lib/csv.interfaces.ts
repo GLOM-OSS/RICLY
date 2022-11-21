@@ -27,11 +27,7 @@ export interface Classroom {
 }
 
 export interface Subject {
-  classrooms: {
-    classroom_id: string;
-    classroom_name: string;
-    classroom_code: string;
-  }[];
+  classrooms: Omit<Classroom, 'coordinator_email'>[];
   teacher_email: string;
   subject_name: string;
   subject_id: string;
