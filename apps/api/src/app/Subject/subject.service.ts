@@ -15,7 +15,6 @@ export class SubjectService {
   constructor(private prismaService: PrismaService) {}
 
   async createMany(csvSubjects: SubjectCsvModel[], school_id: string) {
-    console.log(csvSubjects);
     const subjects: Prisma.SubjectCreateManyInput[] = [];
     const classroomHasSubjects: Prisma.ClassroomHasSubjectCreateManyInput[] =
       [];
@@ -66,7 +65,7 @@ export class SubjectService {
     });
   }
 
-  async findAll(school_id: string) {
+  async findAll(where: Prisma.SubjectWhereInput) {
     const subjects = await this.prismaService.subject.findMany({
       select: {
         subject_id: true,
@@ -87,7 +86,7 @@ export class SubjectService {
           },
         },
       },
-      where: { ClassroomHasSubjects: { every: { Classroom: { school_id } } } },
+      where,
     });
     return subjects.map(({ ClassroomHasSubjects, ...subject }) => {
       let teacher_email: string;

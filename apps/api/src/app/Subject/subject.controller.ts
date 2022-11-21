@@ -1,16 +1,17 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpException,
-    HttpStatus,
-    Post,
-    Req,
-    Session,
-    UploadedFile,
-    UseGuards,
-    UseInterceptors
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+  Query,
+  Req,
+  Session,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
@@ -54,13 +55,24 @@ export class SubjectController {
   }
 
   @Get('all')
-  async getSubjects(@Session() session) {
+  async getSubjects(
+    @Query()
+    {
+      classroom_id,
+      teacher_id,
+    }: { classroom_id?: string; teacher_id?: string },
+    @Session() session
+  ) {
     const {
       passport: {
         user: { school_id },
       },
     } = session;
-    return this.subjectService.findAll(school_id);
+    return this.subjectService.findAll({
+      ClassroomHasSubjects: {
+        every: { teacher_id, Classroom: { school_id, classroom_id } },
+      },
+    });
   }
 
   @Delete('delete')
