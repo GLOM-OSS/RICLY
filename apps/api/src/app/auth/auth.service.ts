@@ -32,13 +32,25 @@ export class AuthService {
         },
       };
       const person = await this.prismaService.person.findFirst({
+        select: {
+          Secretaries: { select: { school_id: true } },
+          Teachers: { select: { school_id: true } },
+        },
         where: {
           email: personCreateInput.email,
           Secretaries: { some },
           Teachers: { some },
         },
       });
-      return person
+      if (person) {
+        const { Secretaries, Teachers } = person;
+        let school_id: string;
+        if (Secretaries.length > 0) {
+          school_id = Secretaries[0].school_id;
+        } else school_id = Teachers[0].school_id;
+        return { school_id, ...person };
+      }
+      return null;
     }
     return this.prismaService.person.upsert({
       create: {
@@ -159,10 +171,12 @@ export class AuthService {
         ],
       },
     });
-    if (school)
-      return this.prismaService.person.findUnique({
+    if (school) {
+      const person = await this.prismaService.person.findUnique({
         where: { email: request.body.email },
       });
+      return { ...person, school_id: school.school_id };
+    }
     return null;
   }
 }
