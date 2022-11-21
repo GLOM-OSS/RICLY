@@ -3,6 +3,7 @@ import { Auth } from '@ricly/auth';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router';
 import Buildings from '../pages/buildings';
+import Classrooms from '../pages/classrooms';
 import Dashboard from '../pages/dashboard';
 import Layout from '../pages/layout';
 import Teachers from '../pages/teachers';
@@ -29,6 +30,7 @@ export const routes = [
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'halls', element: <Buildings /> },
       { path: 'teachers', element: <Teachers /> },
+      { path: 'classrooms', element: <Classrooms /> },
     ],
   },
   //   {
