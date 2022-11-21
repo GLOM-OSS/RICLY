@@ -98,6 +98,24 @@ export class DeleteTeacherDto {
   teachers: string[];
 }
 
+export class DeleteClassroomDto {
+  @ApiProperty({
+    description: `A list of all classroom's id you want to delete`,
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  classrooms: string[];
+}
+
+export class DeleteSubjectsDto {
+  @ApiProperty({
+    description: `A list of all subject's id you want to delete`,
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  subjects: string[];
+}
+
 export enum Role {
   ADMIN = 'ADMIN',
   DEVELOPER = 'DEVELOPER',
