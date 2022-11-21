@@ -20,20 +20,20 @@ import { Readable } from 'stream';
 import { AUTH500 } from '../../exception';
 import { readAndProcessFile } from '../../utils/csv-parser';
 import { Roles } from '../app.decorator';
-import { DeleteSubjectDto, Role, User } from '../app.dto';
+import { DeleteStudentDto, Role, User } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
-import { SubjectCsvModel, SubjectService } from './subject.service';
+import { StudentService } from './student.service';
 
-@ApiTags('Subjects')
+@ApiTags('Students')
 @Roles(Role.SECRETARY)
-@Controller('subjects')
+@Controller('students')
 @UseGuards(AuthenticatedGuard)
-export class SubjectController {
-  constructor(private subjectService: SubjectService) {}
+export class StudentController {
+  constructor(private studentService: StudentService) {}
 
   @Post('imports')
-  @UseInterceptors(FileInterceptor('subjects'))
-  async importSubjects(
+  @UseInterceptors(FileInterceptor('students'))
+  async importStudents(
     @Session() session,
     @UploadedFile() file: Express.Multer.File
   ) {
@@ -44,23 +44,24 @@ export class SubjectController {
     } = session;
 
     try {
-      const data = await readAndProcessFile<SubjectCsvModel>(
-        ['subject_name', 'subject_code', 'classroom_code', 'email'],
-        Readable.from(file.buffer)
-      );
-      return this.subjectService.createMany(data, school_id);
+      const data = await readAndProcessFile<{
+        fullname: string;
+        email: string;
+        classroom_code: string;
+      }>(['fullname', 'email', 'classroom_code'], Readable.from(file.buffer));
+      return this.studentService.createMany(data, school_id);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   @Get('all')
-  async getSubjects(
+  async getStudents(
     @Query()
     {
       classroom_id,
-      teacher_id,
-    }: { classroom_id?: string; teacher_id?: string },
+      subject_id,
+    }: { classroom_id?: string; subject_id?: string },
     @Session() session
   ) {
     const {
@@ -68,21 +69,25 @@ export class SubjectController {
         user: { school_id },
       },
     } = session;
-    return this.subjectService.findAll({
-      ClassroomHasSubjects: {
-        every: { teacher_id, Classroom: { school_id, classroom_id } },
+    return this.studentService.findAll({
+      Classroom: {
+        school_id,
+        classroom_id,
+        ...(subject_id
+          ? { ClassroomHasSubjects: { some: { subject_id } } }
+          : {}),
       },
     });
   }
 
   @Delete('delete')
-  async deleteSubjects(
+  async deleteStudents(
     @Req() request: Request,
-    @Body() { subjects }: DeleteSubjectDto
+    @Body() { students }: DeleteStudentDto
   ) {
     const { preferred_lang } = request.user as User;
     try {
-      return await this.subjectService.deleteMany(subjects);
+      return await this.studentService.deleteMany(students);
     } catch (error) {
       throw new HttpException(
         AUTH500[preferred_lang],

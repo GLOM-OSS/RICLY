@@ -107,13 +107,22 @@ export class DeleteClassroomDto {
   classrooms: string[];
 }
 
-export class DeleteSubjectsDto {
+export class DeleteSubjectDto {
   @ApiProperty({
     description: `A list of all subject's id you want to delete`,
   })
   @IsArray()
   @ArrayMinSize(1)
   subjects: string[];
+}
+
+export class DeleteStudentDto {
+  @ApiProperty({
+    description: `A list of all subject's id you want to delete`,
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  students: string[];
 }
 
 export enum Role {
