@@ -13,6 +13,7 @@ import { Request, Response } from 'express';
 import { AUTH500 } from '../../exception';
 import { IsPublic, Roles } from '../app.decorator';
 import { NewPasswordDto, Role, User } from '../app.dto';
+import { CustomGuard } from './custom/custom.guard';
 import { AuthenticatedGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { GoogleGuard } from './google/google.guard';
@@ -43,6 +44,13 @@ export class AuthController {
   @UseGuards(GoogleGuard)
   async signIn() {
     //google authentication
+  }
+
+  @IsPublic()
+  @Post('app-signin')
+  @UseGuards(CustomGuard)
+  async apiSignin(@Req() request: Request) {
+    return request.user
   }
 
   @Post('new-password')

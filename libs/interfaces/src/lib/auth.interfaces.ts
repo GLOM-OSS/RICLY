@@ -14,6 +14,10 @@ export type Gender = 'Male' | 'Female';
 export enum Role {
   ADMIN = 'ADMIN',
   DEVELOPER = 'DEVELOPER',
+  
+  TEACHER = 'TEACHER',
+  SECRETARY = 'SECRETARY',
+  COORDINATOR = 'COORDINATOR',
 }
 export type UserRole = {
   user_id: string;

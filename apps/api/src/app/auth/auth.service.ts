@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
-import { NewPasswordDto, Role, User } from '../app.dto';
+import { NewPasswordDto, Role, User, UserRole } from '../app.dto';
 
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
@@ -11,7 +12,46 @@ import { AUTH10 } from '../../exception';
 export class AuthService {
   constructor(private prismaService: PrismaService) {}
 
-  async validateUser(personCreateInput: Prisma.PersonCreateInput) {
+  async validateUser(
+    personCreateInput: Prisma.PersonCreateInput,
+    options?: {
+      client_urL: string;
+      client_api_key: string;
+    }
+  ) {
+    if (options) {
+      const { client_urL, client_api_key } = options;
+      const some = {
+        School: {
+          OR: [
+            { api_test_key: client_api_key },
+            {
+              AND: { school_domain: client_urL, api_key: client_api_key },
+            },
+          ],
+        },
+      };
+      const person = await this.prismaService.person.findFirst({
+        select: {
+          Secretaries: { select: { school_id: true } },
+          Teachers: { select: { school_id: true } },
+        },
+        where: {
+          email: personCreateInput.email,
+          Secretaries: { some },
+          Teachers: { some },
+        },
+      });
+      if (person) {
+        const { Secretaries, Teachers } = person;
+        let school_id: string;
+        if (Secretaries.length > 0) {
+          school_id = Secretaries[0].school_id;
+        } else school_id = Teachers[0].school_id;
+        return { school_id, ...person };
+      }
+      return null;
+    }
     return this.prismaService.person.upsert({
       create: {
         ...personCreateInput,
@@ -31,8 +71,9 @@ export class AuthService {
     });
   }
 
-  async deserializeUser(email: string): Promise<User> {
-    const person = await this.prismaService.person.findUnique({
+  async deserializeUser(email: string, school_id: string): Promise<User> {
+    const userRoles: UserRole[] = [];
+    const person = await this.prismaService.person.findFirst({
       where: { email },
     });
     if (person) {
@@ -49,6 +90,37 @@ export class AuthService {
             },
           ],
         };
+      } else {
+        const secretary = await this.prismaService.secretary.findFirst({
+          where: { Person: { email }, School: { school_id } },
+        });
+        if (secretary) {
+          userRoles.push({
+            user_id: secretary.secretary_id,
+            role: Role.SECRETARY,
+          });
+        }
+
+        const teacher = await this.prismaService.teacher.findFirst({
+          where: { Person: { email }, School: { school_id } },
+        });
+        if (teacher) {
+          userRoles.push({
+            user_id: teacher.teacher_id,
+            role: Role.TEACHER,
+          });
+
+          const coordinator = await this.prismaService.classroom.findFirst({
+            where: { coordinator: teacher.teacher_id, School: { school_id } },
+          });
+          if (coordinator) {
+            userRoles.push({
+              user_id: teacher.teacher_id,
+              role: Role.COORDINATOR,
+            });
+          }
+        }
+        return { ...person, roles: userRoles };
       }
     }
     return null;
@@ -86,5 +158,25 @@ export class AuthService {
       });
     }
     throw new HttpException(JSON.stringify(AUTH10), HttpStatus.UNAUTHORIZED);
+  }
+
+  async validateRequest(request: Request) {
+    const clientUrl = request.headers.origin;
+    const clientApiKey = request.get('RICLY-API-KEY');
+    const school = await this.prismaService.school.findFirst({
+      where: {
+        OR: [
+          { api_test_key: clientApiKey },
+          { AND: { school_domain: clientUrl ?? null, api_key: clientApiKey } },
+        ],
+      },
+    });
+    if (school) {
+      const person = await this.prismaService.person.findUnique({
+        where: { email: request.body.email },
+      });
+      return { ...person, school_id: school.school_id };
+    }
+    return null;
   }
 }

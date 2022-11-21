@@ -9,12 +9,19 @@ export class AuthSerializer extends PassportSerializer {
   constructor(private authService: AuthService) {
     super();
   }
-  serializeUser(user: Person, done: (err, email: string) => void) {
-    done(null, user.email);
+  serializeUser(
+    user: Person & { school_id?: string },
+    done: (err, user: { school_id: string; email: string }) => void
+  ) {
+    console.log(user.email, user.school_id)
+    done(null, { email: user.email, school_id: user.school_id });
   }
 
-  async deserializeUser(email: string, done: (err, user: User) => void) {
-    const deserializeUser = await this.authService.deserializeUser(email);
+  async deserializeUser(
+    user: { school_id: string; email: string },
+    done: (err, user: User) => void
+  ) {
+    const deserializeUser = await this.authService.deserializeUser(user.email, user.school_id);
     done(null, deserializeUser);
   }
 }

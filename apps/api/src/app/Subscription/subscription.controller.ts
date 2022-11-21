@@ -14,7 +14,7 @@ import { Request } from 'express';
 import { AUTH500 } from '../../exception';
 import { Roles } from '../app.decorator';
 import { Role, User, SubscribeDto, SubscribeQueryDto } from '../app.dto';
-import { AuthenticatedGuard } from '../auth/auth.guard';
+import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { SubscriptionService } from './subscription.service';
 
 @Roles(Role.DEVELOPER)
@@ -28,11 +28,12 @@ export class SubscriptionController {
   async subscribe(@Req() request: Request, @Body() subcription: SubscribeDto) {
     const { preferred_lang } = request.user as User;
     try {
-      const { school_id, total_paid } = subcription;
+      const { school_id, total_paid, transaction_id } = subcription;
       const unit_price = Number(process.env.NX_API_UNIT_PRICE);
       return await this.subscriptionService.create({
         total_paid,
         unit_price,
+        transaction_id,
         School: { connect: { school_id } },
         number_of_apis: Math.floor(total_paid / unit_price),
       });

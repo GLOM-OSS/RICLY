@@ -14,7 +14,7 @@ import { Request } from 'express';
 import { AUTH500 } from '../../exception';
 import { Roles } from '../app.decorator';
 import { Role, SchoolPostDto, User, UserRole } from '../app.dto';
-import { AuthenticatedGuard } from '../auth/auth.guard';
+import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { SchoolService } from './school.service';
 
 @ApiTags('School')

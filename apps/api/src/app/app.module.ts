@@ -15,9 +15,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AppController } from './app.controller';
 import { AppInterceptor } from './app.interceptor';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { SchoolModule } from './school/school.module';
-import { SubscriptionModule } from './subscription/subscription.module';
+import { AuthModule } from './Auth/auth.module';
+import { SchoolModule } from './School/school.module';
+import { SubscriptionModule } from './Subscription/subscription.module';
+import { BuildingModule } from './Building/building.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { SubscriptionModule } from './subscription/subscription.module';
     PrismaModule,
     AuthModule,
     SchoolModule,
-    SubscriptionModule
+    SubscriptionModule,
+    BuildingModule,
   ],
   controllers: [AppController],
   providers: [
