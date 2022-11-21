@@ -1,22 +1,22 @@
 import {
-  AddOutlined,
-  FileDownloadOutlined,
-  ReportRounded,
-  SearchOutlined,
+    AddOutlined,
+    FileDownloadOutlined,
+    ReportRounded,
+    SearchOutlined
 } from '@mui/icons-material';
 import {
-  Box,
-  Button,
-  InputAdornment,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  TextField,
-  Typography,
+    Box,
+    Button,
+    InputAdornment,
+    Skeleton,
+    Table,
+    TableBody,
+    TableCell,
+    TableRow,
+    TextField,
+    Typography
 } from '@mui/material';
-import { Classroom, Teacher } from '@ricly/interfaces';
+import { Classroom } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
@@ -25,7 +25,6 @@ import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import ClassroomCard from '../../components/classroom/classroomCard';
-import TeacherCard from '../../components/teacher/teacherCard';
 import { useUser } from '../../contexts/UserContextProvider';
 
 export default function Classrooms() {
