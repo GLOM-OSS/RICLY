@@ -65,8 +65,9 @@ export class SubjectService {
     });
   }
 
-  async findAll(where: Prisma.SubjectWhereInput) {
+  async findAll(where: Prisma.SubjectWhereInput, take?: number) {
     const subjects = await this.prismaService.subject.findMany({
+      take,
       select: {
         subject_id: true,
         subject_name: true,
@@ -88,31 +89,41 @@ export class SubjectService {
       },
       where,
     });
-    return subjects.map(({ ClassroomHasSubjects, ...subject }) => {
-      let teacher_email: string;
-      const classrooms = ClassroomHasSubjects.map(
-        ({
-          Teacher: {
-            Person: { email },
-          },
-          Classroom: { ...classroom },
-        }) => {
-          teacher_email = email;
-          return {
-            ...classroom,
-          };
-        }
-      );
-      return {
-        ...subject,
-        classrooms: classrooms.map(
-          ({ classroom_acronym: classroom_code, ...classroom }) => ({
-            classroom_code,
-            ...classroom,
-          })
-        ),
-        teacher_email,
-      };
-    });
+    return subjects.map(
+      ({ ClassroomHasSubjects, subject_acronym, ...subject }) => {
+        let teacher_email: string;
+        const classrooms = ClassroomHasSubjects.map(
+          ({
+            Teacher: {
+              Person: { email },
+            },
+            Classroom: { ...classroom },
+          }) => {
+            teacher_email = email;
+            return {
+              ...classroom,
+            };
+          }
+        );
+        return {
+          ...subject,
+          subject_code: subject_acronym,
+          classrooms: classrooms.map(
+            ({ classroom_acronym: classroom_code, ...classroom }) => ({
+              classroom_code,
+              ...classroom,
+            })
+          ),
+          teacher_email,
+        };
+      }
+    );
+  }
+
+  async findOne(subject_id: string) {
+    const subjects = await this.findAll({ subject_id }, 1);
+    if (subjects.length > 0) {
+      return subjects[0];
+    }
   }
 }

@@ -5,13 +5,14 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
   Session,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
@@ -73,6 +74,11 @@ export class SubjectController {
         every: { teacher_id, Classroom: { school_id, classroom_id } },
       },
     });
+  }
+
+  @Get(':subject_id')
+  async getSubject(@Param('subject_id') subject_id: string) {
+    return this.subjectService.findOne(subject_id);
   }
 
   @Delete('delete')
