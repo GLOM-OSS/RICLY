@@ -23,6 +23,7 @@ import { TeacherModule } from './Teacher/teacher.module';
 import { ClassroomModule } from './Classroom/classrrom.module';
 import { SubjectModule } from './Subject/subject.module';
 import { StudentModule } from './Student/student.module';
+import { AppMiddleware } from './app.middleware';
 
 @Module({
   imports: [
@@ -75,7 +76,8 @@ export class AppModule implements NestModule {
           },
         }),
         passport.initialize(),
-        passport.session()
+        passport.session(),
+        AppMiddleware
       )
       .forRoutes('*');
   }
