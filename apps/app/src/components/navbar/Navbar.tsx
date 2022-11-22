@@ -1,7 +1,7 @@
 import {
   FileDownloadOutlined,
   KeyboardArrowDownOutlined,
-  ReportRounded,
+  ReportRounded
 } from '@mui/icons-material';
 import {
   Box,
@@ -9,17 +9,17 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-  Typography,
+  Typography
 } from '@mui/material';
 import { SchoolInterface } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import Logo from '../../assets/Logo.png';
 import { useUser } from '../../contexts/UserContextProvider';
+import { findSchools } from '../../services/school.service';
 import NavItem from './navItem';
 
 export default function Navbar({ logout }: { logout: () => void }) {
@@ -30,41 +30,18 @@ export default function Navbar({ logout }: { logout: () => void }) {
   } = useUser();
 
   const [isSchoolMenuOpen, setIsSchoolMenuOpen] = useState<boolean>(false);
-  const [schools, setSchools] = useState<SchoolInterface[]>([
-    {
-      api_calls_left: 20,
-      api_calls_used: 200,
-      api_key: 'kskdksis',
-      api_test_key: 'kdksowkekd',
-      school_acronym: 'UdM',
-      school_code: 'skdk',
-      school_name: 'Universite des montagnes',
-      test_api_calls_left: 10,
-    },
-  ]);
+  const [schools, setSchools] = useState<SchoolInterface[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [areSchoolsLoading, setAreSchoolsLoading] = useState<boolean>(false);
 
   const loadSchools = () => {
     setAreSchoolsLoading(true);
-    setTimeout(() => {
-      // TODO: LOAD person_id's SCHOOLS DATA INTO SCHOOLS state for nav bar to swap schools.
-      if (random() > 5) {
-        const newSchools: SchoolInterface[] = [
-          {
-            api_calls_left: 20,
-            api_calls_used: 200,
-            api_key: 'kskdksis',
-            api_test_key: 'kdksowkekd',
-            school_acronym: 'UdM',
-            school_code: 'skdk',
-            school_name: 'Universite des montagnes',
-            test_api_calls_left: 10,
-          },
-        ];
-        setSchools(newSchools);
+    findSchools()
+      .then((schools) => {
+        setSchools(schools);
         setAreSchoolsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({ render: formatMessage({ id: 'loadingSchools' }) });
         notif.update({
@@ -73,15 +50,15 @@ export default function Navbar({ logout }: { logout: () => void }) {
             <ErrorMessage
               retryFunction={loadSchools}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSchools' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingSchools' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   useEffect(() => {
