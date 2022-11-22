@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -80,5 +81,10 @@ export class SchoolController {
   @Get(':school_code')
   async getSchool(@Param('school_code') school_code: string) {
     return await this.schoolService.findOne({ school_code });
+  }
+
+  @Delete(':school_code/delete')
+  async deleteSchool(@Param('school_code') school_code: string) {
+    return await this.schoolService.deleteSchool(school_code);
   }
 }

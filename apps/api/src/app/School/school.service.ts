@@ -95,4 +95,11 @@ export class SchoolService {
     }
     return null;
   }
+
+  async deleteSchool(school_code: string) {
+    return this.prismaService.school.update({
+      data: { is_deleted: false },
+      where: { school_code },
+    });
+  }
 }
