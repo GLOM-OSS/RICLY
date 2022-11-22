@@ -1,12 +1,15 @@
 import { http } from '@ricly/axios';
-import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
+import {
+  CreateSchoolInterface,
+  SchoolInterface
+} from '@ricly/interfaces';
 
 export async function findSchools() {
   const { data } = await http.get<SchoolInterface[]>(`/school/all`);
   return data;
 }
 
-export async function findSchoolProfile(school_code: string) {
+export async function findSchoolData(school_code: string) {
   const { data } = await http.get<SchoolInterface>(`/school/${school_code}`);
   return data;
 }

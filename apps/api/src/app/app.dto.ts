@@ -25,7 +25,7 @@ export class SubscribeDto {
 }
 
 export class SubscribeQueryDto {
-  @IsUUID()
+  @IsString()
   @ApiProperty()
   school_code: string;
 }
