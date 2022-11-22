@@ -28,8 +28,10 @@ export class AuthController {
   @Get('')
   @IsPublic()
   @UseGuards(GoogleGuard)
-  async register(@Res() res: Response) {
-    return res.redirect(`${process.env.RICLY_APP_SUCCESS_URL}`);
+  async register(@Req() request: Request, @Res() res: Response) {
+    if (request.get('RICLY-API-KEY'))
+      return res.redirect(`${process.env.RICLY_APP_SUCCESS_URL}/dashboard`);
+    return res.redirect(`${process.env.RICLY_APP_SUCCESS_URL}/schools`);
   }
 
   @IsPublic()
@@ -50,7 +52,7 @@ export class AuthController {
   @Post('app-signin')
   @UseGuards(CustomGuard)
   async apiSignin(@Req() request: Request) {
-    return request.user
+    return request.user;
   }
 
   @Post('new-password')

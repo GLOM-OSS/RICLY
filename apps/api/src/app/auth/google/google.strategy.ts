@@ -34,7 +34,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         fullname: `${given_name} ${family_name}`,
       };
       const clientApiKey = request.get('RICLY-API-KEY');
-      if (clientApiKey) {
+      if (!clientApiKey) {
         return this.authService.validateUser(user);
       }
       return this.authService.validateUser(user, {
