@@ -45,7 +45,7 @@ export class SchoolPostDto {
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ required: true })
+  @ApiProperty({ required: false })
   school_domain?: string;
 }
 

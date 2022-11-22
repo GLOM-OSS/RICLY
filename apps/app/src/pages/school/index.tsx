@@ -11,57 +11,40 @@ import {
   Typography,
 } from '@mui/material';
 import { Box } from '@mui/system';
+import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
+import { Scrollbars } from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
+import AddSchoolDialog from '../../components/schools/addSchool';
+import ConfirmDeleteDialog from '../../components/schools/confirmDeleteDialog';
 import SchoolCard from '../../components/schools/schoolCard';
 import { useUser } from '../../contexts/UserContextProvider';
-import { Scrollbars } from 'rc-scrollbars';
-import ConfirmDeleteDialog from '../../components/schools/confirmDeleteDialog';
-import AddSchoolDialog from '../../components/schools/addSchool';
-import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
+import {
+  createNewSchool,
+  findSchools,
+  removeSchool,
+} from '../../services/school.service';
 
 export default function Schools() {
   const { formatMessage } = useIntl();
-  const [schools, setSchools] = useState<SchoolInterface[]>([
-    {
-      api_calls_left: 20,
-      api_calls_used: 200,
-      api_key: 'kskdksis',
-      api_test_key: 'kdksowkekd',
-      school_acronym: 'UdM',
-      school_code: 'skdk',
-      school_name: 'Universite des montagnes',
-      test_api_calls_left: 10,
-    },
-  ]);
+  const [schools, setSchools] = useState<SchoolInterface[]>([]);
   const [areSchoolsLoading, setAreSchoolsLoading] = useState<boolean>(false);
   const [displaySchools, setDisplaySchools] = useState<SchoolInterface[]>([]);
 
   const loadSchools = () => {
     setAreSchoolsLoading(true);
-    setTimeout(() => {
-      // TODO: LOAD person_id's SCHOOLS DATA INTO SCHOOLS state for nav bar to swap schools.
-      if (random() > 5) {
-        const newSchools: SchoolInterface[] = [
-          {
-            api_calls_left: 20,
-            api_calls_used: 200,
-            api_key: 'kskdksis',
-            api_test_key: 'kdksowkekd',
-            school_acronym: 'UdM',
-            school_code: 'skdk',
-            school_name: 'Universite des montagnes',
-            test_api_calls_left: 10,
-          },
-        ];
-        setSchools(newSchools);
+    findSchools()
+    .then((schools) => {
+        // alert(schools)
+        setSchools(schools);
+        setDisplaySchools(schools);
         setAreSchoolsLoading(false);
-        setDisplaySchools(newSchools);
-      } else {
+      })
+      .catch((error) => {
+        alert(error.message)
         const notif = new useNotification();
         notif.notify({ render: formatMessage({ id: 'loadingSchools' }) });
         notif.update({
@@ -70,15 +53,15 @@ export default function Schools() {
             <ErrorMessage
               retryFunction={loadSchools}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSchools' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingSchools' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   useEffect(() => {
@@ -122,30 +105,28 @@ export default function Schools() {
     });
     setNotifications([...newNotifications, { notif, usage: 'delete' }]);
     notif.notify({ render: formatMessage({ id: 'deleting' }) });
-    setTimeout(() => {
-      //TODO: CALL API HERE TO LOG USER OUT
-      if (random() > 5) {
+    removeSchool(deletableSchool?.school_code as string)
+      .then(() => {
         loadSchools();
         notif.dismiss();
         setIsConfirmDeleteDialogOpen(false);
         setDeletableSchool(undefined);
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={deleteSchool}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'errorDeleting' })}
+              message={error?.message || formatMessage({ id: 'errorDeleting' })}
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-      setDeleting(false);
-    }, 3000);
+      })
+      .finally(() => setDeleting(false));
   };
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState<boolean>(false);
@@ -160,19 +141,18 @@ export default function Schools() {
     });
     setNotifications([...newNotifications, { notif, usage: 'create' }]);
     notif.notify({ render: formatMessage({ id: 'creatingSchool' }) });
-    setTimeout(() => {
-      const submitSchool = {
-        ...school,
-        school_domain: `https://${school.school_domain}`,
-      };
-      // TODO: CALL API HERE TO CREATE SCHOOL WITH DATA submitSchool
-      setIsCreatingSchool(false);
-      if (random() > 5) {
+    const submitSchool = {
+      ...school,
+      school_domain: `https://${school.school_domain}`,
+    };
+    createNewSchool(submitSchool)
+      .then((newSchool) => {
+        setSchools([...schools, newSchool]);
         notif.update({
           render: formatMessage({ id: 'schoolCreatedSuccessfully' }),
         });
-        // TODO: add new school to schools
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
@@ -182,15 +162,16 @@ export default function Schools() {
                 createSchool(school);
               }}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedToCreateSchool' })}
+              message={
+                error?.message || formatMessage({ id: 'failedToCreateSchool' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      })
+      .finally(() => setIsCreatingSchool(false));
   };
 
   return (
@@ -305,7 +286,7 @@ export default function Schools() {
                           type: 'SELECT_SCHOOL',
                           payload: { selected_school: school },
                         });
-                        navigate(`/-/schools/${school.school_code}`);
+                        navigate(`/-/${school.school_code}/dashboard`);
                       }}
                     />
                   ))
