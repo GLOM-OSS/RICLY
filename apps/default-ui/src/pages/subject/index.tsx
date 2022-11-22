@@ -114,7 +114,7 @@ export default function Subjects() {
   const loadSubjects = () => {
     setAreSubjectsLoading(true);
     setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL subjects HERE with data classroom_id, teacher_id
+      // TODO: CALL API TO GET SCHOOL subjects HERE with data selectedClassroom, selectedTeacher
       if (random() > 5) {
         const newSubjects: Subject[] = [];
         setSubjects(newSubjects);
