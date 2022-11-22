@@ -40,7 +40,7 @@ export class SchoolController {
       const existingSchool = await this.schoolService.findOne({
         school_domain: newSchool.school_domain,
       });
-      if (existingSchool)
+      if (newSchool.school_domain && existingSchool)
         throw new HttpException(
           ERR03('school')[preferred_lang],
           HttpStatus.NOT_ACCEPTABLE

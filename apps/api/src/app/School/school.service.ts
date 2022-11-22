@@ -70,7 +70,7 @@ export class SchoolService {
         school_acronym: true,
         school_name: true,
       },
-      where: { developer_id },
+      where: { developer_id, is_deleted: false },
     });
   }
 
@@ -98,7 +98,7 @@ export class SchoolService {
 
   async deleteSchool(school_code: string) {
     return this.prismaService.school.update({
-      data: { is_deleted: false },
+      data: { is_deleted: true },
       where: { school_code },
     });
   }
