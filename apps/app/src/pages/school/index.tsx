@@ -256,7 +256,7 @@ export default function Schools() {
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
               placeholder={formatMessage({ id: 'searchSchool' })}
-              sx={{ m: 1, width: '25ch' }}
+              sx={{ m: 1, width: '25ch', backgroundColor:theme.common.white }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
