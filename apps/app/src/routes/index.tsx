@@ -27,6 +27,7 @@ export const routes = [
     element: <Layout />,
     children: [
       { path: 'schools', element: <Schools /> },
+      { path: ':school_code', element: <Navigate to="dashboard" /> },
       {
         path: ':school_code',
         children: [
