@@ -37,14 +37,14 @@ function axiosInstance(): AxiosInstance {
     (response) => {
       response = {
         ...response,
-        data: decrypt(response.data),
+        data: response.data ? decrypt(response.data): {},
       };
       return response;
     },
     (error) => {
-      if (error.response?.statusCode === 403 && location.pathname !== '/signin')
-        location.href = '/signin';
-      return Promise.reject(error.response.data);
+      if (error.response?.status === 403 && location.pathname !== '/')
+        location.href = '/';
+      return Promise.reject(error.response?.data);
     }
   );
 

@@ -153,4 +153,5 @@ export function Auth({ app = 'app' }: { app?: string }) {
   );
 }
 
+export { logOut } from './auth.service';
 export default Auth;
