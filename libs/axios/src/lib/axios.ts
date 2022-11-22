@@ -42,7 +42,7 @@ function axiosInstance(): AxiosInstance {
       return response;
     },
     (error) => {
-      if (error.response.statusCode === 403 && location.pathname !== '/signin')
+      if (error.response?.statusCode === 403 && location.pathname !== '/signin')
         location.href = '/signin';
       return Promise.reject(error.response.data);
     }
