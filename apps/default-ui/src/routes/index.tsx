@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { Auth } from '@ricly/auth';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router';
 import Buildings from '../pages/buildings';
 import Classrooms from '../pages/classrooms';
 import Dashboard from '../pages/dashboard';
@@ -21,7 +21,7 @@ export const Test = () => {
 export const routes = [
   {
     path: '/',
-    element: <Auth />,
+    element: <Auth app='default-ui'/>,
   },
   {
     path: '-',
@@ -33,8 +33,8 @@ export const routes = [
       { path: 'classrooms', element: <Classrooms /> },
     ],
   },
-  //   {
-  //     path: '*',
-  //     element: <Navigate to="/" />,
-  //   },
+    // {
+    //   path: '*',
+    //   element: <Navigate to="/" />,
+    // },
 ];
