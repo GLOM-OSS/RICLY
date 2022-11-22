@@ -30,7 +30,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     if (email_verified) {
       const user = {
         email,
-        preferred_lang: locale as Lang,
+        preferred_lang: locale.substring(0, 2) as Lang,
         fullname: `${given_name} ${family_name}`,
       };
       const clientApiKey = request.get('RICLY-API-KEY');

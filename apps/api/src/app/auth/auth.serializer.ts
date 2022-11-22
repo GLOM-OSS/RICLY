@@ -13,7 +13,6 @@ export class AuthSerializer extends PassportSerializer {
     user: Person & { school_id?: string },
     done: (err, user: { school_id: string; email: string }) => void
   ) {
-    console.log(user.email, user.school_id)
     done(null, { email: user.email, school_id: user.school_id });
   }
 
