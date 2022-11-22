@@ -14,7 +14,7 @@ export class CustomStrategy extends PassportStrategy(Strategy) {
     const clientUrl = request.headers.origin;
     const clientApiKey = request.get('RICLY-API-KEY');
     return this.authService.validateRequest(
-      request.body.email,
+      request.body,
       clientUrl,
       clientApiKey
     );

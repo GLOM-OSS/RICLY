@@ -21,7 +21,7 @@ export class AuthService {
     if (options) {
       const { client_urL, client_api_key } = options;
       const user = await this.validateRequest(
-        personCreateInput.email,
+        personCreateInput,
         client_urL,
         client_api_key
       );
@@ -142,7 +142,7 @@ export class AuthService {
   }
 
   async validateRequest(
-    email: string,
+    data: Prisma.PersonCreateInput,
     clientUrl: string,
     clientApiKey: string
   ) {
@@ -158,20 +158,20 @@ export class AuthService {
     };
     const person = await this.prismaService.person.findFirst({
       select: {
-        person_id: true,
-        email: true,
-        fullname: true,
-        preferred_lang: true,
         Secretaries: { select: { school_id: true } },
         Teachers: { select: { school_id: true } },
       },
       where: {
-        email,
+        email: data.email,
         OR: [{ Teachers: { some } }, { Secretaries: { some } }],
       },
     });
     if (person) {
-      const { Secretaries, Teachers, ...user } = person;
+      const user = await this.prismaService.person.update({
+        data,
+        where: { email: data.email },
+      });
+      const { Secretaries, Teachers } = person;
       let school_id: string;
       if (Secretaries.length > 0) {
         school_id = Secretaries[0].school_id;
