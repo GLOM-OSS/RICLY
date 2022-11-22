@@ -1,12 +1,8 @@
-import { Google, ReportRounded } from '@mui/icons-material';
+import { Google } from '@mui/icons-material';
 import { Box, Button, lighten, Typography } from '@mui/material';
 import { theme } from '@ricly/theme';
-import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
-import { useState } from 'react';
 import { useIntl } from 'react-intl';
 import Logo from '../assets/Logo.png';
-import { useNavigate } from 'react-router';
 
 const ExternalLink = ({ children, to }: { to: string; children: string }) => {
   return (
@@ -60,62 +56,6 @@ const ExternalLink = ({ children, to }: { to: string; children: string }) => {
 
 export function Auth({ app = 'app' }: { app?: string }) {
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
-
-  const [isAuthenticatingUser, setIsAuthenticatingUser] =
-    useState<boolean>(false);
-  const authenticateUser = () => {
-    const notif = new useNotification();
-    setIsAuthenticatingUser(true);
-    notif.notify({
-      render: formatMessage({ id: 'authenticatingUser' }),
-    });
-    setTimeout(() => {
-      if (app === 'app') {
-        // TODO: CALL API TO CONNECT DEVELOPER WITH GOOGLE
-        if (random() > 5) {
-          navigate('/schools');
-          notif.dismiss();
-        } else {
-          notif.update({
-            type: 'ERROR',
-            render: (
-              <ErrorMessage
-                retryFunction={authenticateUser}
-                notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'authenticationFailed' })}
-              />
-            ),
-            autoClose: false,
-            icon: () => <ReportRounded fontSize="medium" color="error" />,
-          });
-          setIsAuthenticatingUser(false);
-        }
-      } else {
-        // TODO: CALL API TO CONNECT SCHOOL PERNNEL WITH GOOGLE HERE.
-        if (random() > 5) {
-          navigate('/dashboard');
-          notif.dismiss();
-        } else {
-          notif.update({
-            type: 'ERROR',
-            render: (
-              <ErrorMessage
-                retryFunction={authenticateUser}
-                notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'authenticationFailed' })}
-              />
-            ),
-            autoClose: false,
-            icon: () => <ReportRounded fontSize="medium" color="error" />,
-          });
-          setIsAuthenticatingUser(false);
-        }
-      }
-    }, 3000);
-  };
 
   return (
     <Box
@@ -153,19 +93,23 @@ export function Auth({ app = 'app' }: { app?: string }) {
             id: app === 'app' ? 'developerSignInCaption' : 'signInCaption',
           })}
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ marginTop: theme.spacing(7), textTransform: 'none' }}
-          startIcon={<Google fontSize="large" sx={{ color: 'white' }} />}
-          onClick={authenticateUser}
-          disabled={isAuthenticatingUser}
+        <Typography
+          component="a"
+          href={`${process.env['NX_API_BASE_URL']}/auth/google-signin`}
+          rel="noreferrer"
         >
-          {formatMessage({
-            id: app === 'app' ? 'authenticateWithGoogle' : 'signInWithGoogle',
-          })}
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            sx={{ marginTop: theme.spacing(7), textTransform: 'none' }}
+            startIcon={<Google fontSize="large" sx={{ color: 'white' }} />}
+          >
+            {formatMessage({
+              id: app === 'app' ? 'authenticateWithGoogle' : 'signInWithGoogle',
+            })}
+          </Button>
+        </Typography>
       </Box>
       <Box
         sx={{
