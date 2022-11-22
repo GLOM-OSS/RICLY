@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { getRandomString } from '@ricly/utils';
 import { PrismaService } from '../../prisma/prisma.service';
-import { getRandomString } from '../../utils';
 import { SchoolPostDto } from '../app.dto';
 
 @Injectable()
