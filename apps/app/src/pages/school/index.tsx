@@ -1,28 +1,28 @@
 import {
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined,
+  SearchOutlined
 } from '@mui/icons-material';
 import {
   Button,
   InputAdornment,
   Skeleton,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Box } from '@mui/system';
+import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
+import { Scrollbars } from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
+import AddSchoolDialog from '../../components/schools/addSchool';
+import ConfirmDeleteDialog from '../../components/schools/confirmDeleteDialog';
 import SchoolCard from '../../components/schools/schoolCard';
 import { useUser } from '../../contexts/UserContextProvider';
-import { Scrollbars } from 'rc-scrollbars';
-import ConfirmDeleteDialog from '../../components/schools/confirmDeleteDialog';
-import AddSchoolDialog from '../../components/schools/addSchool';
-import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
 
 export default function Schools() {
   const { formatMessage } = useIntl();
