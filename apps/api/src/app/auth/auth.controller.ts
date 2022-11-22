@@ -13,9 +13,9 @@ import { Request, Response } from 'express';
 import { AUTH500 } from '../../exception';
 import { IsPublic, Roles } from '../app.decorator';
 import { NewPasswordDto, Role, User } from '../app.dto';
-import { CustomGuard } from './custom/custom.guard';
 import { AuthenticatedGuard } from './auth.guard';
 import { AuthService } from './auth.service';
+import { CustomGuard } from './custom/custom.guard';
 import { GoogleGuard } from './google/google.guard';
 import { LocalGuard } from './local/local.guard';
 
@@ -76,7 +76,18 @@ export class AuthController {
 
   @Get('/user')
   async getUser(@Req() request: Request) {
-    console.log(request.user);
     return request.user;
+  }
+
+  @Get('/close')
+  async closeSession(@Req() request: Request, @Res() res: Response) {
+    try {
+      request.logOut({ keepSessionInfo: false }, (err) => {
+        if (err) throw new Error(err);
+        res.redirect(request.headers.origin);
+      });
+    } catch (error) {
+      throw new HttpException(error?.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
