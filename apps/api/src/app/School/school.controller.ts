@@ -60,13 +60,17 @@ export class SchoolController {
     const clientUrl = request.headers.origin;
     const clientApiKey = request.get('RICLY-API-KEY');
     return await this.schoolService.findOne({
-      OR: {
-        api_test_key: clientApiKey,
-        AND: {
-          api_key: clientApiKey,
-          school_domain: clientUrl,
+      OR: [
+        {
+          api_test_key: clientApiKey,
         },
-      },
+        {
+          AND: {
+            api_key: clientApiKey,
+            school_domain: clientUrl,
+          },
+        },
+      ],
     });
   }
 
