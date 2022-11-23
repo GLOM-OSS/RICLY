@@ -48,6 +48,7 @@ function UserContextProvider({
       roles: [
         { user_id: 'skdk', role: Role.SECRETARY },
         { user_id: 'skdk', role: Role.TEACHER },
+        { user_id: 'skdk', role: Role.COORDINATOR },
       ],
       gender: 'Male',
       phone_number: '657140183',
