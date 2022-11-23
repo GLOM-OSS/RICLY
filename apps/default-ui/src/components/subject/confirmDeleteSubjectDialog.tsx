@@ -1,16 +1,16 @@
 import { ReportRounded } from '@mui/icons-material';
 import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
 } from '@mui/material';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
+import { deleteSubjects } from '../../services/subject.service';
 
 export default function ConfirmDeleteSubjectDialog({
   isDialogOpen,
@@ -28,28 +28,28 @@ export default function ConfirmDeleteSubjectDialog({
     setIsDeleting(true);
     const notif = new useNotification();
     notif.notify({ render: formatMessage({ id: 'deleting' }) });
-    setTimeout(() => {
-      //TODO: CALL api to delete subject here with data subject_id
-      if (random() > 5) {
+    deleteSubjects([subject_id])
+      .then(() => {
         notif.dismiss();
         closeDialog();
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={logout}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'errorDeletingSubject' })}
+              message={
+                error?.message || formatMessage({ id: 'errorDeletingSubject' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-        setIsDeleting(false);
-      }
-    }, 3000);
+      })
+      .finally(() => setIsDeleting(false));
   };
 
   return (
