@@ -45,7 +45,10 @@ function UserContextProvider({
       fullname: 'Lorrain Tchakoumi Kouatchoua',
       person_id: 'lksikelsie',
       preferred_lang: 'fr',
-      roles: [{ user_id: 'skdk', role: Role.SECRETARY }],
+      roles: [
+        { user_id: 'skdk', role: Role.SECRETARY },
+        { user_id: 'skdk', role: Role.TEACHER },
+      ],
       gender: 'Male',
       phone_number: '657140183',
     },
