@@ -124,7 +124,7 @@ export default function Timetables() {
         }}
       >
         <Typography variant="h3">
-          {formatMessage({ id: 'Timetables' })}
+          {formatMessage({ id: 'timetables' })}
         </Typography>
         <Button
           variant="contained"
