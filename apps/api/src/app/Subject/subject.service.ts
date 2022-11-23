@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { Subject } from '@ricly/interfaces';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -55,77 +56,95 @@ export class SubjectService {
         data: classroomHasSubjects,
         skipDuplicates: true,
       }),
+      this.prismaService.classroomHasSubject.updateMany({
+        data: { is_deleted: false },
+        where: {
+          OR: subjects.map(({ subject_code }) => ({
+            Subject: { subject_code },
+          })),
+        },
+      }),
     ]);
   }
 
   async deleteMany(subjectIds: string[]) {
-    return this.prismaService.subject.updateMany({
+    return this.prismaService.classroomHasSubject.updateMany({
       data: { is_deleted: true },
-      where: { OR: subjectIds.map((id) => ({ subject_id: id })) },
+      where: { OR: subjectIds.map((id) => ({ Subject: { subject_id: id } })) },
     });
   }
-  
+
   async removeClassrooms(subject_id: string, classroomIds: string[]) {
     return this.prismaService.classroomHasSubject.updateMany({
       data: { is_deleted: true },
-      where: { OR: classroomIds.map((id) => ({ classroom_id: id, subject_id })) },
+      where: {
+        subject_id,
+        OR: classroomIds.map((id) => ({ classroom_id: id, subject_id })),
+      },
     });
   }
 
-
-  async findAll(where: Prisma.SubjectWhereInput, take?: number) {
-    const subjects = await this.prismaService.subject.findMany({
-      take,
-      select: {
-        subject_id: true,
-        subject_name: true,
-        subject_acronym: true,
-        ClassroomHasSubjects: {
-          select: {
-            Teacher: {
-              select: { Person: { select: { email: true } } },
+  async findAll(where: Prisma.ClassroomHasSubjectWhereInput, take?: number) {
+    const classroomHasSubjects =
+      await this.prismaService.classroomHasSubject.findMany({
+        take,
+        select: {
+          Teacher: {
+            select: { Person: { select: { email: true } } },
+          },
+          Classroom: {
+            select: {
+              classroom_id: true,
+              classroom_name: true,
+              classroom_acronym: true,
             },
-            Classroom: {
-              select: {
-                classroom_id: true,
-                classroom_name: true,
-                classroom_acronym: true,
-              },
+          },
+          Subject: {
+            select: {
+              subject_id: true,
+              subject_name: true,
+              subject_acronym: true,
             },
           },
         },
-      },
-      where,
-    });
-    return subjects.map(
-      ({ ClassroomHasSubjects, subject_acronym, ...subject }) => {
-        let teacher_email: string;
-        const classrooms = ClassroomHasSubjects.map(
-          ({
-            Teacher: {
-              Person: { email },
-            },
-            Classroom: { ...classroom },
-          }) => {
-            teacher_email = email;
-            return {
-              ...classroom,
-            };
-          }
+        where,
+      });
+    let subjects: Subject[] = [];
+    classroomHasSubjects.forEach(
+      ({
+        Teacher: {
+          Person: { email },
+        },
+        Subject,
+        Classroom: { classroom_acronym: classroom_code, ...classroom },
+      }) => {
+        const subjectData = subjects.find(
+          (_) => _.subject_id === Subject.subject_id
         );
-        return {
-          ...subject,
-          subject_code: subject_acronym,
-          classrooms: classrooms.map(
-            ({ classroom_acronym: classroom_code, ...classroom }) => ({
-              classroom_code,
-              ...classroom,
-            })
-          ),
-          teacher_email,
-        };
+        if (subjectData) {
+          subjects = subjects.map((subject) =>
+            subject.subject_id === Subject.subject_id
+              ? {
+                  ...subject,
+                  classrooms: [
+                    ...subject.classrooms,
+                    { classroom_code, ...classroom },
+                  ],
+                }
+              : subject
+          );
+        } else {
+          const { subject_acronym, ...subjectData } = Subject;
+          subjects.push({
+            ...subjectData,
+            teacher_email: email,
+            subject_code: subject_acronym,
+            classrooms: [{ classroom_code, ...classroom }],
+          });
+        }
       }
     );
+    return subjects;
   }
 
   async findOne(subject_id: string) {
