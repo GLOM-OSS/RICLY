@@ -2,13 +2,13 @@ export interface Availability {
   availability_id: string;
   availability_date: Date;
   start_time: Date;
-  ends_time: Date;
+  end_time: Date;
   is_used: boolean;
 }
 
 export interface CreateAvailability {
   start_time: Date;
-  ends_time: Date;
+  end_time: Date;
   availabilities: Date[];
 }
 
