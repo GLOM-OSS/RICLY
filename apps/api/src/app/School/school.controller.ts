@@ -14,7 +14,7 @@ import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { ERR03 } from '../../exception';
 import { Roles } from '../app.decorator';
-import { Role, SchoolPostDto, User, UserRole } from '../app.dto';
+import { getRoleId, Role, SchoolPostDto, User } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { SchoolService } from './school.service';
 
@@ -24,13 +24,6 @@ import { SchoolService } from './school.service';
 @Roles(Role.DEVELOPER, Role.SECRETARY)
 export class SchoolController {
   constructor(private schoolService: SchoolService) {}
-
-  private getRoleId(roles: UserRole[], wantedRole: Role) {
-    const { user_id: developer_id } = roles.find(
-      ({ role }) => role === wantedRole
-    );
-    return developer_id;
-  }
 
   @Post('new')
   @ApiExcludeEndpoint(true)
@@ -50,7 +43,7 @@ export class SchoolController {
         );
 
       return await this.schoolService.create(
-        this.getRoleId(roles, Role.DEVELOPER),
+        getRoleId(roles, Role.DEVELOPER),
         newSchool
       );
     } catch (error) {
@@ -81,9 +74,7 @@ export class SchoolController {
   @ApiExcludeEndpoint(true)
   async getSchools(@Req() request: Request) {
     const { roles } = request.user as User;
-    return await this.schoolService.findAll(
-      this.getRoleId(roles, Role.DEVELOPER)
-    );
+    return await this.schoolService.findAll(getRoleId(roles, Role.DEVELOPER));
   }
 
   @Get(':school_code')
