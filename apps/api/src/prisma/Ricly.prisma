@@ -129,11 +129,13 @@ model Availability {
     availability_date DateTime @db.Date
     start_time        DateTime @db.Time(0)
     end_time          DateTime @db.Time(0)
-    is_used           Boolean  @db.TinyInt
+    is_used           Boolean  @default(false) @db.TinyInt
     is_deleted        Boolean  @default(false) @db.TinyInt
     created_at        DateTime @default(now()) @db.DateTime(0)
     teacher_id        String   @db.VarChar(36)
     Teacher           Teacher  @relation(fields: [teacher_id], references: [teacher_id], onDelete: Cascade, onUpdate: Cascade)
+
+    @@unique([availability_date, teacher_id])
 }
 
 model Building {
