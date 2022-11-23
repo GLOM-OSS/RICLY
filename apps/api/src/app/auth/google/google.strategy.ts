@@ -11,8 +11,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private authService: AuthService) {
     super({
       callbackURL: `${process.env.NX_API_BASE_URL}/auth`,
-      clientSecret: process.env.GOOGLE_SECRET,
-      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.NX_GOOGLE_SECRET,
+      clientID: process.env.NX_GOOGLE_CLIENT_ID,
       scope: ['email', 'profile'],
       passReqToCallback: true,
     });

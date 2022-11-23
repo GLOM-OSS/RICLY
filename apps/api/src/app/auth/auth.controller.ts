@@ -25,7 +25,7 @@ import { LocalGuard } from './local/local.guard';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Get('')
+  @Get('callback')
   @IsPublic()
   @UseGuards(GoogleGuard)
   async register(@Req() request: Request, @Res() res: Response) {
