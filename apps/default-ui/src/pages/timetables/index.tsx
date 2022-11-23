@@ -1,13 +1,13 @@
 import { FileDownloadOutlined, ReportRounded } from '@mui/icons-material';
 import {
-    Box,
-    Button,
-    MenuItem,
-    Skeleton,
-    Table,
-    TableBody,
-    TextField,
-    Typography
+  Box,
+  Button,
+  MenuItem,
+  Skeleton,
+  Table,
+  TableBody,
+  TextField,
+  Typography,
 } from '@mui/material';
 import { Classroom, TimeTable } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -16,7 +16,7 @@ import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import NewAvailabilityDialog from '../../components/availabilities/newAvailabilityDialog';
+import { useNavigate } from 'react-router';
 import TimetableCard from '../../components/timetables/timetableCard';
 import { useUser } from '../../contexts/UserContextProvider';
 
@@ -61,7 +61,6 @@ export default function Timetables() {
   const [areClassroomsLoading, setAreClassroomsLoading] =
     useState<boolean>(true);
 
-
   const loadClassrooms = () => {
     setAreClassroomsLoading(true);
     setTimeout(() => {
@@ -92,74 +91,62 @@ export default function Timetables() {
     }, 3000);
   };
 
-
   const {
     user: { roles },
   } = useUser();
   useEffect(() => {
     if (roles.find(({ role }) => role === 'COORDINATOR')) {
       loadTimetables();
-      loadClassrooms()
-    }else {
-        const notif = new useNotification();
-        notif.notify({ render: formatMessage({ id: 'notifying' }) });
-        notif.update({
-          type: 'ERROR',
-          render: formatMessage({
-            id: 'mustHaveCoordinatorRole',
-          }),
-          icon: () => <ReportRounded fontSize="medium" color="error" />,
-        });
-      }
+      loadClassrooms();
+    } else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveCoordinatorRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClassroom]);
 
-  const [isNewTimetableDialogOpen, setIsNewTimetableDialogOpen] =
-    useState<boolean>(false);
+  const navigate = useNavigate();
   return (
-    <>
-      <NewAvailabilityDialog
-        isDialogOpen={isNewTimetableDialogOpen}
-        closeDialog={() => setIsNewTimetableDialogOpen(false)}
-      />
+    <Box sx={{ height: '100%', display: 'grid', gridTemplateRows: 'auto 1fr' }}>
       <Box
-        sx={{ height: '100%', display: 'grid', gridTemplateRows: 'auto 1fr' }}
+        sx={{
+          marginBottom: theme.spacing(3.75),
+          display: 'grid',
+          gridTemplateColumns: 'auto 1fr',
+          justifyItems: 'end',
+        }}
+      >
+        <Typography variant="h3">
+          {formatMessage({ id: 'Timetables' })}
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate('new')}
+          sx={{ textTransform: 'none' }}
+          size="small"
+          endIcon={
+            <FileDownloadOutlined
+              sx={{
+                color: theme.common.white,
+              }}
+            />
+          }
+        >
+          {formatMessage({ id: 'newTimetable' })}
+        </Button>
+      </Box>
+      <Box
+        sx={{ display: 'grid', height: '100%', gridTemplateRows: 'auto 1fr' }}
       >
         <Box
-          sx={{
-            marginBottom: theme.spacing(3.75),
-            display: 'grid',
-            gridTemplateColumns: 'auto 1fr',
-            justifyItems: 'end',
-          }}
-        >
-          <Typography variant="h3">
-            {formatMessage({ id: 'Timetables' })}
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setIsNewTimetableDialogOpen(true)}
-            sx={{ textTransform: 'none' }}
-            disabled={isNewTimetableDialogOpen}
-            size="small"
-            endIcon={
-              <FileDownloadOutlined
-                sx={{
-                  color: theme.common.white,
-                }}
-              />
-            }
-          >
-            {formatMessage({ id: 'newTimetable' })}
-          </Button>
-        </Box>
-        <Box
-          sx={{ display: 'grid', height: '100%', gridTemplateRows: 'auto 1fr' }}
-        >
-
-
-<Box
           sx={{
             display: 'grid',
             gridTemplateColumns: 'auto auto auto 1fr',
@@ -180,7 +167,7 @@ export default function Timetables() {
           <TextField
             select
             size="small"
-            sx={{ m: 1, width: '25ch', backgroundColor:theme.common.white }}
+            sx={{ m: 1, width: '25ch', backgroundColor: theme.common.white }}
             label={formatMessage({ id: 'classroom' })}
             disabled={areTimetablesLoading || areClassroomsLoading}
             value={selectedClassroom}
@@ -194,48 +181,40 @@ export default function Timetables() {
           </TextField>
         </Box>
 
-
-          <Scrollbars>
-            <Table sx={{ minWidth: 650 }}>
-              <TableBody>
-                {areTimetablesLoading ? (
-                  [...new Array(10)].map((_, index) => (
-                    <Skeleton
-                      key={index}
-                      height={70}
-                      animation="wave"
-                      sx={{
-                        marginBottom: theme.spacing(0.5),
-                        '&.MuiSkeleton-root': { transform: 'scale(1, 1)' },
-                      }}
-                    />
+        <Scrollbars>
+          <Table sx={{ minWidth: 650 }}>
+            <TableBody>
+              {areTimetablesLoading ? (
+                [...new Array(10)].map((_, index) => (
+                  <Skeleton
+                    key={index}
+                    height={70}
+                    animation="wave"
+                    sx={{
+                      marginBottom: theme.spacing(0.5),
+                      '&.MuiSkeleton-root': { transform: 'scale(1, 1)' },
+                    }}
+                  />
+                ))
+              ) : timetables.length === 0 ? (
+                <Typography variant="h5" sx={{ textAlign: 'center' }}>
+                  {formatMessage({
+                    id: 'noTimetablesYet',
+                  })}
+                </Typography>
+              ) : (
+                timetables
+                  .sort((a, b) =>
+                    new Date(a.created_at) > new Date(b.created_at) ? 1 : -1
+                  )
+                  .map((timetable, index) => (
+                    <TimetableCard key={index} timetable={timetable} />
                   ))
-                ) : timetables.length === 0 ? (
-                  <Typography variant="h5" sx={{ textAlign: 'center' }}>
-                    {formatMessage({
-                      id: 'noTimetablesYet',
-                    })}
-                  </Typography>
-                ) : (
-                  timetables
-                    .sort((a, b) =>
-                      new Date(a.created_at) >
-                      new Date(b.created_at)
-                        ? 1
-                        : -1
-                    )
-                    .map((timetable, index) => (
-                      <TimetableCard
-                        key={index}
-                        timetable={timetable}
-                      />
-                    ))
-                )}
-              </TableBody>
-            </Table>
-          </Scrollbars>
-        </Box>
+              )}
+            </TableBody>
+          </Table>
+        </Scrollbars>
       </Box>
-    </>
+    </Box>
   );
 }
