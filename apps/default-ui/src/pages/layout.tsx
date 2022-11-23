@@ -1,16 +1,56 @@
 import { FileDownloadOutlined } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
 import { theme } from '@ricly/theme';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Outlet } from 'react-router';
 import Logo from '../assets/Logo.png';
 import LogoutDialog from '../components/logout/logoutDialog';
 import NavItem from '../components/NavItem';
+import { useUser } from '../contexts/UserContextProvider';
 
 export default function Layout() {
   const { formatMessage } = useIntl();
+  const {
+    user: { roles },
+  } = useUser();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState<boolean>(false);
+  const secNav = [
+    'dashboard',
+    'halls',
+    'teachers',
+    'classrooms',
+    'subjects',
+    'students',
+  ];
+  const coordoNav = ['timetables'];
+  const teacherNav = ['availabilities', 'schedules'];
+  const [finalNav, setFinalNav] = useState<string[]>([]);
+
+  useEffect(() => {
+    const resp = roles.map(({ role }) => {
+      switch (role) {
+        case 'TEACHER': {
+          return teacherNav;
+        }
+        case 'SECRETARY': {
+          return secNav;
+        }
+        case 'COORDINATOR': {
+          return coordoNav;
+        }
+        default:
+          return [];
+      }
+    });
+    const newNav: string[] = [];
+    resp.forEach((_) => {
+      newNav.push(..._);
+    });
+    setFinalNav(newNav);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roles]);
+
   return (
     <>
       <LogoutDialog
@@ -46,19 +86,14 @@ export default function Layout() {
             sx={{
               display: 'grid',
               justifyItems: 'start',
-              gridTemplateRows: 'auto auto auto auto auto auto 1fr',
+              gridTemplateRows: `${[...new Array(finalNav.length)].map(
+                (_) => 'auto'
+              ).join(' ')} 1fr`,
               rowGap: theme.spacing(4),
               padding: `${theme.spacing(1)} ${theme.spacing(4.625)}`,
             }}
           >
-            {[
-              'dashboard',
-              'halls',
-              'teachers',
-              'classrooms',
-              'subjects',
-              'students',
-            ].map((_, index) => (
+            {finalNav.map((_, index) => (
               <NavItem key={index} to={_}>
                 {formatMessage({ id: _ })}
               </NavItem>
