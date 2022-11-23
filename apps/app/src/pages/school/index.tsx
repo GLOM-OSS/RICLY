@@ -1,14 +1,14 @@
 import {
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined,
+  SearchOutlined
 } from '@mui/icons-material';
 import {
   Button,
   InputAdornment,
   Skeleton,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Box } from '@mui/system';
 import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
@@ -38,7 +38,6 @@ export default function Schools() {
     setAreSchoolsLoading(true);
     findSchools()
     .then((schools) => {
-        // alert(schools)
         setSchools(schools);
         setDisplaySchools(schools);
         setAreSchoolsLoading(false);
@@ -237,7 +236,7 @@ export default function Schools() {
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
               placeholder={formatMessage({ id: 'searchSchool' })}
-              sx={{ m: 1, width: '25ch' }}
+              sx={{ m: 1, width: '25ch', backgroundColor:theme.common.white }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
