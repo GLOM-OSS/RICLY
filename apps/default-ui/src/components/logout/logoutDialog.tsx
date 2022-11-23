@@ -5,10 +5,10 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
+  DialogTitle
 } from '@mui/material';
+import { logOut } from '@ricly/auth';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
@@ -30,30 +30,30 @@ export default function LogoutDialog({
     setLoggingOut(true);
     const notif = new useNotification();
     notif.notify({ render: formatMessage({ id: 'loggingOut' }) });
-    setTimeout(() => {
-      //TODO: CALL API HERE TO LOG USER OUT
-      if (random() > 5) {
+    logOut()
+      .then(() => {
         userDispatch({ type: 'CLEAR_USER' });
         navigate('/');
         notif.dismiss();
         closeDialog();
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={logout}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'errorLoggingOut' })}
+              message={
+                error?.message || formatMessage({ id: 'errorLoggingOut' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-        setLoggingOut(false);
-      }
-    }, 3000);
+      })
+      .finally(() => setLoggingOut(false));
   };
 
   return (
