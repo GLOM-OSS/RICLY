@@ -5,12 +5,12 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
+  DialogTitle
 } from '@mui/material';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
+import { deleteClassrooms } from '../../services/classroom.service';
 
 export default function ConfirmDeleteDialog({
   isDialogOpen,
@@ -28,28 +28,29 @@ export default function ConfirmDeleteDialog({
     setIsDeleting(true);
     const notif = new useNotification();
     notif.notify({ render: formatMessage({ id: 'deleting' }) });
-    setTimeout(() => {
-      //TODO: CALL delete classroom here with data element_id
-      if (random() > 5) {
+    deleteClassrooms([element])
+      .then(() => {
         notif.dismiss();
         closeDialog();
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={logout}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'errorDeletingClassroom' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'errorDeletingClassroom' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-        setIsDeleting(false);
-      }
-    }, 3000);
+      })
+      .finally(() => setIsDeleting(false));
   };
 
   return (
