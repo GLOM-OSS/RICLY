@@ -1,11 +1,9 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
   HttpException,
-  HttpStatus,
-  Post, Req,
+  HttpStatus, Post, Query, Req,
   Session,
   UploadedFile,
   UseGuards,
@@ -95,7 +93,7 @@ export class BuildingController {
   @Delete('delete')
   async deleteBuildings(
     @Req() request: Request,
-    @Body() { buildings }: DeleteBuildingDto
+    @Query() { buildings }: DeleteBuildingDto
   ) {
     const { preferred_lang } = request.user as User;
     try {
@@ -106,13 +104,12 @@ export class BuildingController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
- 
   }
-  
+
   @Delete('halls/delete')
   async deleteHalls(
     @Req() request: Request,
-    @Body() { halls }: DeleteHallDto
+    @Query() { halls }: DeleteHallDto
   ) {
     const { preferred_lang } = request.user as User;
     try {

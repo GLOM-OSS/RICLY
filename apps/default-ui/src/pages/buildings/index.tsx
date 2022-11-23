@@ -15,13 +15,16 @@ import {
 import { Building } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import BuildingCard from '../../components/buildings/buildingCard';
 import { useUser } from '../../contexts/UserContextProvider';
+import {
+  getBuildings,
+  importBuildings,
+} from '../../services/buildings.service';
 
 export default function Buildings() {
   const { formatMessage } = useIntl();
@@ -33,25 +36,13 @@ export default function Buildings() {
 
   const loadBuildings = () => {
     setAreBuildingsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL buildings HERE with data school_code
-      if (random() > 5) {
-        const newBuildings: Building[] = [
-          {
-            building_code: 'Building A',
-            building_id: 'lskds',
-            Halls: [],
-          },
-          {
-            building_code: 'Building B',
-            building_id: 'lskdse',
-            Halls: [{ hall_capacity: 50, hall_code: 'E18', hall_id: 'eiowi' }],
-          },
-        ];
-        setBuildings(newBuildings);
-        setDisplayBuildings(newBuildings);
+    getBuildings()
+      .then((buildings) => {
+        setBuildings(buildings);
+        setDisplayBuildings(buildings);
         setAreBuildingsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingBuildings' }),
@@ -62,15 +53,16 @@ export default function Buildings() {
             <ErrorMessage
               retryFunction={loadBuildings}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingBuildings' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingBuildings' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const {
@@ -101,31 +93,31 @@ export default function Buildings() {
     notif.notify({
       render: formatMessage({ id: 'creatingBuildingsAndClassrooms' }),
     });
-    setTimeout(() => {
-      setIsCreating(false);
-      //TODO call api here for hall creations with csv file files[0]
-      if (random() > 5) {
+    importBuildings(files[0])
+      .then((data) => {
         notif.update({
-          //TODO: PUT REPONSE OF API HERE PRECISING THE NUMBER OF ROWS SUCCESSFULLY CREATED
-          render: formatMessage({ id: 'allCreatedSuccessfull' }),
+          render: `${formatMessage({
+            id: 'allCreatedSuccessfull',
+          })}. Buildings(${data[0].count}), Halls(${data[1].count})`,
         });
         setNotifications([]);
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={() => uploadFile(files)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'csvCreationFailed' })}
+              message={
+                error?.message || formatMessage({ id: 'csvCreationFailed' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 4000);
+      });
   }
 
   return (
@@ -217,7 +209,7 @@ export default function Buildings() {
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
             placeholder={formatMessage({ id: 'searchBuilding' })}
-            sx={{ m: 1, width: '25ch', backgroundColor:theme.common.white }}
+            sx={{ m: 1, width: '25ch', backgroundColor: theme.common.white }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">

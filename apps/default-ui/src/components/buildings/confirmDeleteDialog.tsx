@@ -5,12 +5,12 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
+  DialogTitle
 } from '@mui/material';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
+import { deleteBuildings, deleteHalls } from '../../services/buildings.service';
 import { DeletableElement } from './buildingCard';
 
 export default function ConfirmDeleteDialog({
@@ -30,51 +30,52 @@ export default function ConfirmDeleteDialog({
     const notif = new useNotification();
     notif.notify({ render: formatMessage({ id: 'deleting' }) });
     if (level === 1) {
-      setTimeout(() => {
-        //TODO: CALL delete building here with data element_id
-        if (random() > 5) {
+      deleteBuildings([element_id])
+        .then(() => {
           notif.dismiss();
           closeDialog();
-        } else {
+        })
+        .catch((error) => {
           notif.update({
             type: 'ERROR',
             render: (
               <ErrorMessage
                 retryFunction={logout}
                 notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'errorDeletingBuilding' })}
+                message={
+                  error?.message ||
+                  formatMessage({ id: 'errorDeletingBuilding' })
+                }
               />
             ),
             autoClose: false,
             icon: () => <ReportRounded fontSize="medium" color="error" />,
           });
           setIsDeleting(false);
-        }
-      }, 3000);
+        });
     } else {
-      setTimeout(() => {
-        //TODO: CALL delete hall here with data element_id
-        if (random() > 5) {
+      deleteHalls([element_id])
+        .then(() => {
           notif.dismiss();
           closeDialog();
-        } else {
+        })
+        .catch((error) => {
           notif.update({
             type: 'ERROR',
             render: (
               <ErrorMessage
                 retryFunction={logout}
                 notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'errorDeletingHall' })}
+                message={
+                  error?.message || formatMessage({ id: 'errorDeletingHall' })
+                }
               />
             ),
             autoClose: false,
             icon: () => <ReportRounded fontSize="medium" color="error" />,
           });
           setIsDeleting(false);
-        }
-      }, 3000);
+        });
     }
   };
 
