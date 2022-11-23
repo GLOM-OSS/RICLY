@@ -1,7 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { Auth } from '@ricly/auth';
 import { useIntl } from 'react-intl';
-import { Navigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
+import Availabilities from '../pages/availabilities';
 import Buildings from '../pages/buildings';
 import Classrooms from '../pages/classrooms';
 import Dashboard from '../pages/dashboard';
@@ -37,6 +38,8 @@ export const routes = [
       { path: 'subjects', element: <Subjects /> },
       { path: 'subjects/:subject_id', element: <SubjectClassrooms /> },
       { path: 'students', element: <Students /> },
+      { path: 'availabilities', element: <Availabilities /> },
+      { path: 'schedules', element: <Students /> },
     ],
   },
     // {
