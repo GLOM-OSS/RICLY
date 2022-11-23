@@ -27,7 +27,7 @@ export default function Availabilities() {
   const loadAvailabilities = () => {
     setAreAvailabilitiesLoading(true);
     setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL teachers HERE with data school_code
+      // TODO: CALL API TO GET personne's availabilities HERE with data school_code
       if (random() > 5) {
         const newAvailabilities: Availability[] = [];
         setAvailabilities(newAvailabilities);
