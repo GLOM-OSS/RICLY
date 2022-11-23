@@ -12,7 +12,6 @@ function axiosInstance(): AxiosInstance {
   const axiosInstance = axios.create({
     baseURL: process.env['NX_API_BASE_URL'],
     headers: {
-      'Content-type': 'application/json',
       'RICLY-API-KEY': process.env['NX_APP_API_KEY']
     },
     withCredentials: true,
