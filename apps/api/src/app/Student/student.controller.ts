@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -11,7 +10,7 @@ import {
   Session,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
@@ -83,7 +82,7 @@ export class StudentController {
   @Delete('delete')
   async deleteStudents(
     @Req() request: Request,
-    @Body() { students }: DeleteStudentDto
+    @Query() { students }: DeleteStudentDto
   ) {
     const { preferred_lang } = request.user as User;
     try {
