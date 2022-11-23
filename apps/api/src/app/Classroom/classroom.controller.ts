@@ -1,15 +1,15 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
   HttpException,
   HttpStatus,
   Post,
+  Query,
   Req,
   Session,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
@@ -64,7 +64,7 @@ export class classroomController {
   @Delete('delete')
   async deleteClassrooms(
     @Req() request: Request,
-    @Body() { classrooms }: DeleteClassroomDto
+    @Query() { classrooms }: DeleteClassroomDto
   ) {
     const { preferred_lang } = request.user as User;
     try {
