@@ -12,6 +12,7 @@ import {
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { Request } from 'express';
@@ -29,6 +30,8 @@ export interface Hall {
   hall_capacity: number;
   building_code: string;
 }
+
+@ApiTags('Buildings')
 @Roles(Role.SECRETARY)
 @Controller('buildings')
 @UseGuards(AuthenticatedGuard)

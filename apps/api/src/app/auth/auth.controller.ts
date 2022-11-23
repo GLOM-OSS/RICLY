@@ -9,6 +9,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AUTH500 } from '../../exception';
 import { IsPublic, Roles } from '../app.decorator';
@@ -21,12 +22,14 @@ import { LocalGuard } from './local/local.guard';
 
 @Controller('auth')
 @Roles(Role.DEVELOPER)
+@ApiTags('Authentication')
 @UseGuards(AuthenticatedGuard)
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Get('callback')
   @IsPublic()
+  @Get('callback')
+  @ApiExcludeEndpoint(true)
   @UseGuards(GoogleGuard)
   async register(@Req() request: Request, @Res() res: Response) {
     if (request.get('RICLY-API-KEY'))
@@ -36,6 +39,7 @@ export class AuthController {
 
   @IsPublic()
   @Post('signin')
+  @ApiExcludeEndpoint(true)
   @UseGuards(LocalGuard)
   async localSignIn(@Req() request: Request) {
     return request.user;
@@ -43,6 +47,7 @@ export class AuthController {
 
   @IsPublic()
   @Get('google-signin')
+  @ApiExcludeEndpoint(true)
   @UseGuards(GoogleGuard)
   async signIn() {
     //google authentication
@@ -56,6 +61,7 @@ export class AuthController {
   }
 
   @Post('new-password')
+  @ApiExcludeEndpoint(true)
   async resetPassword(
     @Req() request: Request,
     @Body() newPassword: NewPasswordDto
