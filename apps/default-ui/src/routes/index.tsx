@@ -11,6 +11,7 @@ import Students from '../pages/student';
 import Subjects from '../pages/subject';
 import SubjectClassrooms from '../pages/subject/[subject_id]';
 import Teachers from '../pages/teachers';
+import Timetables from '../pages/timetables';
 
 export const Test = () => {
   const { school_code } = useParams();
@@ -40,6 +41,7 @@ export const routes = [
       { path: 'students', element: <Students /> },
       { path: 'availabilities', element: <Availabilities /> },
       { path: 'schedules', element: <Students /> },
+      { path: 'timetables', element: <Timetables /> },
     ],
   },
     // {
