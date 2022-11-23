@@ -43,6 +43,10 @@ export class StudentService {
         data: students,
         skipDuplicates: true,
       }),
+      this.prismaService.student.updateMany({
+        data: { is_deleted: false },
+        where: { OR: persons.map(({ email }) => ({ Person: { email } })) },
+      }),
     ]);
   }
 

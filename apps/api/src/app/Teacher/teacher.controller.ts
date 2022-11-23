@@ -1,16 +1,16 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
   HttpException,
   HttpStatus,
   Post,
+  Query,
   Req,
   Session,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
@@ -26,7 +26,7 @@ import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { TeacherService } from './teacher.service';
 
 @Roles(Role.SECRETARY)
-@ApiTags('Controller')
+@ApiTags('Teachers')
 @Controller('teachers')
 @UseGuards(AuthenticatedGuard)
 export class TeacherController {
@@ -56,11 +56,12 @@ export class TeacherController {
       );
       const persons: Prisma.PersonCreateManyInput[] = [];
       const teachers: Prisma.TeacherCreateManyInput[] = [];
-      data.forEach(({ email, ...teacher }) => {
+      data.forEach(({ email, phone_number, ...teacher }) => {
         const person_id = randomUUID();
         persons.push({
           email,
           person_id,
+          phone_number: `${phone_number}`,
         });
         teachers.push({
           person_id,
@@ -87,7 +88,7 @@ export class TeacherController {
   @Delete('delete')
   async deleteTeachers(
     @Req() request: Request,
-    @Body() { teachers }: DeleteTeacherDto
+    @Query() { teachers }: DeleteTeacherDto
   ) {
     const { preferred_lang } = request.user as User;
     try {

@@ -2,7 +2,7 @@ import {
   AddOutlined,
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined,
+  SearchOutlined
 } from '@mui/icons-material';
 import {
   Box,
@@ -14,17 +14,20 @@ import {
   TableCell,
   TableRow,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Classroom } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import ClassroomCard from '../../components/classroom/classroomCard';
 import { useUser } from '../../contexts/UserContextProvider';
+import {
+  getClassrooms,
+  importClassrooms
+} from '../../services/classroom.service';
 
 export default function Classrooms() {
   const { formatMessage } = useIntl();
@@ -36,14 +39,13 @@ export default function Classrooms() {
 
   const loadClassrooms = () => {
     setAreClassroomsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL classrooms HERE
-      if (random() > 5) {
-        const newClassrooms: Classroom[] = [];
-        setClassrooms(newClassrooms);
-        setDisplayClassrooms(newClassrooms);
+    getClassrooms()
+      .then((classrooms) => {
+        setClassrooms(classrooms);
+        setDisplayClassrooms(classrooms);
         setAreClassroomsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingClassrooms' }),
@@ -54,15 +56,16 @@ export default function Classrooms() {
             <ErrorMessage
               retryFunction={loadClassrooms}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingClassrooms' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingClassrooms' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const {
@@ -106,31 +109,32 @@ export default function Classrooms() {
     notif.notify({
       render: formatMessage({ id: 'creatingClassrooms' }),
     });
-    setTimeout(() => {
-      setIsCreating(false);
-      //TODO call api here for classrooms creations with csv file files[0]
-      if (random() > 5) {
+    importClassrooms(files[0])
+      .then((data) => {
         notif.update({
-          //TODO: PUT REPONSE OF API HERE PRECISING THE NUMBER OF ROWS SUCCESSFULLY CREATED
-          render: formatMessage({ id: 'allCreatedSuccessfull' }),
+          render: `${formatMessage({
+            id: 'allCreatedSuccessfull',
+          })}. Classroom(s): ${data[0].count}`,
         });
         setNotifications([]);
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={() => uploadFile(files)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'csvCreationFailed' })}
+              message={
+                error?.message || formatMessage({ id: 'csvCreationFailed' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 4000);
+      })
+      .finally(() => setIsCreating(false));
   }
 
   return (

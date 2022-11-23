@@ -25,12 +25,6 @@ export class AuthService {
         client_urL,
         client_api_key
       );
-      if (user) {
-        await this.prismaService.person.update({
-          data: personCreateInput,
-          where: { email: personCreateInput.email },
-        });
-      }
       return user;
     }
     return this.prismaService.person.upsert({
@@ -166,6 +160,7 @@ export class AuthService {
         OR: [{ Teachers: { some } }, { Secretaries: { some } }],
       },
     });
+    console.log(person, data.email)
     if (person) {
       const user = await this.prismaService.person.update({
         data,

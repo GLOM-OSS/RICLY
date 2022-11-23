@@ -1,14 +1,15 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
   HttpException,
   HttpStatus,
   Post,
+  Query,
   Req,
   Session,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -19,11 +20,13 @@ import { AUTH500 } from '../../exception';
 import { readAndProcessFile } from '../../utils/csv-parser';
 import { Roles } from '../app.decorator';
 import { DeleteClassroomDto, Role, User } from '../app.dto';
+import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { ClassroomService, ClassrooomCsvModel } from './classroom.service';
 
 @ApiTags('Classrooms')
 @Roles(Role.SECRETARY)
 @Controller('classrooms')
+@UseGuards(AuthenticatedGuard)
 export class classroomController {
   constructor(private classroomService: ClassroomService) {}
 
@@ -44,7 +47,6 @@ export class classroomController {
         ['classroom_name', 'classroom_code', 'classroom_session', 'email'],
         Readable.from(file.buffer)
       );
-      console.log(data)
       return this.classroomService.createMany(data, school_id);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -64,7 +66,7 @@ export class classroomController {
   @Delete('delete')
   async deleteClassrooms(
     @Req() request: Request,
-    @Body() { classrooms }: DeleteClassroomDto
+    @Query() { classrooms }: DeleteClassroomDto
   ) {
     const { preferred_lang } = request.user as User;
     try {

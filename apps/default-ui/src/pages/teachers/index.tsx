@@ -17,12 +17,12 @@ import {
 import { Teacher } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import TeacherCard from '../../components/teacher/teacherCard';
 import { useUser } from '../../contexts/UserContextProvider';
+import { getTeachers, importTeachers } from '../../services/teachers.service';
 
 export default function Teachers() {
   const { formatMessage } = useIntl();
@@ -33,23 +33,13 @@ export default function Teachers() {
 
   const loadTeachers = () => {
     setAreTeachersLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL teachers HERE with data school_code
-      if (random() > 5) {
-        const newTeachers: Teacher[] = [
-          {
-            email: 'lorraintchakoumi@gmail.com',
-            fullname: 'Tchakoumi Lorrain Kouatchoua',
-            hours_per_week: 20,
-            phone_number: '657140183',
-            teacher_type: 'MISSIONARY',
-            teacher_id: 'ldl',
-          },
-        ];
-        setTeachers(newTeachers);
-        setDisplayTeachers(newTeachers);
+    getTeachers()
+      .then((teachers) => {
+        setTeachers(teachers);
+        setDisplayTeachers(teachers);
         setAreTeachersLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingTeachers' }),
@@ -60,15 +50,15 @@ export default function Teachers() {
             <ErrorMessage
               retryFunction={loadTeachers}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingTeachers' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingTeachers' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const {
@@ -112,31 +102,32 @@ export default function Teachers() {
     notif.notify({
       render: formatMessage({ id: 'creatingTeachers' }),
     });
-    setTimeout(() => {
-      setIsCreating(false);
-      //TODO call api here for teacher creations with csv file files[0]
-      if (random() > 5) {
+    importTeachers(files[0])
+      .then((data) => {
         notif.update({
-          //TODO: PUT REPONSE OF API HERE PRECISING THE NUMBER OF ROWS SUCCESSFULLY CREATED
-          render: formatMessage({ id: 'allCreatedSuccessfull' }),
+          render: `${formatMessage({
+            id: 'allCreatedSuccessfull',
+          })}. Teacher(s)(${data[0].count})`,
         });
         setNotifications([]);
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={() => uploadFile(files)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'csvCreationFailed' })}
+              message={
+                error?.message || formatMessage({ id: 'csvCreationFailed' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 4000);
+      })
+      .finally(() => setIsCreating(false));
   }
 
   return (

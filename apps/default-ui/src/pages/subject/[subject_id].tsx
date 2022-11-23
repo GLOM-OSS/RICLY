@@ -1,8 +1,7 @@
 import {
-  DeleteOutline,
   KeyboardBackspaceOutlined,
   ReportRounded,
-  SearchOutlined,
+  SearchOutlined
 } from '@mui/icons-material';
 import {
   Box,
@@ -15,12 +14,11 @@ import {
   TableRow,
   TextField,
   Tooltip,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Classroom, Subject } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -28,6 +26,7 @@ import { useNavigate, useParams } from 'react-router';
 import ClassroomCard from '../../components/subject/classroomCard';
 // import ClassroomCard from '../../components/classroom/classroomCard';
 import { useUser } from '../../contexts/UserContextProvider';
+import { getSubjectData } from '../../services/subject.service';
 
 export default function SubjectClassrooms() {
   const { formatMessage } = useIntl();
@@ -41,20 +40,13 @@ export default function SubjectClassrooms() {
 
   const loadSubject = () => {
     setIsSubjectLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SUBJECT HERE with date subject_id
-      if (random() > 5) {
-        const newSubject: Subject = {
-          classrooms: [],
-          subject_code: 'UEoo2',
-          subject_id: 'eiwos',
-          subject_name: "Systemes d'exploietation",
-          teacher_email: 'lorraintchakoumi@gmail.com',
-        };
-        setSubject(newSubject);
-        setDisplayClassrooms(newSubject.classrooms);
+    getSubjectData(subject_id as string)
+      .then((subject) => {
+        setSubject(subject);
+        setDisplayClassrooms(subject.classrooms);
         setIsSubjectLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingSubject' }),
@@ -65,15 +57,15 @@ export default function SubjectClassrooms() {
             <ErrorMessage
               retryFunction={loadSubject}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSubject' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingSubject' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const {
@@ -149,7 +141,7 @@ export default function SubjectClassrooms() {
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
             placeholder={formatMessage({ id: 'searchClassrooms' })}
-            sx={{ m: 1, width: '25ch', backgroundColor:theme.common.white }}
+            sx={{ m: 1, width: '25ch', backgroundColor: theme.common.white }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">

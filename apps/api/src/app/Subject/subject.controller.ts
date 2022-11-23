@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -12,7 +11,7 @@ import {
   Session,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
@@ -70,9 +69,9 @@ export class SubjectController {
       },
     } = session;
     return this.subjectService.findAll({
-      ClassroomHasSubjects: {
-        every: { teacher_id, Classroom: { school_id, classroom_id } },
-      },
+      teacher_id,
+      is_deleted: false,
+      Classroom: { school_id, classroom_id },
     });
   }
 
@@ -84,7 +83,7 @@ export class SubjectController {
   @Delete('delete')
   async deleteSubjects(
     @Req() request: Request,
-    @Body() { subjects }: DeleteSubjectDto
+    @Query() { subjects }: DeleteSubjectDto
   ) {
     const { preferred_lang } = request.user as User;
     try {
@@ -101,7 +100,7 @@ export class SubjectController {
   async removeClassrooms(
     @Req() request: Request,
     @Param('subject_id') subject_id: string,
-    @Body() { classrooms }: DeleteClassroomDto
+    @Query() { classrooms }: DeleteClassroomDto
   ) {
     const { preferred_lang } = request.user as User;
     try {

@@ -141,3 +141,10 @@ export type UserRole = {
 export type User = Person & {
   roles: UserRole[];
 };
+
+export function getRoleId(roles: UserRole[], wantedRole: Role) {
+  const { user_id } = roles.find(
+    ({ role }) => role === wantedRole
+  );
+  return user_id;
+}

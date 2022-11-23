@@ -10,7 +10,7 @@ import { AuthService } from '../auth.service';
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private authService: AuthService) {
     super({
-      callbackURL: `${process.env.NX_API_BASE_URL}/auth`,
+      callbackURL: `${process.env.NX_API_BASE_URL}/auth/callback`,
       clientSecret: process.env.NX_GOOGLE_SECRET,
       clientID: process.env.NX_GOOGLE_CLIENT_ID,
       scope: ['email', 'profile'],

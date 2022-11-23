@@ -1,17 +1,16 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
   HttpException,
-  HttpStatus,
-  Post, Req,
+  HttpStatus, Post, Query, Req,
   Session,
   UploadedFile,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { Request } from 'express';
@@ -29,6 +28,8 @@ export interface Hall {
   hall_capacity: number;
   building_code: string;
 }
+
+@ApiTags('Buildings')
 @Roles(Role.SECRETARY)
 @Controller('buildings')
 @UseGuards(AuthenticatedGuard)
@@ -92,7 +93,7 @@ export class BuildingController {
   @Delete('delete')
   async deleteBuildings(
     @Req() request: Request,
-    @Body() { buildings }: DeleteBuildingDto
+    @Query() { buildings }: DeleteBuildingDto
   ) {
     const { preferred_lang } = request.user as User;
     try {
@@ -103,13 +104,12 @@ export class BuildingController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
- 
   }
-  
+
   @Delete('halls/delete')
   async deleteHalls(
     @Req() request: Request,
-    @Body() { halls }: DeleteHallDto
+    @Query() { halls }: DeleteHallDto
   ) {
     const { preferred_lang } = request.user as User;
     try {

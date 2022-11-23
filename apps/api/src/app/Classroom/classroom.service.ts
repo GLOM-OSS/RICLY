@@ -65,6 +65,12 @@ export class ClassroomService {
         data: weekdays,
         skipDuplicates: true,
       }),
+      this.prismaService.classroom.updateMany({
+        data: { is_deleted: false },
+        where: {
+          OR: classrooms.map(({ classroom_code }) => ({ classroom_code })),
+        },
+      }),
     ]);
   }
 

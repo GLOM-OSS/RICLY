@@ -2,7 +2,7 @@ import {
   AddOutlined,
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined
+  SearchOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -15,17 +15,19 @@ import {
   TableCell,
   TableRow,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Classroom, Student, Subject } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import StudentCard from '../../components/student/studentCard';
 import { useUser } from '../../contexts/UserContextProvider';
+import { getClassrooms } from '../../services/classroom.service';
+import { getStudents, importStudents } from '../../services/student.service';
+import { getSubjects } from '../../services/subject.service';
 
 export default function Students() {
   const { formatMessage } = useIntl();
@@ -43,13 +45,12 @@ export default function Students() {
 
   const loadClassrooms = () => {
     setAreClassroomsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL classrooms HERE
-      if (random() > 5) {
-        const newClassrooms: Classroom[] = [];
-        setClassrooms(newClassrooms);
+    getClassrooms()
+      .then((classrooms) => {
+        setClassrooms(classrooms);
         setAreClassroomsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingClassrooms' }),
@@ -60,26 +61,26 @@ export default function Students() {
             <ErrorMessage
               retryFunction={loadClassrooms}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingClassrooms' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingClassrooms' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const loadSubjects = () => {
     setAreSubjectsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL subjects HERE
-      if (random() > 5) {
-        const newSubjects: Subject[] = [];
-        setSubjects(newSubjects);
+    getSubjects()
+      .then((subjects) => {
+        setSubjects(subjects);
         setAreSubjectsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingSubjects' }),
@@ -90,27 +91,28 @@ export default function Students() {
             <ErrorMessage
               retryFunction={loadSubjects}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSubjects' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingSubjects' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const loadStudents = () => {
     setAreStudentsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL Students HERE with data selectedClassroom, selectedSubject
-      if (random() > 5) {
-        const newStudents: Student[] = [];
-        setStudents(newStudents);
-        setDisplayStudents(newStudents);
-        setAreStudentsLoading(false);
-      } else {
+    getStudents({
+      classroom_id: selectedClassroom,
+      subject_id: selectedSubject,
+    })
+      .then((students) => {
+        setStudents(students);
+        setDisplayStudents(students);
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingStudents' }),
@@ -121,15 +123,16 @@ export default function Students() {
             <ErrorMessage
               retryFunction={loadStudents}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingStudents' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingStudents' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      })
+      .finally(() => setAreStudentsLoading(false));
   };
 
   const {
@@ -140,7 +143,7 @@ export default function Students() {
       loadStudents();
       loadSubjects();
       loadClassrooms();
-    }else {
+    } else {
       const notif = new useNotification();
       notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
@@ -173,31 +176,32 @@ export default function Students() {
     notif.notify({
       render: formatMessage({ id: 'creatingStudents' }),
     });
-    setTimeout(() => {
-      setIsCreating(false);
-      //TODO call api here for classrooms creations with csv file files[0]
-      if (random() > 5) {
+    importStudents(files[0])
+      .then((data) => {
         notif.update({
-          //TODO: PUT REPONSE OF API HERE PRECISING THE NUMBER OF ROWS SUCCESSFULLY CREATED
-          render: formatMessage({ id: 'allCreatedSuccessfull' }),
+          render: `${formatMessage({
+            id: 'allCreatedSuccessfull',
+          })}. Student(s): ${data[0].count}`,
         });
         setNotifications([]);
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={() => uploadFile(files)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'csvCreationFailed' })}
+              message={
+                error?.message || formatMessage({ id: 'csvCreationFailed' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 4000);
+      })
+      .finally(() => setIsCreating(false));
   }
 
   return (

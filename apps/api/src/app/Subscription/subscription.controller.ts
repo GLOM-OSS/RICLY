@@ -17,10 +17,10 @@ import { Role, User, SubscribeDto, SubscribeQueryDto } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { SubscriptionService } from './subscription.service';
 
-@Roles(Role.DEVELOPER)
 @ApiTags('Subscriptions')
 @Controller('subscriptions')
 @UseGuards(AuthenticatedGuard)
+@Roles(Role.DEVELOPER, Role.SECRETARY)
 export class SubscriptionController {
   constructor(private subscriptionService: SubscriptionService) {}
 
