@@ -117,7 +117,8 @@ export default function Teachers() {
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      });
+      })
+      .finally(() => setIsCreating(false));
   }
 
   return (
