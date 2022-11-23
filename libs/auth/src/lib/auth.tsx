@@ -198,7 +198,7 @@ export function Auth({ app = 'app' }: { app?: string }) {
           rel="noreferrer"
           href={
             app === 'app'
-              ? `${process.env['NX_API_BASE_URL']}/google-signin`
+              ? `${process.env['NX_API_BASE_URL']}/auth/google-signin`
               : undefined
           }
         >
@@ -206,7 +206,7 @@ export function Auth({ app = 'app' }: { app?: string }) {
             variant="contained"
             color="primary"
             size="large"
-            id={'google-button'}
+            id={app === 'app' ? 'app-signin' : 'google-button'}
             disabled={isAuthenticatingUser}
             sx={{ marginTop: theme.spacing(7), textTransform: 'none' }}
             startIcon={<Google fontSize="large" sx={{ color: 'white' }} />}
