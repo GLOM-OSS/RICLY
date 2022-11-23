@@ -55,17 +55,12 @@ export class AuthService {
       const developer = await this.prismaService.developer.findFirst({
         where: { Person: { email } },
       });
-      if (developer) {
-        return {
-          ...person,
-          roles: [
-            {
-              user_id: developer.developer_id,
-              role: Role.DEVELOPER,
-            },
-          ],
-        };
-      } else {
+      if (developer)
+        userRoles.push({
+          user_id: developer.developer_id,
+          role: Role.DEVELOPER,
+        });
+      else {
         const secretary = await this.prismaService.secretary.findFirst({
           where: { Person: { email }, School: { school_id } },
         });
@@ -95,8 +90,8 @@ export class AuthService {
             });
           }
         }
-        return { ...person, roles: userRoles };
       }
+      return { ...person, roles: userRoles };
     }
     return null;
   }
@@ -160,7 +155,6 @@ export class AuthService {
         OR: [{ Teachers: { some } }, { Secretaries: { some } }],
       },
     });
-    console.log(person, data.email)
     if (person) {
       const user = await this.prismaService.person.update({
         data,
