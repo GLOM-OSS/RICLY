@@ -7,7 +7,6 @@ import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
 import Graph, { UsageInterface } from '../../components/dashboard/graph';
 import SubscriptionCard from '../../components/dashboard/subscriptionCard';
 import { useUser } from '../../contexts/UserContextProvider';
@@ -17,9 +16,8 @@ export default function Dashboard() {
   const {
     user: { roles },
   } = useUser();
-  const navigate = useNavigate();
 
-  const [isSchoolLoading, setIsSchoolLoading] = useState<boolean>(false);
+  const [isSchoolLoading, setIsSchoolLoading] = useState<boolean>(true);
   const [school, setSchool] = useState<SchoolInterface>();
 
   const loadSchoolData = () => {
@@ -60,7 +58,7 @@ export default function Dashboard() {
   };
 
   const [areSubscriptionsLoading, setAreSubscriptionsLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const loadSubscriptions = () => {
     setAreSubscriptionsLoading(true);
     setTimeout(() => {
@@ -93,7 +91,7 @@ export default function Dashboard() {
 
   const [usageGraphData, setUsageGraphData] = useState<UsageInterface[]>([]);
 
-  const [isGraphDataLoading, setIsGraphDataLoading] = useState(false);
+  const [isGraphDataLoading, setIsGraphDataLoading] = useState(true);
 
   const loadGraphData = () => {
     setIsGraphDataLoading(true);
@@ -130,11 +128,20 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (!roles.find(({ role }) => role === 'SECRETARY')) navigate('/');
-    else {
+    if (roles.find(({ role }) => role === 'SECRETARY')) {
       loadSchoolData();
       loadSubscriptions();
       loadGraphData();
+    }else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveSecretaryRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

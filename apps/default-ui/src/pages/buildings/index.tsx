@@ -2,7 +2,7 @@ import {
   AddOutlined,
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined,
+  SearchOutlined
 } from '@mui/icons-material';
 import {
   Box,
@@ -10,7 +10,7 @@ import {
   InputAdornment,
   Skeleton,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Building } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -19,7 +19,6 @@ import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
 import BuildingCard from '../../components/buildings/buildingCard';
 import { useUser } from '../../contexts/UserContextProvider';
 
@@ -29,7 +28,7 @@ export default function Buildings() {
   const [displayBuildings, setDisplayBuildings] = useState<Building[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [areBuildingsLoading, setAreBuildingsLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
 
   const loadBuildings = () => {
     setAreBuildingsLoading(true);
@@ -76,10 +75,21 @@ export default function Buildings() {
   const {
     user: { roles },
   } = useUser();
-  const navigate = useNavigate();
   useEffect(() => {
-    if (!roles.find(({ role }) => role === 'SECRETARY')) navigate('/');
-    else loadBuildings();
+    if (roles.find(({ role }) => role === 'SECRETARY')) {
+      loadBuildings();
+    }else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveSecretaryRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
+
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

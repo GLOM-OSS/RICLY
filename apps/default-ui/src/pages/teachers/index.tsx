@@ -2,7 +2,7 @@ import {
   AddOutlined,
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined,
+  SearchOutlined
 } from '@mui/icons-material';
 import {
   Box,
@@ -12,7 +12,7 @@ import {
   Table,
   TableBody,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Teacher } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -21,7 +21,6 @@ import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
 import TeacherCard from '../../components/teacher/teacherCard';
 import { useUser } from '../../contexts/UserContextProvider';
 
@@ -30,7 +29,7 @@ export default function Teachers() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [displayTeachers, setDisplayTeachers] = useState<Teacher[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [areTeachersLoading, setAreTeachersLoading] = useState<boolean>(false);
+  const [areTeachersLoading, setAreTeachersLoading] = useState<boolean>(true);
 
   const loadTeachers = () => {
     setAreTeachersLoading(true);
@@ -75,10 +74,20 @@ export default function Teachers() {
   const {
     user: { roles },
   } = useUser();
-  const navigate = useNavigate();
   useEffect(() => {
-    if (!roles.find(({ role }) => role === 'SECRETARY')) navigate('/');
-    else loadTeachers();
+    if (roles.find(({ role }) => role === 'SECRETARY')) {
+      loadTeachers();
+    }else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveSecretaryRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

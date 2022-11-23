@@ -1,20 +1,20 @@
 import {
-    AddOutlined,
-    FileDownloadOutlined,
-    ReportRounded,
-    SearchOutlined
+  AddOutlined,
+  FileDownloadOutlined,
+  ReportRounded,
+  SearchOutlined,
 } from '@mui/icons-material';
 import {
-    Box,
-    Button,
-    InputAdornment,
-    Skeleton,
-    Table,
-    TableBody,
-    TableCell,
-    TableRow,
-    TextField,
-    Typography
+  Box,
+  Button,
+  InputAdornment,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TextField,
+  Typography,
 } from '@mui/material';
 import { Classroom } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -23,7 +23,6 @@ import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
 import ClassroomCard from '../../components/classroom/classroomCard';
 import { useUser } from '../../contexts/UserContextProvider';
 
@@ -33,7 +32,7 @@ export default function Classrooms() {
   const [displayClassrooms, setDisplayClassrooms] = useState<Classroom[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [areClassroomsLoading, setAreClassroomsLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
 
   const loadClassrooms = () => {
     setAreClassroomsLoading(true);
@@ -69,10 +68,20 @@ export default function Classrooms() {
   const {
     user: { roles },
   } = useUser();
-  const navigate = useNavigate();
   useEffect(() => {
-    if (!roles.find(({ role }) => role === 'SECRETARY')) navigate('/');
-    else loadClassrooms();
+    if (roles.find(({ role }) => role === 'SECRETARY')) {
+      loadClassrooms();
+    } else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveSecretaryRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -213,7 +222,7 @@ export default function Classrooms() {
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
             placeholder={formatMessage({ id: 'searchClassrooms' })}
-            sx={{ m: 1, width: '25ch', backgroundColor:theme.common.white }}
+            sx={{ m: 1, width: '25ch', backgroundColor: theme.common.white }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -247,7 +256,12 @@ export default function Classrooms() {
                     backgroundColor: theme.common.white,
                   }}
                 >
-                  <TableCell colSpan={4} component="th" align='center' scope="row">
+                  <TableCell
+                    colSpan={4}
+                    component="th"
+                    align="center"
+                    scope="row"
+                  >
                     {formatMessage({
                       id:
                         searchValue !== ''

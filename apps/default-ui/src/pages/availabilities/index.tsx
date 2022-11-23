@@ -22,7 +22,7 @@ export default function Availabilities() {
   const { formatMessage } = useIntl();
   const [availabilities, setAvailabilities] = useState<Availability[]>([]);
   const [areAvailabilitiesLoading, setAreAvailabilitiesLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
 
   const loadAvailabilities = () => {
     setAreAvailabilitiesLoading(true);
@@ -60,6 +60,17 @@ export default function Availabilities() {
   useEffect(() => {
     if (roles.find(({ role }) => role === 'TEACHER')) {
       loadAvailabilities();
+    }else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveTeacherRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
+
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

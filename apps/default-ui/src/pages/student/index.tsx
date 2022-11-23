@@ -1,21 +1,21 @@
 import {
-    AddOutlined,
-    FileDownloadOutlined,
-    ReportRounded,
-    SearchOutlined
+  AddOutlined,
+  FileDownloadOutlined,
+  ReportRounded,
+  SearchOutlined
 } from '@mui/icons-material';
 import {
-    Box,
-    Button,
-    InputAdornment,
-    MenuItem,
-    Skeleton,
-    Table,
-    TableBody,
-    TableCell,
-    TableRow,
-    TextField,
-    Typography
+  Box,
+  Button,
+  InputAdornment,
+  MenuItem,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TextField,
+  Typography
 } from '@mui/material';
 import { Classroom, Student, Subject } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -24,7 +24,6 @@ import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
 import StudentCard from '../../components/student/studentCard';
 import { useUser } from '../../contexts/UserContextProvider';
 
@@ -33,12 +32,12 @@ export default function Students() {
   const [students, setStudents] = useState<Student[]>([]);
   const [displayStudents, setDisplayStudents] = useState<Student[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [areStudentsLoading, setAreStudentsLoading] = useState<boolean>(false);
+  const [areStudentsLoading, setAreStudentsLoading] = useState<boolean>(true);
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [areClassroomsLoading, setAreClassroomsLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [areSubjectsLoading, setAreSubjectsLoading] = useState<boolean>(false);
+  const [areSubjectsLoading, setAreSubjectsLoading] = useState<boolean>(true);
   const [selectedSubject, setSelectedSubject] = useState<string>();
   const [selectedClassroom, setSelectedClassroom] = useState<string>();
 
@@ -136,13 +135,21 @@ export default function Students() {
   const {
     user: { roles },
   } = useUser();
-  const navigate = useNavigate();
   useEffect(() => {
-    if (!roles.find(({ role }) => role === 'SECRETARY')) navigate('/');
-    else {
+    if (roles.find(({ role }) => role === 'SECRETARY')) {
       loadStudents();
       loadSubjects();
       loadClassrooms();
+    }else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveSecretaryRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClassroom, selectedSubject]);

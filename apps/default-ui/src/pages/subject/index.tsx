@@ -2,7 +2,7 @@ import {
   AddOutlined,
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined,
+  SearchOutlined
 } from '@mui/icons-material';
 import {
   Box,
@@ -15,7 +15,7 @@ import {
   TableCell,
   TableRow,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Classroom, Subject, Teacher } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -24,7 +24,6 @@ import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
 import SubjectCard from '../../components/subject/subjectCard';
 import { useUser } from '../../contexts/UserContextProvider';
 
@@ -33,12 +32,12 @@ export default function Subjects() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [displaySubjects, setDisplaySubjects] = useState<Subject[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [areSubjectsLoading, setAreSubjectsLoading] = useState<boolean>(false);
+  const [areSubjectsLoading, setAreSubjectsLoading] = useState<boolean>(true);
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [areClassroomsLoading, setAreClassroomsLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [areTeachersLoading, setAreTeachersLoading] = useState<boolean>(false);
+  const [areTeachersLoading, setAreTeachersLoading] = useState<boolean>(true);
   const [selectedTeacher, setSelectedTeacher] = useState<string>();
   const [selectedClassroom, setSelectedClassroom] = useState<string>();
 
@@ -145,13 +144,21 @@ export default function Subjects() {
   const {
     user: { roles },
   } = useUser();
-  const navigate = useNavigate();
   useEffect(() => {
-    if (!roles.find(({ role }) => role === 'SECRETARY')) navigate('/');
-    else {
+    if (roles.find(({ role }) => role === 'SECRETARY')) {
       loadSubjects();
       loadTeachers();
       loadClassrooms();
+    }else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveSecretaryRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClassroom, selectedTeacher]);
