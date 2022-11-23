@@ -18,3 +18,16 @@ export interface TimeTable {
   created_at: Date;
   is_published: Date;
 }
+
+export interface Break {
+  break_id: string;
+  start_time: Date;
+  end_time: Date;
+}
+
+export interface Weekday {
+  weekday_id: string;
+  weekday: number;
+  start_time: Date;
+  end_time: Date;
+}
