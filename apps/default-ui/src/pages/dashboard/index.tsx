@@ -11,6 +11,10 @@ import { useNavigate } from 'react-router';
 import Graph, { UsageInterface } from '../../components/dashboard/graph';
 import SubscriptionCard from '../../components/dashboard/subscriptionCard';
 import { useUser } from '../../contexts/UserContextProvider';
+import {
+  getSchoolProfile,
+  getSchoolSubscriptions,
+} from '../../services/school.service';
 
 export default function Dashboard() {
   const { formatMessage, formatNumber } = useIntl();
@@ -24,22 +28,12 @@ export default function Dashboard() {
 
   const loadSchoolData = () => {
     setIsSchoolLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL DATA HERE with data school_code
-      if (random() > 5) {
-        const newSchool = {
-          api_calls_left: 20,
-          api_calls_used: 200,
-          api_key: 'kskdksis',
-          api_test_key: 'kdksowkekd',
-          school_acronym: 'IAI',
-          school_code: 'skdk',
-          school_name: 'Universite des montagnes',
-          test_api_calls_left: 10,
-        };
-        setSchool(newSchool);
+    getSchoolProfile()
+      .then((school) => {
+        setSchool(school);
         setIsSchoolLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({ render: formatMessage({ id: 'loadingSchoolData' }) });
         notif.update({
@@ -48,28 +42,28 @@ export default function Dashboard() {
             <ErrorMessage
               retryFunction={loadSchoolData}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSchoolData' })}
+              message={
+                error?.mesage ||
+                formatMessage({ id: 'failedLoadingSchoolData' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const [areSubscriptionsLoading, setAreSubscriptionsLoading] =
     useState<boolean>(false);
-  const loadSubscriptions = () => {
+  const loadSubscriptions = (school_code: string) => {
     setAreSubscriptionsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL SUBSCRIPTIONS HERE with data school_code
-      if (random() > 5) {
-        const newSubscriptions: Subscription[] = [];
-        setSubscriptions(newSubscriptions);
+    getSchoolSubscriptions(school_code)
+      .then((subscriptions) => {
+        setSubscriptions(subscriptions);
         setAreSubscriptionsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingSubscriptions' }),
@@ -78,17 +72,18 @@ export default function Dashboard() {
           type: 'ERROR',
           render: (
             <ErrorMessage
-              retryFunction={loadSubscriptions}
+              retryFunction={() => loadSubscriptions(school_code)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSubscriptions' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingSubscriptions' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const [usageGraphData, setUsageGraphData] = useState<UsageInterface[]>([]);
@@ -133,22 +128,16 @@ export default function Dashboard() {
     if (!roles.find(({ role }) => role === 'SECRETARY')) navigate('/');
     else {
       loadSchoolData();
-      loadSubscriptions();
       loadGraphData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useEffect(() => {
+    if (school?.school_code) loadSubscriptions(school.school_code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [school]);
 
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([
-    {
-      number_of_apis: 20,
-      school_id: 'llls',
-      subscribed_at: new Date(),
-      subscription_id: 'lskd',
-      total_paid: 50000,
-      unit_price: 350,
-    },
-  ]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
 
   return (
     <Box sx={{ height: '100%', display: 'grid', gridTemplateRows: 'auto 1fr' }}>
