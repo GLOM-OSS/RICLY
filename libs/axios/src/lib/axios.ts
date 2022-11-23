@@ -12,21 +12,24 @@ function axiosInstance(): AxiosInstance {
   const axiosInstance = axios.create({
     baseURL: process.env['NX_API_BASE_URL'],
     headers: {
-      'RICLY-API-KEY': process.env['NX_APP_API_KEY']
+      'RICLY-API-KEY': process.env['NX_APP_API_KEY'],
     },
     withCredentials: true,
   });
   axiosInstance.interceptors.request.use(
     (request) => {
-      request = {
-        ...request,
-        headers: {
-          ...request.headers,
-          lang: localStorage.getItem(app_lang) || 'Fr',
-        },
-        params: request.params ? { data: encrypt(request.params) } : undefined,
-        data: request.data ? { data: encrypt(request.data) } : undefined,
-      };
+      if (!(request.data instanceof FormData))
+        request = {
+          ...request,
+          headers: {
+            ...request.headers,
+            lang: localStorage.getItem(app_lang) || 'Fr',
+          },
+          params: request.params
+            ? { data: encrypt(request.params) }
+            : undefined,
+          data: request.data ? { data: encrypt(request.data) } : undefined,
+        };
       return request;
     },
     (error) => Promise.reject(error)
@@ -36,7 +39,7 @@ function axiosInstance(): AxiosInstance {
     (response) => {
       response = {
         ...response,
-        data: response.data ? decrypt(response.data): {},
+        data: response.data ? decrypt(response.data) : {},
       };
       return response;
     },
