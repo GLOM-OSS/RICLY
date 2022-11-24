@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 export class TimetableService {
@@ -22,5 +23,43 @@ export class TimetableService {
       created_at,
       ends_at: lastProgram.find((_) => _.created_at === created_at).end_date,
     }));
+  }
+
+  async getTimetablePrograms(where: Prisma.ProgramWhereInput) {
+    const programs = await this.prismaService.program.findMany({
+      select: {
+        program_id: true,
+        start_date: true,
+        end_date: true,
+        Hall: { select: { hall_code: true } },
+        ClassroomHasSubject: {
+          select: {
+            Subject: { select: { subject_name: true } },
+            Classroom: { select: { classroom_acronym: true } },
+            Teacher: { select: { Person: { select: { fullname: true } } } },
+          },
+        },
+      },
+      where: { ...where, is_deleted: false },
+    });
+    return programs.map(
+      ({
+        ClassroomHasSubject: {
+          Classroom: { classroom_acronym: classroom_code },
+          Subject: { subject_name },
+          Teacher: {
+            Person: { fullname },
+          },
+        },
+        Hall: { hall_code },
+        ...program
+      }) => ({
+        fullname,
+        hall_code,
+        ...program,
+        subject_name,
+        classroom_code,
+      })
+    );
   }
 }
