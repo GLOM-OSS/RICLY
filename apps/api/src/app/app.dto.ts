@@ -2,9 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Person } from '@prisma/client';
 import {
   ArrayMinSize,
-  IsArray,
-  IsEmail,
-  IsNumber,
+  IsArray, IsDateString,
+  IsEmail, IsNumber,
   IsOptional,
   IsString,
   IsUUID
@@ -38,7 +37,7 @@ export class SchoolPostDto {
   @IsString()
   @ApiProperty()
   school_acronym: string;
-  
+
   @IsEmail()
   @ApiProperty()
   secretary_email: string;
@@ -125,6 +124,21 @@ export class DeleteStudentDto {
   students: string[];
 }
 
+export class CreateAvailabilityDto {
+  @ApiProperty()
+  @IsDateString()
+  start_time: Date;
+
+  @ApiProperty()
+  @IsDateString()
+  end_time: Date;
+
+  @IsArray()
+  @ApiProperty()
+  @ArrayMinSize(1)
+  availabilities: Date[];
+}
+
 export enum Role {
   ADMIN = 'ADMIN',
   DEVELOPER = 'DEVELOPER',
@@ -143,8 +157,6 @@ export type User = Person & {
 };
 
 export function getRoleId(roles: UserRole[], wantedRole: Role) {
-  const { user_id } = roles.find(
-    ({ role }) => role === wantedRole
-  );
+  const { user_id } = roles.find(({ role }) => role === wantedRole);
   return user_id;
 }

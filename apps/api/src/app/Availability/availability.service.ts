@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -16,5 +17,24 @@ export class AvailabilityService {
       },
       where: { is_deleted: false, teacher_id },
     });
+  }
+
+  async addNewAvailibilities(
+    availabilities: Prisma.AvailabilityCreateManyInput[]
+  ) {
+    return this.prismaService.$transaction([
+      this.prismaService.availability.createMany({
+        data: availabilities,
+        skipDuplicates: true,
+      }),
+      this.prismaService.availability.updateMany({
+        data: { is_deleted: false },
+        where: {
+          OR: availabilities.map(({ availability_date }) => ({
+            availability_date,
+          })),
+        },
+      }),
+    ]);
   }
 }
