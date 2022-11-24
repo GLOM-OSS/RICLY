@@ -1,6 +1,7 @@
 import { FileDownloadOutlined } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
 import { theme } from '@ricly/theme';
+import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Outlet } from 'react-router';
@@ -86,9 +87,9 @@ export default function Layout() {
             sx={{
               display: 'grid',
               justifyItems: 'start',
-              gridTemplateRows: `${[...new Array(finalNav.length)].map(
-                (_) => 'auto'
-              ).join(' ')} 1fr`,
+              gridTemplateRows: `${[...new Array(finalNav.length)]
+                .map((_) => 'auto')
+                .join(' ')} 1fr`,
               rowGap: theme.spacing(4),
               padding: `${theme.spacing(1)} ${theme.spacing(4.625)}`,
             }}
@@ -128,7 +129,9 @@ export default function Layout() {
             padding: `${theme.spacing(3.125)} 0`,
           }}
         >
-          <Outlet />
+          <Scrollbars>
+            <Outlet />
+          </Scrollbars>
         </Box>
       </Box>
     </>
