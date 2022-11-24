@@ -25,13 +25,14 @@ import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { ClassroomService, ClassrooomCsvModel } from './classroom.service';
 
 @ApiTags('Classrooms')
-@Roles(Role.SECRETARY)
 @Controller('classrooms')
 @UseGuards(AuthenticatedGuard)
+@Roles(Role.SECRETARY, Role.TEACHER, Role.COORDINATOR)
 export class classroomController {
   constructor(private classroomService: ClassroomService) {}
 
   @Post('imports')
+  @Roles(Role.SECRETARY)
   @UseInterceptors(FileInterceptor('classrooms'))
   async importClassrooms(
     @Session() session,
@@ -65,6 +66,7 @@ export class classroomController {
   }
 
   @Delete('delete')
+  @Roles(Role.SECRETARY)
   async deleteClassrooms(
     @Req() request: Request,
     @Query() { classrooms }: DeleteClassroomDto
@@ -83,5 +85,10 @@ export class classroomController {
   @Get(':classroom_id/break')
   async getClassroomBreak(@Param('classroom_id') classroom_id: string) {
     return this.classroomService.getClassroomBreak(classroom_id);
+  }
+
+  @Get(':classroom_id/weekdays')
+  async getClassroomWeekdays(@Param('classroom_id') classroom_id: string) {
+    return this.classroomService.getClassroomWeekdays(classroom_id);
   }
 }

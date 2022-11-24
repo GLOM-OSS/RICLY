@@ -112,4 +112,16 @@ export class ClassroomService {
       where: { classroom_id },
     });
   }
+
+  async getClassroomWeekdays(classroom_id: string) {
+    return this.prismaService.weekday.findMany({
+      select: {
+        weekday_id: true,
+        weekday: true,
+        end_time: true,
+        start_time: true,
+      },
+      where: { classroom_id },
+    });
+  }
 }

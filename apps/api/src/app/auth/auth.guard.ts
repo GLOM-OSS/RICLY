@@ -17,7 +17,10 @@ export class AuthenticatedGuard implements CanActivate {
     const isAuthenticated = request.isAuthenticated();
     if (isAuthenticated) {
       const { roles: userRoles } = request.user as User;
-      const roles = this.reflector.get<Role[]>('roles', context.getClass());
+      const roles = this.reflector.getAllAndOverride<Role[]>('roles', [
+        context.getHandler(),
+        context.getClass(),
+      ]);
       return this.userHasRightRoles(userRoles, roles);
     }
     return isAuthenticated;
