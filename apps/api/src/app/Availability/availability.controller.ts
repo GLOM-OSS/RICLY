@@ -8,16 +8,13 @@ import {
   Post,
   Query,
   Req,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@ricly/interfaces';
 import { Request } from 'express';
 import { Roles } from '../app.decorator';
-import {
-  CreateAvailabilityDto, getRoleId,
-  User
-} from '../app.dto';
+import { CreateAvailabilityDto, getRoleId, User } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { AvailabilityService } from './availability.service';
 
@@ -60,5 +57,10 @@ export class AvailabilityController {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @Get('teachers')
+  async getAvailableTeachers(@Query('classroom_id') classroom_id: string) {
+    return this.availabilityService.getAvailableTeachers(classroom_id);
   }
 }

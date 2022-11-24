@@ -47,4 +47,26 @@ export class AvailabilityService {
       },
     });
   }
+
+  async getAvailableTeachers(classroom_id: string) {
+    const teachers = await this.prismaService.teacher.findMany({
+      select: {
+        teacher_id: true,
+        teacher_type: true,
+        hours_per_week: true,
+        Person: { select: { fullname: true, email: true, phone_number: true } },
+      },
+      where: {
+        is_deleted: false,
+        Classrooms: { some: { classroom_id } },
+        Availabilities: {
+          every: { is_used: false, availability_date: { gt: new Date() } },
+        },
+      },
+    });
+    return teachers.map(({ Person, ...teacher }) => ({
+      ...teacher,
+      ...Person,
+    }));
+  }
 }
