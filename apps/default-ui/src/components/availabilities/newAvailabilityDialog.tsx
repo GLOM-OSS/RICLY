@@ -7,18 +7,18 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
+  TextField
 } from '@mui/material';
 import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import { CreateAvailability } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import dayjs, { Dayjs } from 'dayjs';
 import Scrollbars from 'rc-scrollbars';
 import { useState } from 'react';
 import { useIntl } from 'react-intl';
+import { addNewAvailibilities } from '../../services/availabilities.service';
 
 export default function NewAvailabilityDialog({
   isDialogOpen,
@@ -40,32 +40,32 @@ export default function NewAvailabilityDialog({
     notif.notify({
       render: formatMessage({ id: 'creatingAvailabilities' }),
     });
-    setTimeout(() => {
-      setIsCreating(false);
-      //TODO call api here to create availabilities
-      if (random() > 5) {
+    addNewAvailibilities(availabilities)
+      .then(() => {
         notif.update({
           render: formatMessage({ id: 'successfullyCreated' }),
         });
         resetForm();
         closeDialog();
         setNotifications([]);
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={() => createAvailability(availabilities)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedSavingAvailability' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedSavingAvailability' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 4000);
+      });
   }
   const [startsAt, setStartsAt] = useState<Dayjs | null>(dayjs(new Date()));
   const [endsAt, setEndsAt] = useState<Dayjs | null>(dayjs(new Date()));
@@ -133,7 +133,7 @@ export default function NewAvailabilityDialog({
               backgroundColor: theme.common.CSK50,
               padding: theme.spacing(2),
               height: theme.spacing(20),
-              width: theme.spacing(66.25)
+              width: theme.spacing(66.25),
             }}
           >
             <Scrollbars>
@@ -153,9 +153,11 @@ export default function NewAvailabilityDialog({
                       const tempSelectedDates: string[] = selectedDates.map(
                         (_) => _.toDateString()
                       );
-                      const dateData = _.toDateString()
-                      const data = tempSelectedDates.filter((_)=>_!==dateData);
-                      setSelectedDates(data.map(_=>new Date(_)))
+                      const dateData = _.toDateString();
+                      const data = tempSelectedDates.filter(
+                        (_) => _ !== dateData
+                      );
+                      setSelectedDates(data.map((_) => new Date(_)));
                     }}
                     label={formatDate(_, {
                       year: 'numeric',

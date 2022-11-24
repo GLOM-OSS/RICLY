@@ -10,13 +10,13 @@ import {
 import { Availability } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import AvailabilityCard from '../../components/availabilities/availabilityCard';
 import NewAvailabilityDialog from '../../components/availabilities/newAvailabilityDialog';
 import { useUser } from '../../contexts/UserContextProvider';
+import { getTeacherAvailabilities } from '../../services/availabilities.service';
 
 export default function Availabilities() {
   const { formatMessage } = useIntl();
@@ -26,13 +26,12 @@ export default function Availabilities() {
 
   const loadAvailabilities = () => {
     setAreAvailabilitiesLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET personne's availabilities HERE with data school_code
-      if (random() > 5) {
-        const newAvailabilities: Availability[] = [];
-        setAvailabilities(newAvailabilities);
+    getTeacherAvailabilities()
+      .then((availabilities) => {
+        setAvailabilities(availabilities);
         setAreAvailabilitiesLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingAvailabilities' }),
@@ -43,15 +42,16 @@ export default function Availabilities() {
             <ErrorMessage
               retryFunction={loadAvailabilities}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingAvailabilities' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingAvailabilities' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const {
@@ -60,7 +60,7 @@ export default function Availabilities() {
   useEffect(() => {
     if (roles.find(({ role }) => role === 'TEACHER')) {
       loadAvailabilities();
-    }else {
+    } else {
       const notif = new useNotification();
       notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
@@ -70,7 +70,6 @@ export default function Availabilities() {
         }),
         icon: () => <ReportRounded fontSize="medium" color="error" />,
       });
-
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
