@@ -227,8 +227,8 @@ model Break {
 
 model Program {
     program_id               String              @id @default(uuid()) @db.VarChar(36)
-    starts_at                DateTime            @db.DateTime(0)
-    ends_time                DateTime            @db.DateTime(0)
+    start_date               DateTime            @db.DateTime(0)
+    end_date                 DateTime            @db.DateTime(0)
     is_published             Boolean             @default(false) @db.TinyInt
     is_deleted               Boolean             @default(false) @db.TinyInt
     created_at               DateTime            @default(now()) @db.DateTime(0)
