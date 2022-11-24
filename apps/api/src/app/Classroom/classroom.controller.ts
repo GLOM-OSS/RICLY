@@ -4,6 +4,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  Param,
   Post,
   Query,
   Req,
@@ -77,5 +78,10 @@ export class classroomController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  @Get(':classroom_id/break')
+  async getClassroomBreak(@Param('classroom_id') classroom_id: string) {
+    return this.classroomService.getClassroomBreak(classroom_id);
   }
 }

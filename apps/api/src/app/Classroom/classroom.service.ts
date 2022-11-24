@@ -105,4 +105,11 @@ export class ClassroomService {
       })
     );
   }
+
+  async getClassroomBreak(classroom_id: string) {
+    return this.prismaService.break.findFirst({
+      select: { break_id: true, start_time: true, end_time: true },
+      where: { classroom_id },
+    });
+  }
 }
