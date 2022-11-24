@@ -24,6 +24,7 @@ import { ClassroomModule } from './Classroom/classrrom.module';
 import { SubjectModule } from './Subject/subject.module';
 import { StudentModule } from './Student/student.module';
 import { AppMiddleware } from './app.middleware';
+import { AvailabilityModule } from './Availability/availability.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AppMiddleware } from './app.middleware';
     ClassroomModule,
     SubjectModule,
     StudentModule,
+    AvailabilityModule,
   ],
   controllers: [AppController],
   providers: [

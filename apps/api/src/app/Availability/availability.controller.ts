@@ -1,25 +1,50 @@
-import { Controller, Get, Session, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@ricly/interfaces';
+import { Request } from 'express';
 import { Roles } from '../app.decorator';
-import { getRoleId } from '../app.dto';
+import { CreateAvailabilityDto, getRoleId, User } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { AvailabilityService } from './availability.service';
 
+@Roles(Role.TEACHER)
 @ApiTags('Availabilities')
 @Controller('availabilities')
 @UseGuards(AuthenticatedGuard)
-@Roles(Role.COORDINATOR, Role.TEACHER)
 export class AvailabilityController {
   constructor(private availabilityService: AvailabilityService) {}
 
   @Get('all')
-  async findAll(@Session() session) {
-    const {
-      passport: {
-        user: { roles },
-      },
-    } = session;
+  async findAll(@Req() request: Request) {
+    const { roles } = request.user as User;
     return this.availabilityService.findAll(getRoleId(roles, Role.TEACHER));
+  }
+
+  @Post('new')
+  async addAvailabilities(
+    @Req() request: Request,
+    @Body() { availabilities, end_time, start_time }: CreateAvailabilityDto
+  ) {
+    try {
+      const { roles } = request.user as User;
+      const newAvailabilities = availabilities.map((availability_date) => ({
+        end_time: new Date(end_time),
+        start_time: new Date(start_time),
+        teacher_id: getRoleId(roles, Role.TEACHER),
+        availability_date: new Date(availability_date),
+      }));
+      return this.availabilityService.addNewAvailibilities(newAvailabilities);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
