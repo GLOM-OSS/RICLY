@@ -63,4 +63,13 @@ export class AvailabilityController {
   async getAvailableTeachers(@Query('classroom_id') classroom_id: string) {
     return this.availabilityService.getAvailableTeachers(classroom_id);
   }
+
+  @Get('classrooms')
+  @Roles(Role.COORDINATOR)
+  async getCoordinatorClassrooms(@Req() request: Request) {
+    const { roles } = request.user as User;
+    return this.availabilityService.getCoordinatorClasses(
+      getRoleId(roles, Role.COORDINATOR)
+    );
+  }
 }

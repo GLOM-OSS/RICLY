@@ -69,4 +69,29 @@ export class AvailabilityService {
       ...Person,
     }));
   }
+
+  async getCoordinatorClasses(coordinator: string) {
+    const teachers = await this.prismaService.classroom.findMany({
+      select: {
+        classroom_id: true,
+        classroom_name: true,
+        classroom_acronym: true,
+        Coordinator: { select: { Person: { select: { email: true } } } },
+      },
+      where: { coordinator, is_deleted: false },
+    });
+    return teachers.map(
+      ({
+        Coordinator: {
+          Person: { email },
+        },
+        classroom_acronym,
+        ...teacher
+      }) => ({
+        ...teacher,
+        coordinator_email: email,
+        classroom_code: classroom_acronym,
+      })
+    );
+  }
 }
