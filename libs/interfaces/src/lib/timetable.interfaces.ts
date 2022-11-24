@@ -39,3 +39,16 @@ export interface CreateTimetable {
   break: Omit<Break, 'break_id'>;
   course_duration_in_minutes: number;
 }
+
+export interface Program {
+  program_id: string;
+  start_date: Date;
+  end_date: Date;
+  hall_name: string; //important. Please add it on the ui
+  subject_name: string;
+  fullname: string;
+}
+
+export interface ProgramTimeTable extends Break {
+  programs: Program[];
+}
