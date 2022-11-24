@@ -22,7 +22,6 @@ import { ErrorMessage, useNotification } from '@ricly/toast';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
 import ClassroomCard from '../../components/classroom/classroomCard';
 import { useUser } from '../../contexts/UserContextProvider';
 import {
@@ -36,7 +35,7 @@ export default function Classrooms() {
   const [displayClassrooms, setDisplayClassrooms] = useState<Classroom[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
   const [areClassroomsLoading, setAreClassroomsLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
 
   const loadClassrooms = () => {
     setAreClassroomsLoading(true);
@@ -72,10 +71,20 @@ export default function Classrooms() {
   const {
     user: { roles },
   } = useUser();
-  const navigate = useNavigate();
   useEffect(() => {
-    if (!roles.find(({ role }) => role === 'SECRETARY')) navigate('/');
-    else loadClassrooms();
+    if (roles.find(({ role }) => role === 'SECRETARY')) {
+      loadClassrooms();
+    } else {
+      const notif = new useNotification();
+      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      notif.update({
+        type: 'ERROR',
+        render: formatMessage({
+          id: 'mustHaveSecretaryRole',
+        }),
+        icon: () => <ReportRounded fontSize="medium" color="error" />,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

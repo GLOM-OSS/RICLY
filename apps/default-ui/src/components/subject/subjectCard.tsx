@@ -16,8 +16,10 @@ export default function SubjectCard({
     subject_name,
     teacher_email,
   },
+  canDelete=true
 }: {
   subject: Subject;
+  canDelete?: boolean;
 }) {
   const { formatMessage } = useIntl();
 
@@ -54,17 +56,38 @@ export default function SubjectCard({
             ? classrooms[0].classroom_name
             : `(${classrooms.length} ${formatMessage({ id: 'classrooms' })})`}
         </TableCell>
-        <TableCell>
-          {classrooms.length > 1 ? (
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: '1fr auto',
-                justifyItems: 'end',
-                alignItems: 'center',
-                columnGap: theme.spacing(0.5),
-              }}
-            >
+        {canDelete && (
+          <TableCell>
+            {classrooms.length > 1 ? (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  justifyItems: 'end',
+                  alignItems: 'center',
+                  columnGap: theme.spacing(0.5),
+                }}
+              >
+                <Tooltip arrow title={formatMessage({ id: 'deleteClassroom' })}>
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={deleteClassroom}
+                  >
+                    <DeleteOutline />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip arrow title={formatMessage({ id: 'seeClassrooms' })}>
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={() => navigate(subject_id)}
+                  >
+                    <KeyboardBackspaceOutlined />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            ) : (
               <Tooltip arrow title={formatMessage({ id: 'deleteClassroom' })}>
                 <IconButton
                   color="primary"
@@ -74,29 +97,10 @@ export default function SubjectCard({
                   <DeleteOutline />
                 </IconButton>
               </Tooltip>
-              <Tooltip arrow title={formatMessage({ id: 'seeClassrooms' })}>
-                <IconButton
-                  color="primary"
-                  size="small"
-                  onClick={() => navigate(subject_id)}
-                >
-                  <KeyboardBackspaceOutlined />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          ) : (
-            <Tooltip arrow title={formatMessage({ id: 'deleteClassroom' })}>
-              <IconButton
-                color="primary"
-                size="small"
-                onClick={deleteClassroom}
-              >
-                <DeleteOutline />
-              </IconButton>
-            </Tooltip>
-          )}
-        </TableCell>
-      </TableRow>{' '}
+            )}
+          </TableCell>
+        )}
+      </TableRow>
     </>
   );
 }

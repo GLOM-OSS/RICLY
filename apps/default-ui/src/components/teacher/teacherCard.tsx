@@ -15,8 +15,10 @@ export default function TeacherCard({
     hours_per_week,
     teacher_id,
   },
+  canDelete=true
 }: {
   teacher: Teacher;
+  canDelete?: boolean;
 }) {
   const { formatMessage } = useIntl();
 
@@ -51,13 +53,15 @@ export default function TeacherCard({
         <TableCell>{`${hours_per_week}/${formatMessage({
           id: 'week',
         })}`}</TableCell>
-        <TableCell>
-          <Tooltip arrow title={formatMessage({ id: 'deleteSchool' })}>
-            <IconButton color="primary" size="small" onClick={deleteBuilding}>
-              <DeleteOutline />
-            </IconButton>
-          </Tooltip>
-        </TableCell>
+        {canDelete && (
+          <TableCell>
+            <Tooltip arrow title={formatMessage({ id: 'deleteSchool' })}>
+              <IconButton color="primary" size="small" onClick={deleteBuilding}>
+                <DeleteOutline />
+              </IconButton>
+            </Tooltip>
+          </TableCell>
+        )}
       </TableRow>{' '}
     </>
   );

@@ -31,3 +31,11 @@ export interface Weekday {
   start_time: Date;
   end_time: Date;
 }
+
+export interface CreateTimetable {
+  classroom_id: string;
+  start_at: Date;
+  end_at: Date;
+  break: Omit<Break, 'break_id'>;
+  course_duration_in_minutes: number;
+}
