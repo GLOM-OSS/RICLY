@@ -1,18 +1,23 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
   Post,
+  Query,
   Req,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@ricly/interfaces';
 import { Request } from 'express';
 import { Roles } from '../app.decorator';
-import { CreateAvailabilityDto, getRoleId, User } from '../app.dto';
+import {
+  CreateAvailabilityDto, getRoleId,
+  User
+} from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { AvailabilityService } from './availability.service';
 
@@ -43,6 +48,15 @@ export class AvailabilityController {
         availability_date: new Date(availability_date),
       }));
       return this.availabilityService.addNewAvailibilities(newAvailabilities);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Delete('delete')
+  async deleteAvailabities(@Query() { availabilities }) {
+    try {
+      return this.availabilityService.deleteAvailabilities(availabilities);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

@@ -37,4 +37,14 @@ export class AvailabilityService {
       }),
     ]);
   }
+
+  async deleteAvailabilities(availabilityIds: string[]) {
+    return this.prismaService.availability.updateMany({
+      data: { is_deleted: true },
+      where: {
+        is_used: false,
+        OR: availabilityIds.map((availability_id) => ({ availability_id })),
+      },
+    });
+  }
 }

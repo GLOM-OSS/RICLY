@@ -73,7 +73,7 @@ export class SignInDto {
 
 export class DeleteBuildingDto {
   @ApiProperty({
-    description: `A list of all building's id you want to delete`,
+    description: `A list of all building's ids you want to delete`,
   })
   @IsArray()
   @ArrayMinSize(1)
@@ -81,7 +81,7 @@ export class DeleteBuildingDto {
 }
 export class DeleteHallDto {
   @ApiProperty({
-    description: `A list of all hall's id you want to delete`,
+    description: `A list of all hall's ids you want to delete`,
   })
   @IsArray()
   @ArrayMinSize(1)
@@ -90,7 +90,7 @@ export class DeleteHallDto {
 
 export class DeleteTeacherDto {
   @ApiProperty({
-    description: `A list of all teacher's id you want to delete`,
+    description: `A list of all teacher's ids you want to delete`,
   })
   @IsArray()
   @ArrayMinSize(1)
@@ -99,7 +99,7 @@ export class DeleteTeacherDto {
 
 export class DeleteClassroomDto {
   @ApiProperty({
-    description: `A list of all classroom's id you want to delete`,
+    description: `A list of all classroom's ids you want to delete`,
   })
   @IsArray()
   @ArrayMinSize(1)
@@ -108,7 +108,7 @@ export class DeleteClassroomDto {
 
 export class DeleteSubjectDto {
   @ApiProperty({
-    description: `A list of all subject's id you want to delete`,
+    description: `A list of all subject's ids you want to delete`,
   })
   @IsArray()
   @ArrayMinSize(1)
@@ -117,11 +117,19 @@ export class DeleteSubjectDto {
 
 export class DeleteStudentDto {
   @ApiProperty({
-    description: `A list of all subject's id you want to delete`,
+    description: `A list of all subject's ids you want to delete`,
   })
   @IsArray()
   @ArrayMinSize(1)
   students: string[];
+}
+export class DeleteAvailabilityDto {
+  @ApiProperty({
+    description: `A list of all availability's ids you want to delete`,
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  availabilities: string[];
 }
 
 export class CreateAvailabilityDto {
