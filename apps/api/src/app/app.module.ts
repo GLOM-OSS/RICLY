@@ -25,6 +25,7 @@ import { SubjectModule } from './Subject/subject.module';
 import { StudentModule } from './Student/student.module';
 import { AppMiddleware } from './app.middleware';
 import { AvailabilityModule } from './Availability/availability.module';
+import { TimeTableModule } from './Timetable/timetable.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AvailabilityModule } from './Availability/availability.module';
     SubjectModule,
     StudentModule,
     AvailabilityModule,
+    TimeTableModule,
   ],
   controllers: [AppController],
   providers: [
