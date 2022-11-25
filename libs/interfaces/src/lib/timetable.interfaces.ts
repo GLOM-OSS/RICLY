@@ -49,6 +49,7 @@ export interface Program {
   fullname: string;
 }
 
-export interface ProgramTimeTable extends Break {
+export interface ProgramTimeTable extends TimeTable {
+  classroom_code: string;
   programs: Program[];
 }
