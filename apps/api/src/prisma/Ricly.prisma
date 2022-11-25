@@ -153,7 +153,6 @@ model Hall {
     hall_id       String   @id @default(uuid()) @db.VarChar(36)
     hall_code     String   @unique @db.VarChar(30)
     hall_capacity Int
-    is_used       Boolean  @default(false) @db.TinyInt
     is_deleted    Boolean  @default(false) @db.TinyInt
     created_at    DateTime @default(now()) @db.DateTime(0)
     building_id   String   @db.VarChar(36)
@@ -230,23 +229,11 @@ model Program {
     program_id               String              @id @default(uuid()) @db.VarChar(36)
     start_date               DateTime            @db.DateTime(0)
     end_date                 DateTime            @db.DateTime(0)
-    is_published             Boolean             @default(false) @db.TinyInt
+    is_published             Boolean             @default(true) @db.TinyInt
     is_deleted               Boolean             @default(false) @db.TinyInt
     created_at               DateTime            @default(now()) @db.DateTime(0)
     hall_id                  String
     Hall                     Hall                @relation(fields: [hall_id], references: [hall_id], onDelete: Cascade, onUpdate: Cascade)
     classroom_has_subject_id String
     ClassroomHasSubject      ClassroomHasSubject @relation(fields: [classroom_has_subject_id], references: [classroom_has_subject_id], onDelete: Cascade, onUpdate: Cascade)
-
-    @@unique([start_date, end_date, hall_id])
 }
-
-//   verify published program in slot (if it exists put program and end)
-// get available teachers for slot (part time has priority and created at has priority)
-// verify for every subject, if is common_core subject
-// it it's not common_core, verify if classroom has hall_id
-// if it has hall_id, then use hall_id
-// if it's common_core or classroom does not have hall_id, verify hall with capacity (number of course students) available for that slot
-// sort list by hall_id, teacher_type and created_at
-// if nobody has hall_id,slot is left empty
-// else first person on list wins slot
