@@ -6,8 +6,10 @@ import {
   IsEmail, IsNumber,
   IsOptional,
   IsString,
-  IsUUID
+  IsUUID,
+  ValidateNested
 } from 'class-validator';
+import {Type} from 'class-transformer'
 
 export class SubscribeDto {
   @IsNumber()
@@ -145,6 +147,38 @@ export class CreateAvailabilityDto {
   @ApiProperty()
   @ArrayMinSize(1)
   availabilities: Date[];
+}
+
+export class Break {
+  @ApiProperty()
+  @IsDateString()
+  start_time: Date
+
+  @ApiProperty()
+  @IsDateString()
+  end_time: Date
+}
+export class CreateTimetableDto {
+  @ApiProperty()
+  @IsUUID()
+  classroom_id: string;
+
+  @ApiProperty()
+  @IsDateString()
+  start_at: Date;
+
+  @ApiProperty()
+  @IsDateString()
+  end_at: Date;
+
+  @ApiProperty()
+  @ValidateNested()
+  @Type(() => Break)
+  break: Break;
+
+  @ApiProperty()
+  @IsNumber()
+  course_duration_in_minutes: number;
 }
 
 export enum Role {
