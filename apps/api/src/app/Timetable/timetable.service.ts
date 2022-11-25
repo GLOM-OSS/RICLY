@@ -122,48 +122,12 @@ export class TimetableService {
           });
           if (programs.length === 0) {
             //get available teachers
-            const availableTeachers = await this.prismaService.teacher.findMany(
-              {
-                orderBy: { teacher_type: 'asc' }, //This will prioritize part_time over permanent and permanent.
-                select: {
-                  ClassroomHasSubjects: {
-                    select: {
-                      classroom_has_subject_id: true,
-                      subject_id: true,
-                      classroom_id: true,
-                      Classroom: {
-                        select: {
-                          hall_id: true,
-                        },
-                      },
-                    },
-                  },
-                },
-                where: {
-                  Availabilities: {
-                    some: {
-                      end_time: { gte: nextPeriodStartTime },
-                      start_time: { lte: dayPeriodStartTime },
-                      is_deleted: false,
-                      is_used: false,
-                    },
-                  },
-                  ClassroomHasSubjects: {
-                    none: {
-                      classroom_has_subject_id: {
-                        in: dalyProgrammedSubjects.map(
-                          (classroom_has_subject_id) => classroom_has_subject_id
-                        ),
-                      },
-                    },
-                    some: {
-                      Classroom: {
-                        classroom_id,
-                      },
-                    },
-                  },
-                },
-              }
+            const availableTeachers = await this.getAvailableTeachers(
+              classroom_id,
+              { start_time: dayPeriodStartTime, end_time: nextPeriodStartTime },
+              dalyProgrammedSubjects.map(
+                (classroom_has_subject_id) => classroom_has_subject_id
+              )
             );
             //retrieving implicated classroom subjects (classroom_has_subject_id)
             let classroomHasSubjects: IClassroomHasSubject[] = [];
@@ -186,72 +150,12 @@ export class TimetableService {
               );
             });
             //searching for coreSubjects
-            const uniqueCoreSubjects: IClassroomHasSubject[] = [];
-            const coreSubjectHalls: { hall_id: string; subject_id: string }[] =
-              [];
-            for (let i = 0; i < classroomHasSubjects.length; i++) {
-              const { subject_id } = classroomHasSubjects[i];
-              const coreSubjects =
-                await this.prismaService.classroomHasSubject.findMany({
-                  select: {
-                    subject_id: true,
-                    classroom_id: true,
-                    classroom_has_subject_id: true,
-                    Classroom: { select: { hall_id: true } },
-                  },
-                  where: {
-                    subject_id,
-                    is_deleted: false,
-                    classroom_has_subject_id: {
-                      notIn: [
-                        ...classroomHasSubjects.map(
-                          ({ classroom_has_subject_id: id }) => id
-                        ),
-                        ...dalyProgrammedSubjects.map((id) => id),
-                      ],
-                    },
-                  },
-                });
-              uniqueCoreSubjects.push(
-                ...coreSubjects.map(
-                  ({
-                    subject_id,
-                    classroom_id,
-                    Classroom: { hall_id },
-                    classroom_has_subject_id,
-                  }) => ({
-                    classroom_has_subject_id,
-                    classroom_id,
-                    subject_id,
-                    hall_id,
-                  })
-                )
+            const { commonSubjectHalls, uniqueCoreSubjects } =
+              await this.searchCommonSubjects(
+                classroom_id,
+                classroomHasSubjects,
+                dalyProgrammedSubjects.map((id) => id)
               );
-              const nombreOfStudent = await this.prismaService.student.count({
-                where: {
-                  OR: [
-                    ...coreSubjects.map(({ classroom_id }) => ({
-                      classroom_id,
-                    })),
-                    { classroom_id },
-                  ],
-                },
-              });
-              const capableHall = await this.prismaService.hall.findFirst({
-                select: { hall_id: true },
-                where: {
-                  is_used: false,
-                  hall_capacity: { gte: nombreOfStudent },
-                  NOT: {
-                    OR: coreSubjectHalls.map(({ hall_id }) => ({ hall_id })),
-                  },
-                }, //TODO should check if the hall is too big
-              });
-              coreSubjectHalls.push({
-                hall_id: capableHall?.hall_id,
-                subject_id,
-              });
-            }
 
             //added coreSubjects to implicated classroom subjects (classroom_has_subject_id)
             classroomHasSubjects.push(...uniqueCoreSubjects);
@@ -260,40 +164,19 @@ export class TimetableService {
               where: {
                 is_used: false,
                 NOT: {
-                  OR: coreSubjectHalls.map(({ hall_id }) => ({ hall_id })),
+                  OR: commonSubjectHalls.map(({ hall_id }) => ({ hall_id })),
                 },
               },
             });
-            let iterateHalls = availableHalls.length;
 
-            classroomHasSubjects = classroomHasSubjects.map(
-              (classroomHasSubject) => {
-                --iterateHalls;
-                //getting non core subjects hall_id
-                const hall_id =
-                  iterateHalls >= 0
-                    ? availableHalls[iterateHalls].hall_id
-                    : null;
-                const coreSubject = uniqueCoreSubjects.find(
-                  ({ subject_id: id }) => id === classroomHasSubject.subject_id
-                );
-                return coreSubject
-                  ? {
-                      ...classroomHasSubject,
-                      //setting coreSubject hall_id with capable hall_id,
-                      hall_id: coreSubjectHalls.find(
-                        ({ subject_id }) =>
-                          subject_id === classroomHasSubject.subject_id
-                      ).hall_id,
-                    }
-                  : classroomHasSubject.hall_id === null
-                  ? {
-                      ...classroomHasSubject,
-                      hall_id,
-                    }
-                  : classroomHasSubject;
-              }
+            // Attributing halls to courses;
+            classroomHasSubjects = this.attributeHalls(
+              availableHalls,
+              classroomHasSubjects,
+              uniqueCoreSubjects,
+              commonSubjectHalls
             );
+            
             const programs: IClassroomHasSubject[] = [];
             classroomHasSubjects.forEach(
               ({
@@ -340,5 +223,158 @@ export class TimetableService {
       );
     }
     return newPrograms;
+  }
+
+  async getAvailableTeachers(
+    classroom_id: string,
+    dayPeriod: { start_time: Date; end_time: Date },
+    unwantedCourse: string[]
+  ) {
+    return this.prismaService.teacher.findMany({
+      orderBy: { teacher_type: 'asc' }, //This will prioritize part_time over permanent and permanent.
+      select: {
+        ClassroomHasSubjects: {
+          select: {
+            classroom_has_subject_id: true,
+            subject_id: true,
+            classroom_id: true,
+            Classroom: {
+              select: {
+                hall_id: true,
+              },
+            },
+          },
+        },
+      },
+      where: {
+        Availabilities: {
+          some: {
+            end_time: { gte: dayPeriod.end_time },
+            start_time: { lte: dayPeriod.start_time },
+            is_deleted: false,
+            is_used: false,
+          },
+        },
+        ClassroomHasSubjects: {
+          none: {
+            classroom_has_subject_id: {
+              in: unwantedCourse,
+            },
+          },
+          some: {
+            Classroom: {
+              classroom_id,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async searchCommonSubjects(
+    classroom_id: string,
+    classroomHasSubjects: IClassroomHasSubject[],
+    unwantedCourse: string[]
+  ) {
+    const uniqueCoreSubjects: IClassroomHasSubject[] = [];
+    const commonSubjectHalls: { hall_id: string; subject_id: string }[] = [];
+    for (let i = 0; i < classroomHasSubjects.length; i++) {
+      const { subject_id } = classroomHasSubjects[i];
+      const coreSubjects =
+        await this.prismaService.classroomHasSubject.findMany({
+          select: {
+            subject_id: true,
+            classroom_id: true,
+            classroom_has_subject_id: true,
+            Classroom: { select: { hall_id: true } },
+          },
+          where: {
+            subject_id,
+            is_deleted: false,
+            classroom_has_subject_id: {
+              notIn: [
+                ...classroomHasSubjects.map(
+                  ({ classroom_has_subject_id: id }) => id
+                ),
+                ...unwantedCourse,
+              ],
+            },
+          },
+        });
+      uniqueCoreSubjects.push(
+        ...coreSubjects.map(
+          ({
+            subject_id,
+            classroom_id,
+            Classroom: { hall_id },
+            classroom_has_subject_id,
+          }) => ({
+            classroom_has_subject_id,
+            classroom_id,
+            subject_id,
+            hall_id,
+          })
+        )
+      );
+      const nombreOfStudent = await this.prismaService.student.count({
+        where: {
+          OR: [
+            ...coreSubjects.map(({ classroom_id }) => ({
+              classroom_id,
+            })),
+            { classroom_id },
+          ],
+        },
+      });
+      const capableHall = await this.prismaService.hall.findFirst({
+        select: { hall_id: true },
+        where: {
+          is_used: false,
+          hall_capacity: { gte: nombreOfStudent },
+          NOT: {
+            OR: commonSubjectHalls.map(({ hall_id }) => ({ hall_id })),
+          },
+        }, //TODO should check if the hall is too big
+      });
+      commonSubjectHalls.push({
+        hall_id: capableHall?.hall_id,
+        subject_id,
+      });
+    }
+
+    return { uniqueCoreSubjects, commonSubjectHalls };
+  }
+
+  attributeHalls(
+    availableHalls: { hall_id: string }[],
+    classroomHasSubjects: IClassroomHasSubject[],
+    uniqueCoreSubjects: IClassroomHasSubject[],
+    commonSubjectHalls: { hall_id: string; subject_id: string }[]
+  ) {
+    let iterateHalls = availableHalls.length;
+
+    return classroomHasSubjects.map((classroomHasSubject) => {
+      --iterateHalls;
+      //getting non core subjects hall_id
+      const hall_id =
+        iterateHalls >= 0 ? availableHalls[iterateHalls].hall_id : null;
+      const coreSubject = uniqueCoreSubjects.find(
+        ({ subject_id: id }) => id === classroomHasSubject.subject_id
+      );
+      return coreSubject
+        ? {
+            ...classroomHasSubject,
+            //setting coreSubject hall_id with capable hall_id,
+            hall_id: commonSubjectHalls.find(
+              ({ subject_id }) => subject_id === classroomHasSubject.subject_id
+            ).hall_id,
+          }
+        : classroomHasSubject.hall_id === null
+        ? {
+            ...classroomHasSubject,
+            hall_id,
+          }
+        : classroomHasSubject;
+    });
   }
 }
