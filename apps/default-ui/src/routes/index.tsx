@@ -14,7 +14,6 @@ import Teachers from '../pages/teachers';
 import Timetables from '../pages/timetables';
 import NewTimetable from '../pages/timetables/new';
 import TestTimetable from '../pages/timetables/test';
-import DisplayTimetable from '../pages/timetables/[created_at]';
 
 export const Test = () => {
   const { school_code } = useParams();
