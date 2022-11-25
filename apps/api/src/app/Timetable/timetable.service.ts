@@ -341,22 +341,4 @@ export class TimetableService {
     }
     return newPrograms;
   }
-
-  async findPrograms(where: Prisma.ProgramWhereInput) {
-    return this.prismaService.program.findMany({
-      where,
-    });
-  }
-
-  async addPrograms(data: Prisma.ProgramCreateManyInput[]) {
-    return this.prismaService.program.createMany({
-      data,
-      skipDuplicates: true,
-    });
-  }
-  async getCommonClassrooms(where: Prisma.ClassroomHasSubjectWhereInput) {
-    return this.prismaService.classroomHasSubject.findMany({
-      where,
-    });
-  }
 }
