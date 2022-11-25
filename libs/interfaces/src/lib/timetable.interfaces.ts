@@ -16,7 +16,7 @@ export interface TimeTable {
   start_date: Date;
   end_date: Date;
   created_at: Date;
-  is_published: Date;
+  is_published: boolean;
 }
 
 export interface Break {
