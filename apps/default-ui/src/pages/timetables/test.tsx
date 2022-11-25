@@ -249,7 +249,11 @@ export default function TestTimetable() {
         usage: 'break',
       };
       //   console.log(programs)
-      setSlots([breakSlot, ...getSlots(programs)]);
+      setSlots(
+        [breakSlot, ...getSlots(programs)].sort((a, b) =>
+          a.start_time > b.start_time ? -1 : 1
+        )
+      );
       setDisplayPrograms(getProgramDayFamilies(programs, breaktime));
     } else setSlots(getSlots(programs));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -264,29 +268,28 @@ export default function TestTimetable() {
       }}
     >
       <Scrollbars>
-        <Box sx={{ height: '100%', display: 'grid' }}>
-          {slots
-            .sort((a, b) => (a.start_time > b.start_time ? -1 : 1))
-            .map(({ start_time, end_time, usage }, index) => {
-                
-              return (
-                <Box
-                  key={index}
-                  sx={{
-                    justifySelf: 'start',
-                    alignSelf: 'end',
-                    backgroundColor:
-                      usage === 'break'
-                        ? theme.common.CSK200
-                        : theme.common.lowerGray,
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 'bold' }}>
-                    {formatTime(start_time)}
-                  </Typography>
-                </Box>
-              );
-            })}
+        <Box
+          sx={{
+            height: '100%',
+            display: 'grid',
+            gridTemplateRows: `${slots
+              .map(({ usage }) => (usage === 'break' ? '50px' : '1fr'))
+              .join(' ')}`,
+          }}
+        >
+          {slots.map(({ start_time }, index) => {
+            return (
+              <Typography
+                key={index}
+                sx={{
+                  fontWeight: 'bold',
+                  alignSelf: 'end',
+                }}
+              >
+                {formatTime(start_time)}
+              </Typography>
+            );
+          })}
         </Box>
       </Scrollbars>
       <Scrollbars>
@@ -309,8 +312,10 @@ export default function TestTimetable() {
                     sx={{
                       display: 'grid',
                       gap: theme.spacing(1),
-                      gridTemplateRows: `${[...new Array(slots.length)]
-                        .map((_) => '1fr')
+                      gridTemplateRows: `${slots
+                        .map(({ usage }) =>
+                          usage === 'break' ? '50px' : '1fr'
+                        )
                         .join(' ')}`,
                     }}
                   >
