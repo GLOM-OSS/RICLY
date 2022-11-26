@@ -45,7 +45,7 @@ export class SchoolService {
         api_calls_used: 0,
         test_api_calls_left: 500,
         api_key: getRandomString(64),
-        api_test_key: getRandomString(32),
+        api_test_key: getRandomString(58),
         Developer: { connect: { developer_id } },
         Secretaries: {
           create: {
