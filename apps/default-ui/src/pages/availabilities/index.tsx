@@ -5,7 +5,7 @@ import {
   Skeleton,
   Table,
   TableBody,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Availability } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -62,7 +62,7 @@ export default function Availabilities() {
       loadAvailabilities();
     } else {
       const notif = new useNotification();
-      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      // notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
         type: 'ERROR',
         render: formatMessage({
@@ -79,6 +79,7 @@ export default function Availabilities() {
   return (
     <>
       <NewAvailabilityDialog
+        refresh={loadAvailabilities}
         isDialogOpen={isNewAvailabilityDialogOpen}
         closeDialog={() => setIsNewAvailabilityDialogOpen(false)}
       />

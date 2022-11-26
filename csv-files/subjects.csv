@@ -1,6 +1,7 @@
 subject_name,subject_code,classroom_code,email
-Introduction a Linux,UN1,SR1,Ivan.boss@gmail.com
-Programmation Oriente Object,POO,GL1,kuidja@gmail.com
+Introduction a Linux,UN1,SR3,Ivan.boss@gmail.com
+Programmation Oriente Object,POO,L1,kuidja@gmail.com
 Base de donnees distubees,BDD,GL3,l.tchakoumi@gmail.com
-Programmation syteme,PS,MSR1,Ivan.boss@gmail.com
-Machine Learning,ML,MGL1,kuidja@gmail.com
+Programmation syteme,PS,SR3,Ivan.boss@gmail.com
+Machine Learning,ML,GL3,kuidja@gmail.com
+Introduction a Linux,UN1,GL3,kuidja@gmail.com

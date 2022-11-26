@@ -2,7 +2,7 @@ import {
   AddOutlined,
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined
+  SearchOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -12,7 +12,7 @@ import {
   Table,
   TableBody,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Teacher } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -67,9 +67,9 @@ export default function Teachers() {
   useEffect(() => {
     if (roles.find(({ role }) => role === 'SECRETARY')) {
       loadTeachers();
-    }else {
+    } else {
       const notif = new useNotification();
-      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      // notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
         type: 'ERROR',
         render: formatMessage({
@@ -109,6 +109,7 @@ export default function Teachers() {
             id: 'allCreatedSuccessfull',
           })}. Teacher(s)(${data[0].count})`,
         });
+        loadTeachers();
         setNotifications([]);
       })
       .catch((error) => {

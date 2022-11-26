@@ -76,7 +76,7 @@ export default function Classrooms() {
       loadClassrooms();
     } else {
       const notif = new useNotification();
-      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      // notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
         type: 'ERROR',
         render: formatMessage({
@@ -116,6 +116,7 @@ export default function Classrooms() {
             id: 'allCreatedSuccessfull',
           })}. Classroom(s): ${data[0].count}`,
         });
+        loadClassrooms()
         setNotifications([]);
       })
       .catch((error) => {

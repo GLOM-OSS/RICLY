@@ -2,7 +2,7 @@ import {
   AddOutlined,
   FileDownloadOutlined,
   ReportRounded,
-  SearchOutlined
+  SearchOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -10,7 +10,7 @@ import {
   InputAdornment,
   Skeleton,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Building } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -30,8 +30,7 @@ export default function Buildings() {
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [displayBuildings, setDisplayBuildings] = useState<Building[]>([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [areBuildingsLoading, setAreBuildingsLoading] =
-    useState<boolean>(true);
+  const [areBuildingsLoading, setAreBuildingsLoading] = useState<boolean>(true);
 
   const loadBuildings = () => {
     setAreBuildingsLoading(true);
@@ -70,9 +69,9 @@ export default function Buildings() {
   useEffect(() => {
     if (roles.find(({ role }) => role === 'SECRETARY')) {
       loadBuildings();
-    }else {
+    } else {
       const notif = new useNotification();
-      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      // notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
         type: 'ERROR',
         render: formatMessage({
@@ -80,10 +79,9 @@ export default function Buildings() {
         }),
         icon: () => <ReportRounded fontSize="medium" color="error" />,
       });
-
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [roles]);
 
   useEffect(() => {
     setDisplayBuildings(
@@ -110,6 +108,7 @@ export default function Buildings() {
             id: 'allCreatedSuccessfull',
           })}. Buildings(${data[0].count}), Halls(${data[1].count})`,
         });
+        loadBuildings();
         setNotifications([]);
       })
       .catch((error) => {

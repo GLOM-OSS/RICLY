@@ -145,7 +145,7 @@ export default function Subjects() {
       loadClassrooms();
     }else {
       const notif = new useNotification();
-      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      // notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
         type: 'ERROR',
         render: formatMessage({
@@ -184,6 +184,7 @@ export default function Subjects() {
             id: 'allCreatedSuccessfull',
           })}. Subject(s): ${data[0].count}`,
         });
+        loadSubjects()
         setNotifications([]);
       })
       .catch((error) => {

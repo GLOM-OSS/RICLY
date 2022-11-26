@@ -23,8 +23,10 @@ import { addNewAvailibilities } from '../../services/availabilities.service';
 export default function NewAvailabilityDialog({
   isDialogOpen,
   closeDialog,
+  refresh,
 }: //   createAvailability,
 {
+  refresh: () => void
   isDialogOpen: boolean;
   closeDialog: () => void;
   //   createAvailability: (availabilities: CreateAvailability) => void;
@@ -45,6 +47,7 @@ export default function NewAvailabilityDialog({
         notif.update({
           render: formatMessage({ id: 'successfullyCreated' }),
         });
+        refresh()
         resetForm();
         closeDialog();
         setNotifications([]);
