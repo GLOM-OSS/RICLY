@@ -1,5 +1,6 @@
 import { Google, ReportRounded } from '@mui/icons-material';
 import { Box, Button, lighten, Typography } from '@mui/material';
+import { User } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { gapi, loadAuth2 } from 'gapi-script';
@@ -58,7 +59,13 @@ const ExternalLink = ({ children, to }: { to: string; children: string }) => {
   );
 };
 
-export function Auth({ app = 'app' }: { app?: string }) {
+export function Auth({
+  app = 'app',
+  updateUserContext,
+}: {
+  app?: string;
+  updateUserContext: (user: User) => void;
+}) {
   const { formatMessage } = useIntl();
   const [isAuthenticatingUser, setIsAuthenticatingUser] =
     useState<boolean>(false);
@@ -117,9 +124,10 @@ export function Auth({ app = 'app' }: { app?: string }) {
     });
     if (email)
       customAuthentication({ email, fullname })
-        .then(() => {
+        .then((user) => {
           navigate(app === 'app' ? '/-/schools' : '/-/dashboard');
           notif.dismiss();
+          updateUserContext(user);
         })
         .catch((error) => {
           notif.update({

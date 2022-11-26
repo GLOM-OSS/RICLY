@@ -1,26 +1,26 @@
-import { Box, Typography } from '@mui/material';
 import { Auth } from '@ricly/auth';
-import { useIntl } from 'react-intl';
-import { Navigate, useParams } from 'react-router';
+import { Navigate } from 'react-router';
 import Integrations from '../components/integrations/integrations';
+import { useUser } from '../contexts/UserContextProvider';
 import Dashboard from '../pages/dashboard';
 import Layout from '../pages/Layout';
 import Schools from '../pages/school';
 
-export const Test = () => {
-  const { school_code } = useParams();
-  const { formatMessage } = useIntl();
+const AuthPage = () => {
+  const { userDispatch } = useUser();
   return (
-    <Box>
-      <Typography>{school_code}</Typography>
-    </Box>
+    <Auth
+      updateUserContext={(user) =>
+        userDispatch({ type: 'LOAD_USER', payload: { user } })
+      }
+    />
   );
 };
 
 export const routes = [
   {
     path: '/',
-    element: <Auth />,
+    element: <AuthPage />,
   },
   {
     path: '-',

@@ -1,4 +1,5 @@
 import { Auth } from '@ricly/auth';
+import { useUser } from '../contexts/UserContextProvider';
 import Availabilities from '../pages/availabilities';
 import Buildings from '../pages/buildings';
 import Classrooms from '../pages/classrooms';
@@ -13,10 +14,22 @@ import Timetables from '../pages/timetables';
 import NewTimetable from '../pages/timetables/new';
 import TestTimetable from '../pages/timetables/[timestamp]';
 
+const AuthPage = () => {
+  const { userDispatch } = useUser();
+  return (
+    <Auth
+      app="default-ui"
+      updateUserContext={(user) =>
+        userDispatch({ type: 'LOAD_USER', payload: { user } })
+      }
+    />
+  );
+};
+
 export const routes = [
   {
     path: '/',
-    element: <Auth app="default-ui" />,
+    element: <AuthPage />,
   },
   {
     path: '-',
