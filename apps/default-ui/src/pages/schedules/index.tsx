@@ -8,7 +8,6 @@ import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router';
 import ProgramCard from '../../components/timetables/programCard';
 
 interface Slot {
@@ -17,10 +16,9 @@ interface Slot {
   usage: 'slot' | 'break';
 }
 
-export default function TestTimetable() {
+export default function Schedules() {
   const { formatMessage, formatDate, formatTime, formatDateTimeRange } =
     useIntl();
-  const { created_at } = useParams();
   const [breaktime, setBreaktime] = useState<Break>();
   const [isBreaktimeLoading, setIsBreaktimeLoading] = useState<boolean>(true);
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -154,7 +152,9 @@ export default function TestTimetable() {
   const loadPrograms = () => {
     setAreProgramsLoading(true);
     setTimeout(() => {
-      // TODO: CALL API TO GET programs with data created_at
+      //submit data is the timetable from the previous week (7 days back) till the last of his programs
+      const submitData = new Date().setDate(new Date().getDate() - 7);
+      // TODO: CALL API TO GET programs with data submitData
       if (true) {
         const {
           programs: newPrograms,
@@ -303,7 +303,7 @@ export default function TestTimetable() {
               month: 'long',
               day: '2-digit',
             }
-          )} ( ${classroom} )`}
+          )}`}
         </Typography>
       ) : (
         <Skeleton animation="wave" width="40%" />
@@ -428,7 +428,7 @@ export default function TestTimetable() {
                                   ).toUTCString()
                               );
                               return slotData ? (
-                                <ProgramCard program={slotData} />
+                                <ProgramCard forTeacher program={slotData} />
                               ) : (
                                 <Box></Box>
                               );
