@@ -57,7 +57,10 @@ import { TimeTableModule } from './Timetable/timetable.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    const redisClient = createClient({ legacyMode: true });
+    const redisClient = createClient({
+      legacyMode: true,
+      url: `redis://${process.env.REDIS_HOST}`,
+    });
     redisClient.connect().catch((message) => Logger.error(message));
     const RedisStore = connectRedis(session);
 
@@ -67,8 +70,6 @@ export class AppModule implements NestModule {
           name: 'RICLY-5BB35922144F',
           store: new RedisStore({
             client: redisClient,
-            host: process.env.REDIS_HOST,
-            port: Number(process.env.REDIS_PORT),
           }),
           secret: process.env.SESSION_SECRET,
           genid: () => randomUUID(),
