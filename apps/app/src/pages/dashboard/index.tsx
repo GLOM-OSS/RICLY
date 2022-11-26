@@ -1,6 +1,10 @@
 import { FileDownloadOutlined, ReportRounded } from '@mui/icons-material';
 import { Box, Button, Skeleton, Typography } from '@mui/material';
-import { SubscribeInterface, Subscription } from '@ricly/interfaces';
+import {
+  SubscribeInterface,
+  Subscription,
+  UsageInterface
+} from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
@@ -8,14 +12,14 @@ import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate, useParams } from 'react-router';
-import Graph, { UsageInterface } from '../../components/dashboard/graph';
+import Graph from '../../components/dashboard/graph';
 import SubscriptionCard from '../../components/dashboard/subscriptionCard';
 import SubscriptionDialog from '../../components/dashboard/subscriptionDialog';
 import { useUser } from '../../contexts/UserContextProvider';
 import { findSchoolData } from '../../services/school.service';
 import {
   createBinanceOrder,
-  getSubscriptions,
+  getSubscriptions
 } from '../../services/subscription.service';
 
 export default function Dashboard() {
@@ -162,7 +166,7 @@ export default function Dashboard() {
     notif.notify({ render: formatMessage({ id: 'subscribing' }) });
     createBinanceOrder()
       .then((data) => {
-        console.log(data)
+        console.log(data);
         notif.update({
           render: formatMessage({ id: 'subscribedSuccessfully' }),
         });

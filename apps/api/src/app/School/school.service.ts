@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { UsageInterface } from '@ricly/interfaces';
 import { getRandomString } from '@ricly/utils';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SchoolPostDto } from '../app.dto';
@@ -120,7 +121,7 @@ export class SchoolService {
       where: { ClassroomHasSubject: { Teacher: { School: { school_code } } } },
     });
 
-    const programStats: { calls: number; date: Date }[] = [];
+    const programStats: UsageInterface[] = [];
     programs.map(({ created_at }) => {
       const foundIndex = programStats.findIndex(
         (_) => _.date.toDateString() === created_at.toDateString()
