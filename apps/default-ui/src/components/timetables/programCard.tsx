@@ -6,8 +6,10 @@ import { useIntl } from 'react-intl';
 
 export default function ProgramCard({
   program: { start_date, end_date, hall_name, fullname, subject_name },
+  forTeacher,
 }: {
   program: Program;
+  forTeacher?: boolean;
 }) {
   const { formatDate, formatTime, formatMessage } = useIntl();
 
@@ -54,7 +56,7 @@ export default function ProgramCard({
         {subject_name}
       </Typography>
       <Chip label={`( ${hall_name} )`} color="error" size="small" />
-      <Typography variant="body2">{fullname}</Typography>
+      <Typography variant="body2">{'IRT3'}</Typography>
     </Box>
   );
 }
