@@ -47,9 +47,9 @@ export interface Program {
   hall_name: string; //important. Please add it on the ui
   subject_name: string;
   fullname: string;
+  classroom_code: string;
 }
 
 export interface ProgramTimeTable extends TimeTable {
-  classroom_code: string;
   programs: Program[];
 }

@@ -31,7 +31,6 @@ export default function TestTimetable() {
     start_date: Date;
     end_date: Date;
   }>();
-  const [classroom, setClassroom] = useState<string>('');
 
   const loadBreaktime = () => {
     setTimeout(() => {
@@ -122,7 +121,7 @@ export default function TestTimetable() {
         //the object represents the adding of break time to day family
         //given that the breaktime is a date, we need to bring it back to the day of the programDayFamily's day and swap the time (as we know that to be the exact time)
         //else sorting the different programs for time coherency might have the break at the bottom or the top of the programDayFamily
-        const breakProgram = {
+        const breakProgram:Program = {
           program_id: 'default_ui_break',
           end_date: new Date(
             new Date(program.end_date).setHours(
@@ -141,6 +140,7 @@ export default function TestTimetable() {
           fullname: 'default_ui_break',
           hall_name: 'default_ui_break',
           subject_name: 'default_ui_break',
+          classroom_code: program.classroom_code
         };
         displayPrograms = [...displayPrograms, [program, breakProgram]];
       }
@@ -157,7 +157,6 @@ export default function TestTimetable() {
           programs: newPrograms,
           start_date,
           end_date,
-          classroom_code,
         }: ProgramTimeTable = {
           programs: [
             {
@@ -167,6 +166,7 @@ export default function TestTimetable() {
               program_id: 'lslsl',
               start_date: new Date('2022/11/13 08:00:00'),
               subject_name: 'Systeme',
+              classroom_code: 'IRT3',
             },
             {
               end_date: new Date('2022/11/14 17:00:00'),
@@ -175,6 +175,7 @@ export default function TestTimetable() {
               program_id: 'lslsl',
               start_date: new Date('2022/11/14 13:00:00'),
               subject_name: 'Toto',
+              classroom_code: 'IRT3',
             },
             {
               end_date: new Date('2022/11/12 17:00:00'),
@@ -183,6 +184,7 @@ export default function TestTimetable() {
               program_id: 'lslsl',
               start_date: new Date('2022/11/12 13:00:00'),
               subject_name: 'Exploietation',
+              classroom_code: 'IRT3',
             },
             {
               end_date: new Date('2022/11/17 12:00:00'),
@@ -191,6 +193,7 @@ export default function TestTimetable() {
               program_id: 'lslsl',
               start_date: new Date('2022/11/17 08:00:00'),
               subject_name: 'Biologie',
+              classroom_code: 'IRT3',
             },
             {
               end_date: new Date('2022/11/19 17:00:00'),
@@ -199,6 +202,7 @@ export default function TestTimetable() {
               program_id: 'lslsl',
               start_date: new Date('2022/11/19 13:00:00'),
               subject_name: 'Biologie',
+              classroom_code: 'IRT3',
             },
             {
               end_date: new Date('2022/11/12 20:00:00'),
@@ -207,16 +211,15 @@ export default function TestTimetable() {
               program_id: 'lslsl',
               start_date: new Date('2022/11/12 18:00:00'),
               subject_name: "Systeme d'exploietation",
+              classroom_code: 'IRT3',
             },
           ],
-          classroom_code: 'IRT3',
           created_at: new Date(),
           start_date: new Date('2022-11-12'),
           end_date: new Date('2022-11-15'),
           is_published: true,
         };
         setTableInterval({ start_date, end_date });
-        setClassroom(classroom_code);
         setPrograms(newPrograms);
         setAreProgramsLoading(false);
       } else {
@@ -300,7 +303,7 @@ export default function TestTimetable() {
               month: 'long',
               day: '2-digit',
             }
-          )} ( ${classroom} )`}
+          )} ( ${programs[0].classroom_code} )`}
         </Typography>
       ) : (
         <Skeleton animation="wave" width="40%" />
