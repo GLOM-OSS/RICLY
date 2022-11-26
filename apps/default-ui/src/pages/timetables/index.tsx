@@ -7,7 +7,7 @@ import {
   Table,
   TableBody,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Classroom, TimeTable } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -18,9 +18,7 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import TimetableCard from '../../components/timetables/timetableCard';
 import { useUser } from '../../contexts/UserContextProvider';
-import {
-  getCoordinatorClassrooms
-} from '../../services/availabilities.service';
+import { getCoordinatorClassrooms } from '../../services/availabilities.service';
 import { getTimetables } from '../../services/timetable.service';
 
 export default function Timetables() {
@@ -82,7 +80,10 @@ export default function Timetables() {
             <ErrorMessage
               retryFunction={loadClassrooms}
               notification={notif}
-              message={error?.message || formatMessage({ id: 'failedLoadingClassrooms' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingClassrooms' })
+              }
             />
           ),
           autoClose: false,
@@ -208,7 +209,15 @@ export default function Timetables() {
                     new Date(a.created_at) > new Date(b.created_at) ? 1 : -1
                   )
                   .map((timetable, index) => (
-                    <TimetableCard key={index} timetable={timetable} />
+                    <TimetableCard
+                      key={index}
+                      timetable={timetable}
+                      openTimetable={(created_at) =>
+                        navigate(
+                          `/timetables/${selectedClassroom}?${created_at.getTime()}`
+                        )
+                      }
+                    />
                   ))
               )}
             </TableBody>

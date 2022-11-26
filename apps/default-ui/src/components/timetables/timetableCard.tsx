@@ -1,16 +1,16 @@
+import { OpenInNew } from '@mui/icons-material';
 import { Chip, IconButton, TableCell, TableRow, Tooltip } from '@mui/material';
 import { TimeTable } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { useIntl } from 'react-intl';
-import { OpenInNew } from '@mui/icons-material';
-import { useNavigate } from 'react-router';
 
 export default function TimetableCard({
+  openTimetable,
   timetable: { created_at, end_date, is_published, start_date },
 }: {
+  openTimetable: (created_at: Date) => void;
   timetable: TimeTable;
 }) {
-  const navigate = useNavigate();
   const { formatMessage, formatDate, formatDateTimeRange } = useIntl();
 
   return (
@@ -45,9 +45,7 @@ export default function TimetableCard({
         />
       </TableCell>
       <TableCell>
-        <IconButton
-          onClick={() => navigate(`/timetables/${created_at.getTime()}`)}
-        >
+        <IconButton onClick={() => openTimetable(created_at)}>
           <Tooltip title={`${formatMessage({ id: 'openTimeTable' })}`}>
             <OpenInNew />
           </Tooltip>
