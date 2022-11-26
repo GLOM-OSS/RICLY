@@ -28,7 +28,7 @@ import { ClassroomService, ClassrooomCsvModel } from './classroom.service';
 @Controller('classrooms')
 @UseGuards(AuthenticatedGuard)
 @Roles(Role.SECRETARY, Role.TEACHER, Role.COORDINATOR)
-export class classroomController {
+export class ClassroomController {
   constructor(private classroomService: ClassroomService) {}
 
   @Post('imports')
