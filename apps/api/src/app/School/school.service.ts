@@ -109,4 +109,27 @@ export class SchoolService {
       where: { school_code },
     });
   }
+
+  async getApiUsageStats(school_code: string) {
+    const programs = await this.prismaService.program.findMany({
+      orderBy: { created_at: 'asc' },
+      distinct: ['created_at'],
+      select: {
+        created_at: true,
+      },
+      where: { ClassroomHasSubject: { Teacher: { School: { school_code } } } },
+    });
+
+    const programStats: { calls: number; date: Date }[] = [];
+    programs.map(({ created_at }) => {
+      const foundIndex = programStats.findIndex(
+        (_) => _.date.toDateString() === created_at.toDateString()
+      );
+      if (foundIndex !== -1) {
+        const { calls, date } = programStats[foundIndex];
+        programStats[foundIndex] = { calls: calls + 1, date };
+      } else programStats.push({ calls: 1, date: programs[0].created_at });
+    });
+    return programs;
+  }
 }

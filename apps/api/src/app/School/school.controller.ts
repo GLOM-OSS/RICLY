@@ -5,10 +5,11 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Param, Post,
+  Param,
+  Post,
   Put,
   Req,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -96,5 +97,10 @@ export class SchoolController {
     @Body() newSchool: Partial<SchoolPostDto>
   ) {
     return await this.schoolService.updateSchool(school_code, newSchool);
+  }
+
+  @Get(':school_code/api-usage')
+  async getApiUsageStats(@Param('school_code') school_code: string) {
+    return await this.schoolService.getApiUsageStats(school_code);
   }
 }
