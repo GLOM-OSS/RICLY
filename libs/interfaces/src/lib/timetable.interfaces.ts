@@ -16,7 +16,7 @@ export interface TimeTable {
   start_date: Date;
   end_date: Date;
   created_at: Date;
-  is_published: Date;
+  is_published: boolean;
 }
 
 export interface Break {
@@ -47,8 +47,9 @@ export interface Program {
   hall_name: string; //important. Please add it on the ui
   subject_name: string;
   fullname: string;
+  classroom_code: string;
 }
 
-export interface ProgramTimeTable extends Break {
+export interface ProgramTimeTable extends TimeTable {
   programs: Program[];
 }
