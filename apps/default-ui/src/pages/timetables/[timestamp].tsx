@@ -1,7 +1,7 @@
 import { ReportRounded } from '@mui/icons-material';
 import { Skeleton, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import { Break, Program, ProgramTimeTable } from '@ricly/interfaces';
+import { Break, Program } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
@@ -9,7 +9,10 @@ import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import ProgramCard from '../../components/timetables/programCard';
+import { getClassroomBreak } from '../../services/classroom.service';
+import { getTimetablePrograms } from '../../services/timetable.service';
 
 interface Slot {
   start_time: Date;
@@ -18,11 +21,14 @@ interface Slot {
 }
 
 export default function TestTimetable() {
-  const { formatMessage, formatDate, formatTime, formatDateTimeRange } =
-    useIntl();
-  const { timestamp } = useParams();
+  const { classroom_id } = useParams();
+  const [searchParams] = useSearchParams();
+  const timestamp = searchParams.get('timestamp');
+
   const [breaktime, setBreaktime] = useState<Break>();
   const [slots, setSlots] = useState<Slot[]>([]);
+  const { formatMessage, formatDate, formatTime, formatDateTimeRange } =
+    useIntl();
 
   const [programs, setPrograms] = useState<Program[]>([]);
   const [displayPrograms, setDisplayPrograms] = useState<Program[][]>([]);
@@ -33,16 +39,11 @@ export default function TestTimetable() {
   }>();
 
   const loadBreaktime = () => {
-    setTimeout(() => {
-      // TODO: CALL API TO GET class weekdays HERE with data selectedClassroom
-      if (random() > 5) {
-        const newBreaktime: Break = {
-          break_id: 'dhsie',
-          end_time: new Date('2022/11/13 13:00:00'),
-          start_time: new Date('2022/11/13 12:00:00'),
-        };
-        setBreaktime(newBreaktime);
-      } else {
+    getClassroomBreak(classroom_id as string)
+      .then((classroomBreak) => {
+        setBreaktime(classroomBreak);
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingBreaktime' }),
@@ -53,25 +54,34 @@ export default function TestTimetable() {
             <ErrorMessage
               retryFunction={loadBreaktime}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingBreaktime' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingBreaktime' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const getSlots = (programs: Program[]): Slot[] => {
     const newSlots: Slot[] = slots;
     programs.forEach(({ start_date: sd, end_date: ed }) => {
       const start = new Date(
-        new Date().setUTCHours(sd.getUTCHours(), sd.getUTCMinutes(), sd.getUTCSeconds())
+        new Date().setUTCHours(
+          sd.getUTCHours(),
+          sd.getUTCMinutes(),
+          sd.getUTCSeconds()
+        )
       );
       const end = new Date(
-        new Date().setUTCHours(ed.getUTCHours(), ed.getUTCMinutes(), ed.getUTCSeconds())
+        new Date().setUTCHours(
+          ed.getUTCHours(),
+          ed.getUTCMinutes(),
+          ed.getUTCSeconds()
+        )
       );
       const overlappingSlot = newSlots.find(
         ({ start_time: st, end_time: et }) => {
@@ -121,7 +131,7 @@ export default function TestTimetable() {
         //the object represents the adding of break time to day family
         //given that the breaktime is a date, we need to bring it back to the day of the programDayFamily's day and swap the time (as we know that to be the exact time)
         //else sorting the different programs for time coherency might have the break at the bottom or the top of the programDayFamily
-        const breakProgram:Program = {
+        const breakProgram: Program = {
           program_id: 'default_ui_break',
           end_date: new Date(
             new Date(program.end_date).setUTCHours(
@@ -140,7 +150,7 @@ export default function TestTimetable() {
           fullname: 'default_ui_break',
           hall_name: 'default_ui_break',
           subject_name: 'default_ui_break',
-          classroom_code: program.classroom_code
+          classroom_code: program.classroom_code,
         };
         displayPrograms = [...displayPrograms, [program, breakProgram]];
       }
@@ -150,79 +160,13 @@ export default function TestTimetable() {
 
   const loadPrograms = () => {
     setAreProgramsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET programs with data created_at
-      if (random() > 5) {
-        const {
-          programs: newPrograms,
-          start_date,
-          end_date,
-        }: ProgramTimeTable = {
-          programs: [
-            {
-              end_date: new Date('2022/11/13 12:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B016',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/13 08:00:00'),
-              subject_name: 'Systeme',
-              classroom_code: 'IRT3',
-            },
-            {
-              end_date: new Date('2022/11/14 17:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B016',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/14 13:00:00'),
-              subject_name: 'Toto',
-              classroom_code: 'IRT3',
-            },
-            {
-              end_date: new Date('2022/11/12 17:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B0166',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/12 13:00:00'),
-              subject_name: 'Exploietation',
-              classroom_code: 'IRT3',
-            },
-            {
-              end_date: new Date('2022/11/17 12:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B0166',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/17 08:00:00'),
-              subject_name: 'Biologie',
-              classroom_code: 'IRT3',
-            },
-            {
-              end_date: new Date('2022/11/19 17:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B0166',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/19 13:00:00'),
-              subject_name: 'Biologie',
-              classroom_code: 'IRT3',
-            },
-            {
-              end_date: new Date('2022/11/12 20:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B01666',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/12 18:00:00'),
-              subject_name: "Systeme d'exploietation",
-              classroom_code: 'IRT3',
-            },
-          ],
-          created_at: new Date(),
-          start_date: new Date('2022-11-12'),
-          end_date: new Date('2022-11-15'),
-          is_published: true,
-        };
+    getTimetablePrograms(Number(timestamp), classroom_id as string)
+      .then(({ programs, start_date, end_date }) => {
         setTableInterval({ start_date, end_date });
-        setPrograms(newPrograms);
+        setPrograms(programs);
         setAreProgramsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingPrograms' }),
@@ -233,22 +177,24 @@ export default function TestTimetable() {
             <ErrorMessage
               retryFunction={loadPrograms}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingPrograms' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingPrograms' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   useEffect(() => {
-    loadBreaktime();
-    loadPrograms();
+    if (timestamp && classroom_id) {
+      loadBreaktime();
+      loadPrograms();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [timestamp, classroom_id]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps

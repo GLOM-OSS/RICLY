@@ -1,5 +1,9 @@
 import { http } from '@ricly/axios';
-import { CreateTimetable, TimeTable } from '@ricly/interfaces';
+import {
+  CreateTimetable,
+  ProgramTimeTable,
+  TimeTable,
+} from '@ricly/interfaces';
 
 export async function getTimetables() {
   const { data } = await http.get<TimeTable[]>(`/timetables/all`);
@@ -8,5 +12,18 @@ export async function getTimetables() {
 
 export async function generateNewTimetable(newTimetable: CreateTimetable) {
   const { data } = await http.post<number>(`/timetables/new`, newTimetable);
+  return data;
+}
+
+export async function getTimetablePrograms(
+  timestamp: number,
+  classroom_id?: string
+) {
+  const { data } = await http.get<ProgramTimeTable>(
+    `/timetables/${timestamp}`,
+    {
+      params: { classroom_id, timestamp },
+    }
+  );
   return data;
 }

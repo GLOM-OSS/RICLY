@@ -214,7 +214,7 @@ export default function Timetables() {
                       timetable={timetable}
                       openTimetable={(created_at) =>
                         navigate(
-                          `/timetables/${selectedClassroom}?${created_at.getTime()}`
+                          `/timetables/${selectedClassroom}?timestamp=${created_at.getTime()}`
                         )
                       }
                     />
