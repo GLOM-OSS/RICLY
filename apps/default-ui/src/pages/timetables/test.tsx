@@ -1,7 +1,7 @@
 import { ReportRounded } from '@mui/icons-material';
-import { Typography } from '@mui/material';
+import { Skeleton, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import { Break, Program } from '@ricly/interfaces';
+import { Break, Program, ProgramTimeTable } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
@@ -17,7 +17,8 @@ interface Slot {
 }
 
 export default function TestTimetable() {
-  const { formatMessage, formatDate, formatTime } = useIntl();
+  const { formatMessage, formatDate, formatTime, formatDateTimeRange } =
+    useIntl();
   const [breaktime, setBreaktime] = useState<Break>();
   const [isBreaktimeLoading, setIsBreaktimeLoading] = useState<boolean>(true);
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -25,6 +26,11 @@ export default function TestTimetable() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [displayPrograms, setDisplayPrograms] = useState<Program[][]>([]);
   const [areProgramsLoading, setAreProgramsLoading] = useState<boolean>(true);
+  const [tableInterval, setTableInterval] = useState<{
+    start_date: Date;
+    end_date: Date;
+  }>();
+  const [classroom, setClassroom] = useState<string>('');
 
   const loadBreaktime = () => {
     setIsBreaktimeLoading(true);
@@ -148,56 +154,70 @@ export default function TestTimetable() {
     setTimeout(() => {
       // TODO: CALL API TO GET programs
       if (true) {
-        const newPrograms: Program[] = [
-          {
-            end_date: new Date('2022/11/13 12:00:00'),
-            fullname: 'Djembissie Marco',
-            hall_name: 'B016',
-            program_id: 'lslsl',
-            start_date: new Date('2022/11/13 08:00:00'),
-            subject_name: 'Systeme',
-          },
-          {
-            end_date: new Date('2022/11/14 17:00:00'),
-            fullname: 'Djembissie Marco',
-            hall_name: 'B016',
-            program_id: 'lslsl',
-            start_date: new Date('2022/11/14 13:00:00'),
-            subject_name: 'Toto',
-          },
-          {
-            end_date: new Date('2022/11/12 17:00:00'),
-            fullname: 'Djembissie Marco',
-            hall_name: 'B0166',
-            program_id: 'lslsl',
-            start_date: new Date('2022/11/12 13:00:00'),
-            subject_name: 'Exploietation',
-          },
-          {
-            end_date: new Date('2022/11/17 12:00:00'),
-            fullname: 'Djembissie Marco',
-            hall_name: 'B0166',
-            program_id: 'lslsl',
-            start_date: new Date('2022/11/17 08:00:00'),
-            subject_name: 'Biologie',
-          },
-          {
-            end_date: new Date('2022/11/19 17:00:00'),
-            fullname: 'Djembissie Marco',
-            hall_name: 'B0166',
-            program_id: 'lslsl',
-            start_date: new Date('2022/11/19 13:00:00'),
-            subject_name: 'Biologie',
-          },
-          {
-            end_date: new Date('2022/11/12 20:00:00'),
-            fullname: 'Djembissie Marco',
-            hall_name: 'B01666',
-            program_id: 'lslsl',
-            start_date: new Date('2022/11/12 18:00:00'),
-            subject_name: "Systeme d'exploietation",
-          },
-        ];
+        const {
+          programs: newPrograms,
+          start_date,
+          end_date,
+          classroom_code,
+        }: ProgramTimeTable = {
+          programs: [
+            {
+              end_date: new Date('2022/11/13 12:00:00'),
+              fullname: 'Djembissie Marco',
+              hall_name: 'B016',
+              program_id: 'lslsl',
+              start_date: new Date('2022/11/13 08:00:00'),
+              subject_name: 'Systeme',
+            },
+            {
+              end_date: new Date('2022/11/14 17:00:00'),
+              fullname: 'Djembissie Marco',
+              hall_name: 'B016',
+              program_id: 'lslsl',
+              start_date: new Date('2022/11/14 13:00:00'),
+              subject_name: 'Toto',
+            },
+            {
+              end_date: new Date('2022/11/12 17:00:00'),
+              fullname: 'Djembissie Marco',
+              hall_name: 'B0166',
+              program_id: 'lslsl',
+              start_date: new Date('2022/11/12 13:00:00'),
+              subject_name: 'Exploietation',
+            },
+            {
+              end_date: new Date('2022/11/17 12:00:00'),
+              fullname: 'Djembissie Marco',
+              hall_name: 'B0166',
+              program_id: 'lslsl',
+              start_date: new Date('2022/11/17 08:00:00'),
+              subject_name: 'Biologie',
+            },
+            {
+              end_date: new Date('2022/11/19 17:00:00'),
+              fullname: 'Djembissie Marco',
+              hall_name: 'B0166',
+              program_id: 'lslsl',
+              start_date: new Date('2022/11/19 13:00:00'),
+              subject_name: 'Biologie',
+            },
+            {
+              end_date: new Date('2022/11/12 20:00:00'),
+              fullname: 'Djembissie Marco',
+              hall_name: 'B01666',
+              program_id: 'lslsl',
+              start_date: new Date('2022/11/12 18:00:00'),
+              subject_name: "Systeme d'exploietation",
+            },
+          ],
+          classroom_code: 'IRT3',
+          created_at: new Date(),
+          start_date: new Date('2022-11-12'),
+          end_date: new Date('2022-11-15'),
+          is_published: true,
+        };
+        setTableInterval({ start_date, end_date });
+        setClassroom(classroom_code);
         setPrograms(newPrograms);
         setAreProgramsLoading(false);
       } else {
@@ -264,100 +284,129 @@ export default function TestTimetable() {
       sx={{
         display: 'grid',
         height: '100%',
-        gridTemplateColumns: '75px 1fr',
+        gap: theme.spacing(2),
+        gridTemplateRows: 'auto 1fr',
       }}
     >
-      <Scrollbars>
-        <Box
-          sx={{
-            height: '100%',
-            display: 'grid',
-            gridTemplateRows: `${slots
-              .map(({ usage }) => (usage === 'break' ? '50px' : '1fr'))
-              .join(' ')}`,
-          }}
+      {tableInterval ? (
+        <Typography
+          variant="h4"
+          sx={{ textAlign: 'center', borderBottom: '1px solid black' }}
         >
-          {slots.map(({ start_time }, index) => {
-            return (
-              <Typography
-                key={index}
-                sx={{
-                  fontWeight: 'bold',
-                  alignSelf: 'end',
-                }}
-              >
-                {formatTime(start_time)}
-              </Typography>
-            );
-          })}
-        </Box>
-      </Scrollbars>
-      <Scrollbars>
-        <Box
-          sx={{
-            display: 'grid',
-            height: '100%',
-            gridTemplateColumns: `${[...new Array(displayPrograms.length)]
-              .map((_) => 'auto')
-              .join(' ')} 1fr`,
-            gap: theme.spacing(1),
-          }}
-        >
-          {displayPrograms
-            .sort((a, b) => (a[0].start_date > b[0].start_date ? 1 : -1))
-            .map((programDayFamily) => {
+          {`${formatDateTimeRange(
+            tableInterval.start_date,
+            tableInterval.end_date,
+            {
+              year: 'numeric',
+              month: 'long',
+              day: '2-digit',
+            }
+          )} ( ${classroom} )`}
+        </Typography>
+      ) : (
+        <Skeleton animation="wave" width="40%" />
+      )}
+      <Box
+        sx={{
+          display: 'grid',
+          height: '100%',
+          gridTemplateColumns: '75px 1fr',
+        }}
+      >
+        <Scrollbars>
+          <Box
+            sx={{
+              height: '100%',
+              display: 'grid',
+              gridTemplateRows: `${slots
+                .map(({ usage }, index) => (usage === 'break' ? '50px' : '1fr'))
+                .join(' ')}`,
+            }}
+          >
+            {slots.map(({ start_time, end_time }, index) => {
               return (
-                <Box sx={{ display: 'grid', gridTemplateRows: '1fr auto' }}>
-                  <Box
-                    sx={{
-                      display: 'grid',
-                      gap: theme.spacing(1),
-                      gridTemplateRows: `${slots
-                        .map(({ usage }) =>
-                          usage === 'break' ? '50px' : '1fr'
-                        )
-                        .join(' ')}`,
-                    }}
-                  >
-                    {slots
-                      .sort((a, b) => (a.start_time > b.start_time ? -1 : 1))
-                      .map(({ start_time: st }, index) => {
-                        const slotData = programDayFamily.find(
-                          ({ end_date: ed, start_date: sd }) =>
-                            new Date(
-                              new Date().setHours(
-                                st.getHours(),
-                                st.getMinutes(),
-                                st.getSeconds()
-                              )
-                            ).toUTCString() ===
-                            new Date(
-                              new Date().setHours(
-                                sd.getHours(),
-                                sd.getMinutes(),
-                                sd.getSeconds()
-                              )
-                            ).toUTCString()
-                        );
-                        return slotData ? (
-                          <ProgramCard program={slotData} />
-                        ) : (
-                          <Box></Box>
-                        );
-                      })}
-                  </Box>
-                  <Typography sx={{ textAlign: 'center', fontWeight: 'bold' }}>
-                    {formatDate(programDayFamily[0].end_date, {
-                      year: 'numeric',
-                      month: 'long',
-                      day: '2-digit',
-                    })}
-                  </Typography>
-                </Box>
+                <Typography
+                  key={index}
+                  sx={{
+                    fontWeight: 'bold',
+                    alignSelf: 'end',
+                  }}
+                >
+                  {formatTime(start_time)}
+                </Typography>
               );
             })}
-        </Box>
-      </Scrollbars>
+          </Box>
+        </Scrollbars>
+        <Scrollbars>
+          <Box
+            sx={{
+              display: 'grid',
+              height: '100%',
+              gridTemplateColumns: `${[...new Array(displayPrograms.length)]
+                .map((_) => 'auto')
+                .join(' ')} 1fr`,
+              gap: theme.spacing(1),
+            }}
+          >
+            {displayPrograms
+              .sort((a, b) => (a[0].start_date > b[0].start_date ? 1 : -1))
+              .map((programDayFamily) => {
+                return (
+                  <Box sx={{ display: 'grid', gridTemplateRows: '1fr auto' }}>
+                    <Box
+                      sx={{
+                        display: 'grid',
+                        gap: theme.spacing(1),
+                        gridTemplateRows: `${slots
+                          .map(({ usage }) =>
+                            usage === 'break' ? '50px' : '1fr'
+                          )
+                          .join(' ')}`,
+                      }}
+                    >
+                      {slots
+                        .sort((a, b) => (a.start_time > b.start_time ? -1 : 1))
+                        .map(({ start_time: st }, index) => {
+                          const slotData = programDayFamily.find(
+                            ({ end_date: ed, start_date: sd }) =>
+                              new Date(
+                                new Date().setHours(
+                                  st.getHours(),
+                                  st.getMinutes(),
+                                  st.getSeconds()
+                                )
+                              ).toUTCString() ===
+                              new Date(
+                                new Date().setHours(
+                                  sd.getHours(),
+                                  sd.getMinutes(),
+                                  sd.getSeconds()
+                                )
+                              ).toUTCString()
+                          );
+                          return slotData ? (
+                            <ProgramCard program={slotData} />
+                          ) : (
+                            <Box></Box>
+                          );
+                        })}
+                    </Box>
+                    <Typography
+                      sx={{ textAlign: 'center', fontWeight: 'bold' }}
+                    >
+                      {formatDate(programDayFamily[0].end_date, {
+                        year: 'numeric',
+                        month: 'long',
+                        day: '2-digit',
+                      })}
+                    </Typography>
+                  </Box>
+                );
+              })}
+          </Box>
+        </Scrollbars>
+      </Box>
     </Box>
   );
 }
