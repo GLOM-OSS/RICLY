@@ -7,11 +7,12 @@ import {
   Param,
   Post,
   Query,
-  UseGuards,
+  Req, UseGuards
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 import { Roles } from '../app.decorator';
-import { CreateTimetableDto, Role } from '../app.dto';
+import { CreateTimetableDto, getRoleId, Role, User } from '../app.dto';
 import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { TimetableService } from './timetable.service';
 
@@ -30,15 +31,32 @@ export class TimetableController {
   @Get(':timestamp')
   @Roles(Role.TEACHER)
   async getTimetablePrograms(
+    @Req() request: Request,
     @Param('timestamp') timestamp: number,
     @Query('classroom_id') classroom_id?: string
   ) {
+    const {
+      user: { school_id },
+    } = request.session['passport'];
+    const { roles } = request.user as User;
     return this.timetableService.getTimetablePrograms({
       OR: [
         { created_at: new Date(timestamp) },
         { start_date: { gte: new Date(timestamp) } },
       ],
-      ...(classroom_id ? { ClassroomHasSubject: { classroom_id } } : {}),
+      ClassroomHasSubject: {
+        ...(classroom_id
+          ? {
+              Teacher: {
+                teacher_id: getRoleId(roles, Role.COORDINATOR),
+                Classrooms: { some: { classroom_id, school_id } },
+              },
+            }
+          : {
+              Classroom: { school_id },
+              teacher_id: getRoleId(roles, Role.TEACHER),
+            }),
+      },
     });
   }
 
