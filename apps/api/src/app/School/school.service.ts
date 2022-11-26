@@ -102,4 +102,11 @@ export class SchoolService {
       where: { school_code },
     });
   }
+
+  async updateSchool(school_code: string, newSchool: Prisma.SchoolUpdateInput) {
+    return this.prismaService.school.update({
+      data: newSchool,
+      where: { school_code },
+    });
+  }
 }

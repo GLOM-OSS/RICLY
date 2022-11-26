@@ -5,10 +5,10 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Param,
-  Post,
+  Param, Post,
+  Put,
   Req,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -87,5 +87,14 @@ export class SchoolController {
   @ApiExcludeEndpoint(true)
   async deleteSchool(@Param('school_code') school_code: string) {
     return await this.schoolService.deleteSchool(school_code);
+  }
+
+  @Put(':school_code/edit')
+  @ApiExcludeEndpoint(true)
+  async editSchool(
+    @Param('school_code') school_code: string,
+    @Body() newSchool: Partial<SchoolPostDto>
+  ) {
+    return await this.schoolService.updateSchool(school_code, newSchool);
   }
 }
