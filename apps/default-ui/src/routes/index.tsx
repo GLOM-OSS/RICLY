@@ -11,7 +11,7 @@ import SubjectClassrooms from '../pages/subject/[subject_id]';
 import Teachers from '../pages/teachers';
 import Timetables from '../pages/timetables';
 import NewTimetable from '../pages/timetables/new';
-import TestTimetable from '../pages/timetables/test';
+import TestTimetable from '../pages/timetables/[created_at]';
 
 export const routes = [
   {
