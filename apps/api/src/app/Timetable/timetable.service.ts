@@ -73,7 +73,7 @@ export class TimetableService {
   }
 
   async generateTimetable({
-    // break: { end_time, start_time },
+    break: { end_time: breakEndTime, start_time: breakStartTime },
     classroom_id,
     course_duration_in_minutes,
     end_at,
@@ -83,12 +83,15 @@ export class TimetableService {
     const newPrograms: Prisma.ProgramCreateManyInput[] = [];
     const newAvailabilities: Prisma.AvailabilityCreateManyInput[] = [];
     let timetableDate = new Date(start_at);
+    const weekdays = await this.prismaService.weekday.findMany({
+      where: { classroom_id },
+    });
     //monday < friday
     while (timetableDate < new Date(end_at)) {
       //get monday
-      const weekday = await this.prismaService.weekday.findFirst({
-        where: { classroom_id, weekday: timetableDate.getDay() },
-      });
+      const weekday = weekdays.find(
+        (_) => _.weekday === timetableDate.getDay()
+      );
       //if monday if classroom weekday
       if (weekday) {
         const { start_time, end_time } = weekday;
@@ -109,7 +112,19 @@ export class TimetableService {
             )
           )
         ) {
-          const nextPeriodStartTime = new Date(
+          let nextPeriodStartTime: Date;
+          if (
+            dayPeriodStartTime.toTimeString() === breakStartTime.toTimeString()
+          ) {
+            nextPeriodStartTime = new Date(
+              new Date(dayPeriodStartTime).setUTCHours(
+                breakEndTime.getUTCHours(),
+                breakEndTime.getUTCMinutes()
+              )
+            );
+            continue;
+          }
+          nextPeriodStartTime = new Date(
             new Date(dayPeriodStartTime).setUTCMinutes(
               dayPeriodStartTime.getUTCMinutes() + course_duration_in_minutes
             )
@@ -254,7 +269,7 @@ export class TimetableService {
         skipDuplicates: true,
       }),
     ]);
-    return created_at.getTime()
+    return created_at.getTime();
   }
 
   async getAvailableTeachers(
