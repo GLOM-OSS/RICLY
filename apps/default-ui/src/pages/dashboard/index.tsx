@@ -1,6 +1,10 @@
 import { ReportRounded } from '@mui/icons-material';
 import { Box, Skeleton, Typography } from '@mui/material';
-import { SchoolInterface, Subscription, UsageInterface } from '@ricly/interfaces';
+import {
+  SchoolInterface,
+  Subscription,
+  UsageInterface,
+} from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import Scrollbars from 'rc-scrollbars';
@@ -12,7 +16,7 @@ import { useUser } from '../../contexts/UserContextProvider';
 import {
   getApiUsageStats,
   getSchoolProfile,
-  getSchoolSubscriptions
+  getSchoolSubscriptions,
 } from '../../services/school.service';
 
 export default function Dashboard() {
@@ -119,22 +123,24 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    if (roles.find(({ role }) => role === 'SECRETARY')) {
-      loadSchoolData();
-      loadGraphData();
-    }else {
-      const notif = new useNotification();
-      notif.notify({ render: formatMessage({ id: 'notifying' }) });
-      notif.update({
-        type: 'ERROR',
-        render: formatMessage({
-          id: 'mustHaveSecretaryRole',
-        }),
-        icon: () => <ReportRounded fontSize="medium" color="error" />,
-      });
+    if (roles) {
+      if (roles.find(({ role }) => role === 'SECRETARY')) {
+        loadSchoolData();
+        loadGraphData();
+      } else {
+        const notif = new useNotification();
+        notif.notify({ render: formatMessage({ id: 'notifying' }) });
+        notif.update({
+          type: 'ERROR',
+          render: formatMessage({
+            id: 'mustHaveSecretaryRole',
+          }),
+          icon: () => <ReportRounded fontSize="medium" color="error" />,
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [roles]);
   useEffect(() => {
     if (school?.school_code) loadSubscriptions(school.school_code);
     // eslint-disable-next-line react-hooks/exhaustive-deps

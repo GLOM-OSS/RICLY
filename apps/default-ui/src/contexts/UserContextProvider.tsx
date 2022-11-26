@@ -1,9 +1,8 @@
-import { Role } from '@ricly/interfaces';
 import { Reducer, useContext, useReducer } from 'react';
 import UserContext, {
   DispatchInterface,
   UserAction,
-  UserInterface,
+  UserInterface
 } from './userContext';
 
 const userReducer: Reducer<UserInterface & DispatchInterface, UserAction> = (
@@ -41,17 +40,13 @@ function UserContextProvider({
   const initialState: UserInterface & DispatchInterface = {
     user: {
       created_at: new Date(),
-      email: 'lorraintchakoumi@gmail.com',
-      fullname: 'Lorrain Tchakoumi Kouatchoua',
-      person_id: 'lksikelsie',
+      email: '',
+      fullname: '',
+      person_id: '',
       preferred_lang: 'fr',
-      roles: [
-        { user_id: 'skdk', role: Role.SECRETARY },
-        { user_id: 'skdk', role: Role.TEACHER },
-        { user_id: 'skdk', role: Role.COORDINATOR },
-      ],
+      roles: [],
       gender: 'Male',
-      phone_number: '657140183',
+      phone_number: '',
     },
     userDispatch: () => null,
   };

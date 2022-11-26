@@ -1,10 +1,12 @@
 import { FileDownloadOutlined } from '@mui/icons-material';
 import { Box, Button } from '@mui/material';
+import { getUserInfo } from '@ricly/auth';
 import { theme } from '@ricly/theme';
+import { useNotification } from '@ricly/toast';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { Outlet } from 'react-router';
+import { Outlet, useNavigate } from 'react-router';
 import Logo from '../assets/Logo.png';
 import LogoutDialog from '../components/logout/logoutDialog';
 import NavItem from '../components/NavItem';
@@ -12,9 +14,7 @@ import { useUser } from '../contexts/UserContextProvider';
 
 export default function Layout() {
   const { formatMessage } = useIntl();
-  const {
-    user: { roles },
-  } = useUser();
+  const { userDispatch } = useUser();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState<boolean>(false);
   const secNav = [
     'dashboard',
@@ -27,30 +27,46 @@ export default function Layout() {
   const coordoNav = ['timetables'];
   const teacherNav = ['availabilities', 'schedules'];
   const [finalNav, setFinalNav] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const resp = roles.map(({ role }) => {
-      switch (role) {
-        case 'TEACHER': {
-          return teacherNav;
-        }
-        case 'SECRETARY': {
-          return secNav;
-        }
-        case 'COORDINATOR': {
-          return coordoNav;
-        }
-        default:
-          return [];
-      }
-    });
-    const newNav: string[] = [];
-    resp.forEach((_) => {
-      newNav.push(..._);
-    });
-    setFinalNav(newNav);
+    getUserInfo()
+      .then((user) => {
+        userDispatch({ type: 'LOAD_USER', payload: { user } });
+        const resp = user.roles.map(({ role }) => {
+          switch (role) {
+            case 'TEACHER': {
+              return teacherNav;
+            }
+            case 'SECRETARY': {
+              return secNav;
+            }
+            case 'COORDINATOR': {
+              return coordoNav;
+            }
+            default:
+              return [];
+          }
+        });
+        const newNav: string[] = [];
+        resp.forEach((_) => {
+          newNav.push(..._);
+        });
+        setFinalNav(newNav);
+      })
+      .catch((error) => {
+        const notif = new useNotification();
+        notif.notify({
+          render: formatMessage({ id: 'authenticatingUser' }),
+        });
+        notif.update({
+          type: 'ERROR',
+          render: error?.message || formatMessage({ id: 'authenticatingUser' }),
+        });
+        navigate('/');
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roles]);
+  }, []);
 
   return (
     <>

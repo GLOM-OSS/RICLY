@@ -22,17 +22,15 @@ const UserContext = createContext<
 >({
   user: {
     created_at: new Date(),
-    email: 'lorraintchakoumi@gmail.com',
-    fullname: 'Lorrain Tchakoumi Kouatchoua',
-    person_id: 'lksikelsie',
+    email: '',
+    fullname: '',
+    person_id: '',
     preferred_lang: 'en',
     roles: [],
     gender: 'Male',
-    phone_number: '657140183',
+    phone_number: '',
   },
-  userDispatch: () => {
-    alert("Hellom I'm alive ");
-  },
+  userDispatch: () => null
 });
 
 export default UserContext;
