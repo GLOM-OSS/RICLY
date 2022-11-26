@@ -2,7 +2,7 @@ import { http } from '@ricly/axios';
 import { SchoolInterface, Subscription, UsageInterface } from '@ricly/interfaces';
 
 export async function getSchoolProfile() {
-  const { data } = await http.get<SchoolInterface>(`/school/profile`);
+  const { data } = await http.get<SchoolInterface>(`/schools/profile`);
   return data;
 }
 

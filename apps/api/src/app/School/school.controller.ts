@@ -20,7 +20,7 @@ import { AuthenticatedGuard } from '../Auth/auth.guard';
 import { SchoolService } from './school.service';
 
 @ApiTags('Schools')
-@Controller('school')
+@Controller('schools')
 @UseGuards(AuthenticatedGuard)
 @Roles(Role.DEVELOPER, Role.SECRETARY)
 export class SchoolController {
