@@ -93,9 +93,9 @@ export class TimetableService {
       if (weekday) {
         const { start_time, end_time } = weekday;
         let dayPeriodStartTime = new Date(
-          new Date(timetableDate).setHours(
-            start_time.getHours(),
-            start_time.getMinutes()
+          new Date(timetableDate).setUTCHours(
+            start_time.getUTCHours(),
+            start_time.getUTCMinutes()
           )
         );
         //7:30 < 17:30
@@ -103,15 +103,15 @@ export class TimetableService {
         while (
           dayPeriodStartTime <
           new Date(
-            new Date(timetableDate).setHours(
-              end_time.getHours(),
-              end_time.getMinutes()
+            new Date(timetableDate).setUTCHours(
+              end_time.getUTCHours(),
+              end_time.getUTCMinutes()
             )
           )
         ) {
           const nextPeriodStartTime = new Date(
-            new Date(dayPeriodStartTime).setMinutes(
-              dayPeriodStartTime.getMinutes() + course_duration_in_minutes
+            new Date(dayPeriodStartTime).setUTCMinutes(
+              dayPeriodStartTime.getUTCMinutes() + course_duration_in_minutes
             )
           );
           const programs = await this.prismaService.program.findMany({

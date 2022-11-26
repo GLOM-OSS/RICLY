@@ -66,10 +66,10 @@ export default function Schedules() {
     const newSlots: Slot[] = slots;
     programs.forEach(({ start_date: sd, end_date: ed }) => {
       const start = new Date(
-        new Date().setHours(sd.getHours(), sd.getMinutes(), sd.getSeconds())
+        new Date().setUTCHours(sd.getUTCHours(), sd.getUTCMinutes(), sd.getUTCSeconds())
       );
       const end = new Date(
-        new Date().setHours(ed.getHours(), ed.getMinutes(), ed.getSeconds())
+        new Date().setUTCHours(ed.getUTCHours(), ed.getUTCMinutes(), ed.getUTCSeconds())
       );
       const overlappingSlot = newSlots.find(
         ({ start_time: st, end_time: et }) => {
@@ -102,8 +102,8 @@ export default function Schedules() {
       //if program's day family does exist, push it into it's family and update displayPrograms
       if (programList) {
         console.log({
-          sd: program.start_date.getHours(),
-          ed: program.end_date.getHours(),
+          sd: program.start_date.getUTCHours(),
+          ed: program.end_date.getUTCHours(),
         });
         //look for the programDayFamily and swap it with a new one containing this program
         displayPrograms = displayPrograms.map((programDayFamily) => {
@@ -122,17 +122,17 @@ export default function Schedules() {
         const breakProgram: Program = {
           program_id: 'default_ui_break',
           end_date: new Date(
-            new Date(program.end_date).setHours(
-              breaktime.end_time.getHours(),
-              breaktime.end_time.getMinutes(),
-              breaktime.end_time.getSeconds()
+            new Date(program.end_date).setUTCHours(
+              breaktime.end_time.getUTCHours(),
+              breaktime.end_time.getUTCMinutes(),
+              breaktime.end_time.getUTCSeconds()
             )
           ),
           start_date: new Date(
-            new Date(program.start_date).setHours(
-              breaktime.start_time.getHours(),
-              breaktime.start_time.getMinutes(),
-              breaktime.start_time.getSeconds()
+            new Date(program.start_date).setUTCHours(
+              breaktime.start_time.getUTCHours(),
+              breaktime.start_time.getUTCMinutes(),
+              breaktime.start_time.getUTCSeconds()
             )
           ),
           fullname: 'default_ui_break',
@@ -255,17 +255,17 @@ export default function Schedules() {
     if (breaktime) {
       const breakSlot: Slot = {
         start_time: new Date(
-          new Date().setHours(
-            breaktime.start_time.getHours(),
-            breaktime.start_time.getMinutes(),
-            breaktime.start_time.getSeconds()
+          new Date().setUTCHours(
+            breaktime.start_time.getUTCHours(),
+            breaktime.start_time.getUTCMinutes(),
+            breaktime.start_time.getUTCSeconds()
           )
         ),
         end_time: new Date(
-          new Date().setHours(
-            breaktime.end_time.getHours(),
-            breaktime.end_time.getMinutes(),
-            breaktime.end_time.getSeconds()
+          new Date().setUTCHours(
+            breaktime.end_time.getUTCHours(),
+            breaktime.end_time.getUTCMinutes(),
+            breaktime.end_time.getUTCSeconds()
           )
         ),
         usage: 'break',
@@ -413,17 +413,17 @@ export default function Schedules() {
                               const slotData = programDayFamily.find(
                                 ({ end_date: ed, start_date: sd }) =>
                                   new Date(
-                                    new Date().setHours(
-                                      st.getHours(),
-                                      st.getMinutes(),
-                                      st.getSeconds()
+                                    new Date().setUTCHours(
+                                      st.getUTCHours(),
+                                      st.getUTCMinutes(),
+                                      st.getUTCSeconds()
                                     )
                                   ).toUTCString() ===
                                   new Date(
-                                    new Date().setHours(
-                                      sd.getHours(),
-                                      sd.getMinutes(),
-                                      sd.getSeconds()
+                                    new Date().setUTCHours(
+                                      sd.getUTCHours(),
+                                      sd.getUTCMinutes(),
+                                      sd.getUTCSeconds()
                                     )
                                   ).toUTCString()
                               );

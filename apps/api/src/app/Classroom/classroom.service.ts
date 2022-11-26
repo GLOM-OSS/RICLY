@@ -34,10 +34,10 @@ export class ClassroomService {
           classroom_acronym: classroom_code,
           classroom_code: `${teacher.School.school_code}${classroom_code}`,
         });
-        const dayStartTime = new Date(new Date().setHours(8, 30));
-        const dayEndTime = new Date(new Date().setHours(17, 30));
-        const nightStartTime = new Date(new Date().setHours(6, 30));
-        const nightEndTime = new Date(new Date().setHours(21, 30));
+        const dayStartTime = new Date(new Date().setUTCHours(8, 30));
+        const dayEndTime = new Date(new Date().setUTCHours(17, 30));
+        const nightStartTime = new Date(new Date().setUTCHours(6, 30));
+        const nightEndTime = new Date(new Date().setUTCHours(21, 30));
         const classWeekdays = [2, 3, 4, 5, 6].map((weekday) =>
           classroom_session === 'DAY'
             ? {
