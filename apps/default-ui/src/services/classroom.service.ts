@@ -1,5 +1,5 @@
 import { http } from '@ricly/axios';
-import { Classroom, Weekday } from '@ricly/interfaces';
+import { Break, Classroom, Weekday } from '@ricly/interfaces';
 
 export async function importClassrooms(file: File) {
   const formData = new FormData();
@@ -24,5 +24,10 @@ export async function getClassroomWeekdays(classroom_id: string) {
   const { data } = await http.get<Weekday[]>(
     `/classrooms/${classroom_id}/weekdays`
   );
-  return data
+  return data;
+}
+
+export async function getClassroomBreak(classroom_id: string) {
+  const { data } = await http.get<Break>(`/classrooms/${classroom_id}/break`);
+  return data;
 }

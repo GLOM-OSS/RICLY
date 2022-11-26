@@ -2,7 +2,7 @@ import {
   KeyboardArrowDownOutlined,
   KeyboardArrowUpOutlined,
   KeyboardBackspaceOutlined,
-  ReportRounded,
+  ReportRounded
 } from '@mui/icons-material';
 import {
   Box,
@@ -17,17 +17,16 @@ import {
   TableRow,
   TextField,
   Tooltip,
-  Typography,
+  Typography
 } from '@mui/material';
 import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import {
-  Break,
   Classroom,
   CreateTimetable,
   Subject,
   Teacher,
-  Weekday,
+  Weekday
 } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
@@ -42,9 +41,12 @@ import TeacherCard from '../../components/teacher/teacherCard';
 import { useUser } from '../../contexts/UserContextProvider';
 import {
   getAvailableTeachers,
-  getCoordinatorClassrooms,
+  getCoordinatorClassrooms
 } from '../../services/availabilities.service';
-import { getClassroomWeekdays } from '../../services/classroom.service';
+import {
+  getClassroomBreak,
+  getClassroomWeekdays
+} from '../../services/classroom.service';
 import { getSubjects } from '../../services/subject.service';
 
 export default function NewTimetable() {
@@ -101,33 +103,31 @@ export default function NewTimetable() {
 
   const loadTeachers = () => {
     setAreTeachersLoading(true);
-    if (selectedClassroom)
-      getAvailableTeachers(selectedClassroom)
-        .then((teachers) => {
-          setTeachers(teachers);
-          setAreTeachersLoading(false);
-        })
-        .catch((error) => {
-          const notif = new useNotification();
-          notif.notify({
-            render: formatMessage({ id: 'loadingTeachers' }),
-          });
-          notif.update({
-            type: 'ERROR',
-            render: (
-              <ErrorMessage
-                retryFunction={loadTeachers}
-                notification={notif}
-                message={
-                  error?.message ||
-                  formatMessage({ id: 'failedLoadingTeachers' })
-                }
-              />
-            ),
-            autoClose: false,
-            icon: () => <ReportRounded fontSize="medium" color="error" />,
-          });
+    getAvailableTeachers(selectedClassroom as string)
+      .then((teachers) => {
+        setTeachers(teachers);
+        setAreTeachersLoading(false);
+      })
+      .catch((error) => {
+        const notif = new useNotification();
+        notif.notify({
+          render: formatMessage({ id: 'loadingTeachers' }),
         });
+        notif.update({
+          type: 'ERROR',
+          render: (
+            <ErrorMessage
+              retryFunction={loadTeachers}
+              notification={notif}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingTeachers' })
+              }
+            />
+          ),
+          autoClose: false,
+          icon: () => <ReportRounded fontSize="medium" color="error" />,
+        });
+      });
   };
 
   const loadSubjects = () => {
@@ -161,26 +161,56 @@ export default function NewTimetable() {
 
   const loadWeekdays = () => {
     setAreWeekdaysLoading(true);
+    getClassroomWeekdays(selectedClassroom as string)
+      .then((weekdays) => {
+        setWeekdays(weekdays);
+        setAreWeekdaysLoading(false);
+      })
+      .catch((error) => {
+        const notif = new useNotification();
+        notif.notify({
+          render: formatMessage({ id: 'loadingWeekdays' }),
+        });
+        notif.update({
+          type: 'ERROR',
+          render: (
+            <ErrorMessage
+              retryFunction={loadWeekdays}
+              notification={notif}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingWeekdays' })
+              }
+            />
+          ),
+          autoClose: false,
+          icon: () => <ReportRounded fontSize="medium" color="error" />,
+        });
+      });
+  };
+
+  const loadBreakTime = () => {
+    setIsBreakTimeLoading(true);
     if (selectedClassroom)
-      getClassroomWeekdays(selectedClassroom)
-        .then((weekdays) => {
-          setWeekdays(weekdays);
-          setAreWeekdaysLoading(false);
+      getClassroomBreak(selectedClassroom)
+        .then((classroomBreak) => {
+          setBreakStart(dayjs(classroomBreak.start_time));
+          setBreakEnd(dayjs(classroomBreak.end_time));
+          setIsBreakTimeLoading(false);
         })
         .catch((error) => {
           const notif = new useNotification();
           notif.notify({
-            render: formatMessage({ id: 'loadingWeekdays' }),
+            render: formatMessage({ id: 'loadingBreaktime' }),
           });
           notif.update({
             type: 'ERROR',
             render: (
               <ErrorMessage
-                retryFunction={loadWeekdays}
+                retryFunction={loadBreakTime}
                 notification={notif}
                 message={
                   error?.message ||
-                  formatMessage({ id: 'failedLoadingWeekdays' })
+                  formatMessage({ id: 'failedLoadingBreaktime' })
                 }
               />
             ),
@@ -188,41 +218,6 @@ export default function NewTimetable() {
             icon: () => <ReportRounded fontSize="medium" color="error" />,
           });
         });
-  };
-
-  const loadBreakTime = () => {
-    setIsBreakTimeLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET class breaktime HERE with data selectedClassroom
-      if (random() > 5) {
-        const newBreakTime: Break = {
-          break_id: 'hels',
-          start_time: new Date(),
-          end_time: new Date(),
-        };
-        setBreakStart(dayjs(newBreakTime.start_time));
-        setBreakEnd(dayjs(newBreakTime.end_time));
-        setIsBreakTimeLoading(false);
-      } else {
-        const notif = new useNotification();
-        notif.notify({
-          render: formatMessage({ id: 'loadingBreaktime' }),
-        });
-        notif.update({
-          type: 'ERROR',
-          render: (
-            <ErrorMessage
-              retryFunction={loadBreakTime}
-              notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingBreaktime' })}
-            />
-          ),
-          autoClose: false,
-          icon: () => <ReportRounded fontSize="medium" color="error" />,
-        });
-      }
-    }, 3000);
   };
 
   const {
