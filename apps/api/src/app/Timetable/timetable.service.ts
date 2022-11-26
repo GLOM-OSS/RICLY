@@ -79,7 +79,9 @@ export class TimetableService {
     end_at,
     start_at,
   }: CreateTimetableDto) {
+    const usedAvailabilities: string[] = [];
     const newPrograms: Prisma.ProgramCreateManyInput[] = [];
+    const newAvailabilities: Prisma.AvailabilityCreateManyInput[] = [];
     let timetableDate = new Date(start_at);
     //monday < friday
     while (timetableDate < new Date(end_at)) {
@@ -124,7 +126,11 @@ export class TimetableService {
             //get available teachers
             const availableTeachers = await this.getAvailableTeachers(
               classroom_id,
-              { start_time: dayPeriodStartTime, end_time: nextPeriodStartTime },
+              {
+                start_time: dayPeriodStartTime,
+                end_time: nextPeriodStartTime,
+                availability_date: dayPeriodStartTime,
+              },
               dalyProgrammedSubjects.map(
                 (classroom_has_subject_id) => classroom_has_subject_id
               )
@@ -176,7 +182,7 @@ export class TimetableService {
               uniqueCoreSubjects,
               commonSubjectHalls
             );
-            
+
             const programs: IClassroomHasSubject[] = [];
             classroomHasSubjects.forEach(
               ({
@@ -205,7 +211,6 @@ export class TimetableService {
                   dalyProgrammedSubjects.push(classroom_has_subject_id);
               }
             );
-
             newPrograms.push(
               ...programs.map(({ hall_id, classroom_has_subject_id }) => ({
                 hall_id,
@@ -214,6 +219,19 @@ export class TimetableService {
                 start_date: dayPeriodStartTime,
               }))
             );
+            const {
+              newAvailabilities: new_availabilities,
+              usedAvailabilities: used_availabilities,
+            } = await this.updateTeacherAvailabilities(
+              {
+                availability_date: dayPeriodStartTime,
+                end_time: nextPeriodStartTime,
+                start_time: dayPeriodStartTime,
+              },
+              newPrograms
+            );
+            newAvailabilities.push(...new_availabilities);
+            usedAvailabilities.push(...used_availabilities);
           }
           dayPeriodStartTime = nextPeriodStartTime;
         }
@@ -222,12 +240,26 @@ export class TimetableService {
         timetableDate.setDate(timetableDate.getDate() + 1)
       );
     }
-    return newPrograms;
+    
+    return this.prismaService.$transaction([
+      this.prismaService.program.createMany({
+        data: newPrograms,
+        skipDuplicates: true,
+      }),
+      this.prismaService.availability.updateMany({
+        data: { is_used: true },
+        where: { availability_id: { in: usedAvailabilities } },
+      }),
+      this.prismaService.availability.createMany({
+        data: newAvailabilities,
+        skipDuplicates: true,
+      }),
+    ]);
   }
 
   async getAvailableTeachers(
     classroom_id: string,
-    dayPeriod: { start_time: Date; end_time: Date },
+    dayPeriod: { availability_date: Date; start_time: Date; end_time: Date },
     unwantedCourse: string[]
   ) {
     return this.prismaService.teacher.findMany({
@@ -249,8 +281,9 @@ export class TimetableService {
       where: {
         Availabilities: {
           some: {
-            end_time: { gte: dayPeriod.end_time },
+            availability_date: dayPeriod.availability_date,
             start_time: { lte: dayPeriod.start_time },
+            end_time: { gte: dayPeriod.end_time },
             is_deleted: false,
             is_used: false,
           },
@@ -329,7 +362,6 @@ export class TimetableService {
       const capableHall = await this.prismaService.hall.findFirst({
         select: { hall_id: true },
         where: {
-          is_used: false,
           hall_capacity: { gte: nombreOfStudent },
           NOT: {
             OR: commonSubjectHalls.map(({ hall_id }) => ({ hall_id })),
@@ -376,5 +408,56 @@ export class TimetableService {
           }
         : classroomHasSubject;
     });
+  }
+
+  async updateTeacherAvailabilities(
+    {
+      availability_date,
+      end_time,
+      start_time,
+    }: {
+      availability_date: Date;
+      start_time: Date;
+      end_time: Date;
+    },
+    concernedPrograms: { classroom_has_subject_id: string }[]
+  ) {
+    const usedAvailabilities: string[] = [];
+    const newAvailabilities: Prisma.AvailabilityCreateManyInput[] = [];
+    const availabilities = await this.prismaService.availability.findMany({
+      where: {
+        is_used: false,
+        availability_date,
+        end_time: { gte: end_time },
+        start_time: { lte: start_time },
+        Teacher: {
+          ClassroomHasSubjects: {
+            some: {
+              OR: concernedPrograms,
+            },
+          },
+        },
+      },
+    });
+    availabilities.forEach(
+      ({ availability_id, teacher_id, end_time, start_time }) => {
+        usedAvailabilities.push(availability_id);
+        newAvailabilities.push(
+          {
+            availability_date: start_time,
+            end_time: start_time,
+            teacher_id,
+            start_time,
+          },
+          {
+            end_time,
+            teacher_id,
+            start_time: end_time,
+            availability_date: start_time,
+          }
+        );
+      }
+    );
+    return { usedAvailabilities, newAvailabilities };
   }
 }
