@@ -22,7 +22,6 @@ export default function TestTimetable() {
     useIntl();
   const { created_at } = useParams();
   const [breaktime, setBreaktime] = useState<Break>();
-  const [isBreaktimeLoading, setIsBreaktimeLoading] = useState<boolean>(true);
   const [slots, setSlots] = useState<Slot[]>([]);
 
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -35,17 +34,15 @@ export default function TestTimetable() {
   const [classroom, setClassroom] = useState<string>('');
 
   const loadBreaktime = () => {
-    setIsBreaktimeLoading(true);
     setTimeout(() => {
       // TODO: CALL API TO GET class weekdays HERE with data selectedClassroom
-      if (true) {
+      if (random() > 5) {
         const newBreaktime: Break = {
           break_id: 'dhsie',
           end_time: new Date('2022/11/13 13:00:00'),
           start_time: new Date('2022/11/13 12:00:00'),
         };
         setBreaktime(newBreaktime);
-        setIsBreaktimeLoading(false);
       } else {
         const notif = new useNotification();
         notif.notify({
@@ -155,7 +152,7 @@ export default function TestTimetable() {
     setAreProgramsLoading(true);
     setTimeout(() => {
       // TODO: CALL API TO GET programs with data created_at
-      if (true) {
+      if (random() > 5) {
         const {
           programs: newPrograms,
           start_date,

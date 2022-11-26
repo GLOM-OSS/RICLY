@@ -1,7 +1,6 @@
 import { Box, Chip, Typography } from '@mui/material';
-import { Break, Program } from '@ricly/interfaces';
+import { Program } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
-import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 
 export default function ProgramCard({

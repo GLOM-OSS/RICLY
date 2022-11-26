@@ -20,7 +20,6 @@ export default function Schedules() {
   const { formatMessage, formatDate, formatTime, formatDateTimeRange } =
     useIntl();
   const [breaktime, setBreaktime] = useState<Break>();
-  const [isBreaktimeLoading, setIsBreaktimeLoading] = useState<boolean>(true);
   const [slots, setSlots] = useState<Slot[]>([]);
 
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -30,20 +29,17 @@ export default function Schedules() {
     start_date: Date;
     end_date: Date;
   }>();
-  const [classroom, setClassroom] = useState<string>('');
 
   const loadBreaktime = () => {
-    setIsBreaktimeLoading(true);
     setTimeout(() => {
       // TODO: CALL API TO GET class weekdays HERE with data selectedClassroom
-      if (true) {
+      if (random() > 5) {
         const newBreaktime: Break = {
           break_id: 'dhsie',
           end_time: new Date('2022/11/13 13:00:00'),
           start_time: new Date('2022/11/13 12:00:00'),
         };
         setBreaktime(newBreaktime);
-        setIsBreaktimeLoading(false);
       } else {
         const notif = new useNotification();
         notif.notify({
@@ -155,12 +151,11 @@ export default function Schedules() {
       //submit data is the timetable from the previous week (7 days back) till the last of his programs
       const submitData = new Date().setDate(new Date().getDate() - 7);
       // TODO: CALL API TO GET programs with data submitData
-      if (true) {
+      if (random() > 5) {
         const {
           programs: newPrograms,
           start_date,
           end_date,
-          classroom_code,
         }: ProgramTimeTable = {
           programs: [
             {
@@ -219,7 +214,6 @@ export default function Schedules() {
           is_published: true,
         };
         setTableInterval({ start_date, end_date });
-        setClassroom(classroom_code);
         setPrograms(newPrograms);
         setAreProgramsLoading(false);
       } else {
