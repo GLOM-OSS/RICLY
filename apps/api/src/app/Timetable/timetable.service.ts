@@ -168,7 +168,6 @@ export class TimetableService {
             const availableHalls = await this.prismaService.hall.findMany({
               select: { hall_id: true },
               where: {
-                is_used: false,
                 NOT: {
                   OR: commonSubjectHalls.map(({ hall_id }) => ({ hall_id })),
                 },
@@ -240,10 +239,10 @@ export class TimetableService {
         timetableDate.setDate(timetableDate.getDate() + 1)
       );
     }
-    
-    return this.prismaService.$transaction([
+    const created_at = new Date();
+    await this.prismaService.$transaction([
       this.prismaService.program.createMany({
-        data: newPrograms,
+        data: newPrograms.map((program) => ({ ...program, created_at })),
         skipDuplicates: true,
       }),
       this.prismaService.availability.updateMany({
@@ -255,6 +254,7 @@ export class TimetableService {
         skipDuplicates: true,
       }),
     ]);
+    return created_at.getTime()
   }
 
   async getAvailableTeachers(

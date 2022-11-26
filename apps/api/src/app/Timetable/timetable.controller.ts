@@ -42,15 +42,6 @@ export class TimetableController {
     });
   }
 
-  //   verify published program in slot (if it exists put program and end)
-  // get available teachers for slot (part time has priority and created at has priority)
-  // verify for every subject, if is common_core subject
-  // it it's not common_core, verify if classroom has hall_id
-  // if it has hall_id, then use hall_id
-  // if it's common_core or classroom does not have hall_id, verify hall with capacity (number of course students) available for that slot
-  // sort list by hall_id, teacher_type and created_at
-  // if nobody has hall_id,slot is left empty
-  // else first person on list wins slot
   @Post('new')
   async createNewTimetable(
     @Body()
