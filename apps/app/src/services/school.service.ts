@@ -1,5 +1,5 @@
 import { http } from '@ricly/axios';
-import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
+import { CreateSchoolInterface, SchoolInterface, UsageInterface } from '@ricly/interfaces';
 
 export async function findSchools() {
   const { data } = await http.get<SchoolInterface[]>(`/school/all`);
@@ -26,4 +26,11 @@ export async function updateSchoolData(
   newSchool: Partial<SchoolInterface>
 ) {
   return http.put(`/schools/${school_code}/edit`, newSchool);
+}
+
+export async function getApiUsageStats(school_code: string) {
+  const { data } = await http.get<UsageInterface[]>(
+    `/schools/${school_code}/api-usage`
+  );
+  return data;
 }

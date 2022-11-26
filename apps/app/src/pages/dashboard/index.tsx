@@ -7,7 +7,6 @@ import {
 } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -16,7 +15,10 @@ import Graph from '../../components/dashboard/graph';
 import SubscriptionCard from '../../components/dashboard/subscriptionCard';
 import SubscriptionDialog from '../../components/dashboard/subscriptionDialog';
 import { useUser } from '../../contexts/UserContextProvider';
-import { findSchoolData } from '../../services/school.service';
+import {
+  findSchoolData,
+  getApiUsageStats
+} from '../../services/school.service';
 import {
   createBinanceOrder,
   getSubscriptions
@@ -100,17 +102,12 @@ export default function Dashboard() {
 
   const loadGraphData = () => {
     setIsGraphDataLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL SUBSCRIPTIONS HERE with data school_code
-      if (random() > 5) {
-        const newUsageData: UsageInterface[] = [
-          { calls: 15, date: new Date() },
-          { calls: 10, date: new Date('2022/11/12') },
-          { calls: 72, date: new Date('2022/11/15') },
-        ];
-        setUsageGraphData(newUsageData);
+    getApiUsageStats(school_code as string)
+      .then((usageData) => {
+        setUsageGraphData(usageData);
         setIsGraphDataLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingGraphData' }),
@@ -121,15 +118,16 @@ export default function Dashboard() {
             <ErrorMessage
               retryFunction={loadGraphData}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingGraphData' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingGraphData' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   useEffect(() => {
