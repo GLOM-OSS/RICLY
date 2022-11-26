@@ -1,7 +1,7 @@
 import { ReportRounded } from '@mui/icons-material';
 import { Skeleton, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import { Break, Program, ProgramTimeTable } from '@ricly/interfaces';
+import { Program } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
 import { random } from '@ricly/utils';
@@ -9,6 +9,7 @@ import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import ProgramCard from '../../components/timetables/programCard';
+import { getTimetablePrograms } from '../../services/timetable.service';
 
 interface Slot {
   start_time: Date;
@@ -19,7 +20,6 @@ interface Slot {
 export default function Schedules() {
   const { formatMessage, formatDate, formatTime, formatDateTimeRange } =
     useIntl();
-  const [breaktime, setBreaktime] = useState<Break>();
   const [slots, setSlots] = useState<Slot[]>([]);
 
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -30,46 +30,22 @@ export default function Schedules() {
     end_date: Date;
   }>();
 
-  const loadBreaktime = () => {
-    setTimeout(() => {
-      // TODO: CALL API TO GET class weekdays HERE with data selectedClassroom
-      if (random() > 5) {
-        const newBreaktime: Break = {
-          break_id: 'dhsie',
-          end_time: new Date('2022/11/13 13:00:00'),
-          start_time: new Date('2022/11/13 12:00:00'),
-        };
-        setBreaktime(newBreaktime);
-      } else {
-        const notif = new useNotification();
-        notif.notify({
-          render: formatMessage({ id: 'loadingBreaktime' }),
-        });
-        notif.update({
-          type: 'ERROR',
-          render: (
-            <ErrorMessage
-              retryFunction={loadBreaktime}
-              notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingBreaktime' })}
-            />
-          ),
-          autoClose: false,
-          icon: () => <ReportRounded fontSize="medium" color="error" />,
-        });
-      }
-    }, 3000);
-  };
-
   const getSlots = (programs: Program[]): Slot[] => {
     const newSlots: Slot[] = slots;
     programs.forEach(({ start_date: sd, end_date: ed }) => {
       const start = new Date(
-        new Date().setUTCHours(sd.getUTCHours(), sd.getUTCMinutes(), sd.getUTCSeconds())
+        new Date().setUTCHours(
+          sd.getUTCHours(),
+          sd.getUTCMinutes(),
+          sd.getUTCSeconds()
+        )
       );
       const end = new Date(
-        new Date().setUTCHours(ed.getUTCHours(), ed.getUTCMinutes(), ed.getUTCSeconds())
+        new Date().setUTCHours(
+          ed.getUTCHours(),
+          ed.getUTCMinutes(),
+          ed.getUTCSeconds()
+        )
       );
       const overlappingSlot = newSlots.find(
         ({ start_time: st, end_time: et }) => {
@@ -86,10 +62,7 @@ export default function Schedules() {
     return newSlots;
   };
 
-  const getProgramDayFamilies = (
-    programs: Program[],
-    breaktime: Break
-  ): Program[][] => {
+  const getProgramDayFamilies = (programs: Program[]): Program[][] => {
     let displayPrograms: Program[][] = [];
 
     programs.forEach((program) => {
@@ -116,31 +89,7 @@ export default function Schedules() {
         });
       } else {
         //if program's day family doesn't exist yet, create one and update displayPrograms
-        //the object represents the adding of break time to day family
-        //given that the breaktime is a date, we need to bring it back to the day of the programDayFamily's day and swap the time (as we know that to be the exact time)
-        //else sorting the different programs for time coherency might have the break at the bottom or the top of the programDayFamily
-        const breakProgram: Program = {
-          program_id: 'default_ui_break',
-          end_date: new Date(
-            new Date(program.end_date).setUTCHours(
-              breaktime.end_time.getUTCHours(),
-              breaktime.end_time.getUTCMinutes(),
-              breaktime.end_time.getUTCSeconds()
-            )
-          ),
-          start_date: new Date(
-            new Date(program.start_date).setUTCHours(
-              breaktime.start_time.getUTCHours(),
-              breaktime.start_time.getUTCMinutes(),
-              breaktime.start_time.getUTCSeconds()
-            )
-          ),
-          fullname: 'default_ui_break',
-          hall_name: 'default_ui_break',
-          subject_name: 'default_ui_break',
-          classroom_code: program.classroom_code,
-        };
-        displayPrograms = [...displayPrograms, [program, breakProgram]];
+        displayPrograms = [...displayPrograms, [program]];
       }
     });
     return displayPrograms;
@@ -148,81 +97,14 @@ export default function Schedules() {
 
   const loadPrograms = () => {
     setAreProgramsLoading(true);
-    setTimeout(() => {
-      //submit data is the timetable from the previous week (7 days back) till the last of his programs
-      const submitData = new Date().setDate(new Date().getDate() - 7);
-      // TODO: CALL API TO GET programs with data submitData
-      if (random() > 5) {
-        const {
-          programs: newPrograms,
-          start_date,
-          end_date,
-        }: ProgramTimeTable = {
-          programs: [
-            {
-              end_date: new Date('2022/11/13 12:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B016',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/13 08:00:00'),
-              subject_name: 'Systeme',
-              classroom_code: 'IRT',
-            },
-            {
-              end_date: new Date('2022/11/14 17:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B016',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/14 13:00:00'),
-              subject_name: 'Toto',
-              classroom_code: 'IRT',
-            },
-            {
-              end_date: new Date('2022/11/12 17:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B0166',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/12 13:00:00'),
-              subject_name: 'Exploietation',
-              classroom_code: 'IRT',
-            },
-            {
-              end_date: new Date('2022/11/17 12:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B0166',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/17 08:00:00'),
-              subject_name: 'Biologie',
-              classroom_code: 'IRT',
-            },
-            {
-              end_date: new Date('2022/11/19 17:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B0166',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/19 13:00:00'),
-              subject_name: 'Biologie',
-              classroom_code: 'IRT',
-            },
-            {
-              end_date: new Date('2022/11/12 20:00:00'),
-              fullname: 'Djembissie Marco',
-              hall_name: 'B01666',
-              program_id: 'lslsl',
-              start_date: new Date('2022/11/12 18:00:00'),
-              subject_name: "Systeme d'exploietation",
-              classroom_code: 'IRT',
-            },
-          ],
-          created_at: new Date(),
-          start_date: new Date('2022-11-12'),
-          end_date: new Date('2022-11-15'),
-          is_published: true,
-        };
+    const timestamp = new Date().setDate(new Date().getDate() - 7);
+    getTimetablePrograms(timestamp)
+      .then(({ programs, start_date, end_date }) => {
         setTableInterval({ start_date, end_date });
-        setPrograms(newPrograms);
+        setPrograms(programs);
         setAreProgramsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingPrograms' }),
@@ -233,53 +115,31 @@ export default function Schedules() {
             <ErrorMessage
               retryFunction={loadPrograms}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingPrograms' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingPrograms' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   useEffect(() => {
-    loadBreaktime();
     loadPrograms();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    setSlots(
+      [...getSlots(programs)].sort((a, b) =>
+        a.start_time > b.start_time ? -1 : 1
+      )
+    );
+    setDisplayPrograms(getProgramDayFamilies(programs));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    if (breaktime) {
-      const breakSlot: Slot = {
-        start_time: new Date(
-          new Date().setUTCHours(
-            breaktime.start_time.getUTCHours(),
-            breaktime.start_time.getUTCMinutes(),
-            breaktime.start_time.getUTCSeconds()
-          )
-        ),
-        end_time: new Date(
-          new Date().setUTCHours(
-            breaktime.end_time.getUTCHours(),
-            breaktime.end_time.getUTCMinutes(),
-            breaktime.end_time.getUTCSeconds()
-          )
-        ),
-        usage: 'break',
-      };
-      //   console.log(programs)
-      setSlots(
-        [breakSlot, ...getSlots(programs)].sort((a, b) =>
-          a.start_time > b.start_time ? -1 : 1
-        )
-      );
-      setDisplayPrograms(getProgramDayFamilies(programs, breaktime));
-    } else setSlots(getSlots(programs));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [breaktime, programs]);
+  }, [programs]);
 
   return (
     <Box
@@ -320,9 +180,7 @@ export default function Schedules() {
             sx={{
               height: '100%',
               display: 'grid',
-              gridTemplateRows: `${slots
-                .map(({ usage }, index) => (usage === 'break' ? '50px' : '1fr'))
-                .join(' ')}`,
+              gridTemplateRows: `${slots.map(() => '1fr').join(' ')}`,
             }}
           >
             {slots.map(({ start_time, end_time }, index) => {
@@ -399,9 +257,7 @@ export default function Schedules() {
                             display: 'grid',
                             gap: theme.spacing(1),
                             gridTemplateRows: `${slots
-                              .map(({ usage }) =>
-                                usage === 'break' ? '50px' : '1fr'
-                              )
+                              .map(({ usage }) => '1fr')
                               .join(' ')}`,
                           }}
                         >
