@@ -12,7 +12,6 @@ export async function findSchoolData(school_code: string) {
 }
 
 export async function createNewSchool(newSchool: CreateSchoolInterface) {
-  alert(JSON.stringify(newSchool));
   const { data } = await http.post<SchoolInterface>(`/school/new`, newSchool);
   return data;
 }
