@@ -20,7 +20,7 @@ interface Slot {
 export default function TestTimetable() {
   const { formatMessage, formatDate, formatTime, formatDateTimeRange } =
     useIntl();
-  const { created_at } = useParams();
+  const { timestamp } = useParams();
   const [breaktime, setBreaktime] = useState<Break>();
   const [slots, setSlots] = useState<Slot[]>([]);
 
