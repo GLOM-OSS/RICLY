@@ -30,7 +30,6 @@ import {
 } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import dayjs, { Dayjs } from 'dayjs';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
@@ -48,6 +47,7 @@ import {
   getClassroomWeekdays
 } from '../../services/classroom.service';
 import { getSubjects } from '../../services/subject.service';
+import { generateNewTimetable } from '../../services/timetable.service';
 
 export default function NewTimetable() {
   const { formatMessage, formatTime } = useIntl();
@@ -286,15 +286,12 @@ export default function NewTimetable() {
     notif.notify({
       render: formatMessage({ id: 'generatingTimetable' }),
     });
-    setTimeout(() => {
-      setIsGenerating(false);
-      //TODO call api here to generate timetable
-      if (random() > 5) {
+    generateNewTimetable(timetable)
+      .then((timestamp) => {
         notif.update({
           render: formatMessage({ id: 'timetableGeneratedSuccessfully' }),
         });
-        //TODO: navigate to timetable link to display timetable
-        // navigate(`${'which link to go to'}`)
+        navigate(`timetables/${timestamp}`);
         setGenStart(null);
         setGenEnd(null);
         setBreakStart(null);
@@ -302,22 +299,25 @@ export default function NewTimetable() {
         setSelectedClassroom(undefined);
         setCourseDuration(0);
         setNotifications([]);
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={() => generateTimetable(timetable)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedGeneratingTimetable' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedGeneratingTimetable' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 4000);
+      })
+      .finally(() => setIsGenerating(false));
   }
 
   const handleGenerate = () => {
