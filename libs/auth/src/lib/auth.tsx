@@ -117,12 +117,12 @@ export function Auth({
     const givenName: string = currentUser.getBasicProfile().getGivenName();
     const fullname = `${familyName} ${givenName}`;
     setUser({ email, fullname });
-    const notif = new useNotification();
-    setIsAuthenticatingUser(true);
-    notif.notify({
-      render: formatMessage({ id: 'authenticatingUser' }),
-    });
-    if (email)
+    if (email && app !== 'app') {
+      setIsAuthenticatingUser(true);
+      const notif = new useNotification();
+      notif.notify({
+        render: formatMessage({ id: 'authenticatingUser' }),
+      });
       customAuthentication({ email, fullname })
         .then((user) => {
           navigate(app === 'app' ? '/-/schools' : '/-/dashboard');
@@ -147,6 +147,7 @@ export function Auth({
           });
           setIsAuthenticatingUser(false);
         });
+    }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -267,5 +268,5 @@ export function Auth({
   );
 }
 
-export { logOut } from './auth.service';
+export { logOut, getUserInfo } from './auth.service';
 export default Auth;
