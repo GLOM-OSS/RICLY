@@ -5,25 +5,46 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 export interface ClassrooomCsvModel {
   email: string;
-  classroom_session: 'DAY' | 'NIGHT';
+  hall_code: string;
   classroom_name: string;
   classroom_code: string;
+  classroom_session: 'DAY' | 'NIGHT';
 }
 
 @Injectable()
 export class ClassroomService {
   constructor(private prismaService: PrismaService) {}
 
-  async createMany(csvClassrooms: ClassrooomCsvModel[], school_id: string) {
+  async createClassrooms(
+    csvClassrooms: ClassrooomCsvModel[],
+    school_id: string
+  ) {
     const classrooms: Prisma.ClassroomCreateManyInput[] = [];
     const weekdays: Prisma.WeekdayCreateManyInput[] = [];
+    const teachers = await this.prismaService.teacher.findMany({
+      where: {
+        Person: { email: { in: csvClassrooms.map((_) => _.email) } },
+        School: { school_id },
+      },
+      select: {
+        teacher_id: true,
+        Person: { select: { email: true } },
+        School: { select: { school_code: true } },
+      },
+    });
+    const halls = await this.prismaService.hall.findMany({
+      select: { hall_id: true, hall_code: true },
+      where: { hall_code: { in: csvClassrooms.map((_) => _.hall_code) } },
+    });
     for (let i = 0; i < csvClassrooms.length; i++) {
-      const { email, classroom_session, classroom_code, classroom_name } =
-        csvClassrooms[i];
-      const teacher = await this.prismaService.teacher.findFirst({
-        where: { Person: { email }, School: { school_id } },
-        select: { teacher_id: true, School: { select: { school_code: true } } },
-      });
+      const {
+        email,
+        classroom_session,
+        classroom_code,
+        classroom_name,
+        hall_code,
+      } = csvClassrooms[i];
+      const teacher = teachers.find(({ Person }) => Person.email === email);
       if (teacher) {
         const classroom_id = randomUUID();
         classrooms.push({
@@ -32,6 +53,7 @@ export class ClassroomService {
           classroom_name,
           coordinator: teacher.teacher_id,
           classroom_acronym: classroom_code,
+          hall_id: halls.find((_) => _.hall_code === hall_code)?.hall_id,
           classroom_code: `${teacher.School.school_code}${classroom_code}`,
         });
         const dayStartTime = new Date(new Date().setUTCHours(8, 30));

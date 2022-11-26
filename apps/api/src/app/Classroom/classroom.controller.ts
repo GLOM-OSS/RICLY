@@ -46,10 +46,10 @@ export class ClassroomController {
 
     try {
       const data = await readAndProcessFile<ClassrooomCsvModel>(
-        ['classroom_name', 'classroom_code', 'classroom_session', 'email'],
+        ['classroom_name', 'classroom_code', 'classroom_session', 'hall_code', 'email'],
         Readable.from(file.buffer)
       );
-      return this.classroomService.createMany(data, school_id);
+      return this.classroomService.createClassrooms(data, school_id);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
