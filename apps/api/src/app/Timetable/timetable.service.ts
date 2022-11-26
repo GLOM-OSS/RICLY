@@ -36,10 +36,8 @@ export class TimetableService {
 
   async getTimetablePrograms(where: Prisma.ProgramWhereInput) {
     const programs = await this.prismaService.program.findMany({
-      select: {
-        program_id: true,
-        start_date: true,
-        end_date: true,
+      orderBy: { start_date: 'asc' },
+      include: {
         Hall: { select: { hall_code: true } },
         ClassroomHasSubject: {
           select: {
@@ -51,25 +49,33 @@ export class TimetableService {
       },
       where: { ...where, is_deleted: false },
     });
-    return programs.map(
-      ({
-        ClassroomHasSubject: {
-          Classroom: { classroom_acronym: classroom_code },
-          Subject: { subject_name },
-          Teacher: {
-            Person: { fullname },
+    return {
+      end_date: programs[programs.length - 1]?.end_date,
+      start_date: programs[0]?.start_date,
+      created_at: programs[0]?.created_at,
+      is_published:
+        programs[0]?.is_published &&
+        programs[programs.length - 1]?.is_published,
+      programs: programs.map(
+        ({
+          ClassroomHasSubject: {
+            Classroom: { classroom_acronym: classroom_code },
+            Subject: { subject_name },
+            Teacher: {
+              Person: { fullname },
+            },
           },
-        },
-        Hall: { hall_code },
-        ...program
-      }) => ({
-        fullname,
-        hall_code,
-        ...program,
-        subject_name,
-        classroom_code,
-      })
-    );
+          Hall: { hall_code },
+          ...program
+        }) => ({
+          fullname,
+          hall_code,
+          ...program,
+          subject_name,
+          classroom_code,
+        })
+      ),
+    };
   }
 
   async generateTimetable({
