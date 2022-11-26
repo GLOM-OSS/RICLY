@@ -7,18 +7,21 @@ import {
   Table,
   TableBody,
   TextField,
-  Typography,
+  Typography
 } from '@mui/material';
 import { Classroom, TimeTable } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import TimetableCard from '../../components/timetables/timetableCard';
 import { useUser } from '../../contexts/UserContextProvider';
+import {
+  getCoordinatorClassrooms
+} from '../../services/availabilities.service';
+import { getTimetables } from '../../services/timetable.service';
 
 export default function Timetables() {
   const { formatMessage } = useIntl();
@@ -28,13 +31,12 @@ export default function Timetables() {
 
   const loadTimetables = () => {
     setAreTimetablesLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL teachers HERE with data school_code
-      if (random() > 5) {
-        const newTimetables: TimeTable[] = [];
-        setTimetables(newTimetables);
+    getTimetables()
+      .then((timetables) => {
+        setTimetables(timetables);
         setAreTimetablesLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingTimetables' }),
@@ -45,15 +47,16 @@ export default function Timetables() {
             <ErrorMessage
               retryFunction={loadTimetables}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingTimetables' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingTimetables' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
@@ -63,13 +66,12 @@ export default function Timetables() {
 
   const loadClassrooms = () => {
     setAreClassroomsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL classrooms HERE
-      if (random() > 5) {
-        const newClassrooms: Classroom[] = [];
-        setClassrooms(newClassrooms);
+    getCoordinatorClassrooms()
+      .then((classrooms) => {
+        setClassrooms(classrooms);
         setAreClassroomsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingClassrooms' }),
@@ -80,15 +82,13 @@ export default function Timetables() {
             <ErrorMessage
               retryFunction={loadClassrooms}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingClassrooms' })}
+              message={error?.message || formatMessage({ id: 'failedLoadingClassrooms' })}
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const {
