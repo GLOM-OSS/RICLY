@@ -21,6 +21,7 @@ export class ClassroomService {
   ) {
     const classrooms: Prisma.ClassroomCreateManyInput[] = [];
     const weekdays: Prisma.WeekdayCreateManyInput[] = [];
+    const weekdayBreaks: Prisma.BreakCreateManyInput[] = [];
     const teachers = await this.prismaService.teacher.findMany({
       where: {
         Person: { email: { in: csvClassrooms.map((_) => _.email) } },
@@ -56,25 +57,37 @@ export class ClassroomService {
           hall_id: halls.find((_) => _.hall_code === hall_code)?.hall_id,
           classroom_code: `${teacher.School.school_code}${classroom_code}`,
         });
+        //seeding default classroom weekdays with thier start  and end time.
         const dayStartTime = new Date(new Date().setUTCHours(8, 30));
         const dayEndTime = new Date(new Date().setUTCHours(17, 30));
         const nightStartTime = new Date(new Date().setUTCHours(6, 30));
         const nightEndTime = new Date(new Date().setUTCHours(21, 30));
-        const classWeekdays = [2, 3, 4, 5, 6].map((weekday) =>
-          classroom_session === 'DAY'
+        const classWeekdays = [2, 3, 4, 5, 6].map((weekday) => {
+          const weekday_id = randomUUID();
+          //seeding default classroom weekday breaks
+          weekdayBreaks.push({
+            classroom_id,
+            weekday_id,
+            end_time: new Date(new Date().setUTCHours(12, 30)),
+            start_time: new Date(new Date().setUTCHours(11, 30)),
+          });
+
+          return classroom_session === 'DAY'
             ? {
                 weekday,
-                start_time: dayStartTime,
-                end_time: dayEndTime,
+                weekday_id,
                 classroom_id,
+                end_time: dayEndTime,
+                start_time: dayStartTime,
               }
             : {
                 weekday,
-                start_time: nightStartTime,
-                end_time: nightEndTime,
+                weekday_id,
                 classroom_id,
-              }
-        );
+                end_time: nightEndTime,
+                start_time: nightStartTime,
+              };
+        });
         weekdays.push(...classWeekdays);
       }
     }
@@ -85,6 +98,10 @@ export class ClassroomService {
       }),
       this.prismaService.weekday.createMany({
         data: weekdays,
+        skipDuplicates: true,
+      }),
+      this.prismaService.break.createMany({
+        data: weekdayBreaks,
         skipDuplicates: true,
       }),
       this.prismaService.classroom.updateMany({
