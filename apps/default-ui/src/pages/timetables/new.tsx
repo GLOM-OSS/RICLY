@@ -40,6 +40,12 @@ import { useNavigate } from 'react-router';
 import SubjectCard from '../../components/subject/subjectCard';
 import TeacherCard from '../../components/teacher/teacherCard';
 import { useUser } from '../../contexts/UserContextProvider';
+import {
+  getAvailableTeachers,
+  getCoordinatorClassrooms,
+} from '../../services/availabilities.service';
+import { getClassroomWeekdays } from '../../services/classroom.service';
+import { getSubjects } from '../../services/subject.service';
 
 export default function NewTimetable() {
   const { formatMessage, formatTime } = useIntl();
@@ -63,15 +69,14 @@ export default function NewTimetable() {
 
   const loadClassrooms = () => {
     setAreClassroomsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL classrooms HERE
-      if (random() > 5) {
-        const newClassrooms: Classroom[] = [];
-        setClassrooms(newClassrooms);
+    setAreClassroomsLoading(true);
+    getCoordinatorClassrooms()
+      .then((classrooms) => {
+        setClassrooms(classrooms);
+        setSelectedClassroom(classrooms[0].classroom_id);
         setAreClassroomsLoading(false);
-        if (newClassrooms.length > 0)
-          setSelectedClassroom(newClassrooms[0].classroom_id);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingClassrooms' }),
@@ -82,65 +87,57 @@ export default function NewTimetable() {
             <ErrorMessage
               retryFunction={loadClassrooms}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingClassrooms' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingClassrooms' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const loadTeachers = () => {
     setAreTeachersLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL teachers HERE with data school_code
-      if (random() > 5) {
-        const newTeachers: Teacher[] = [
-          {
-            email: 'lorraintchakoumi@gmail.com',
-            fullname: 'Tchakoumi Lorrain Kouatchoua',
-            hours_per_week: 20,
-            phone_number: '657140183',
-            teacher_type: 'MISSIONARY',
-            teacher_id: 'ldl',
-          },
-        ];
-        setTeachers(newTeachers);
-        setAreTeachersLoading(false);
-      } else {
-        const notif = new useNotification();
-        notif.notify({
-          render: formatMessage({ id: 'loadingTeachers' }),
+    if (selectedClassroom)
+      getAvailableTeachers(selectedClassroom)
+        .then((teachers) => {
+          setTeachers(teachers);
+          setAreTeachersLoading(false);
+        })
+        .catch((error) => {
+          const notif = new useNotification();
+          notif.notify({
+            render: formatMessage({ id: 'loadingTeachers' }),
+          });
+          notif.update({
+            type: 'ERROR',
+            render: (
+              <ErrorMessage
+                retryFunction={loadTeachers}
+                notification={notif}
+                message={
+                  error?.message ||
+                  formatMessage({ id: 'failedLoadingTeachers' })
+                }
+              />
+            ),
+            autoClose: false,
+            icon: () => <ReportRounded fontSize="medium" color="error" />,
+          });
         });
-        notif.update({
-          type: 'ERROR',
-          render: (
-            <ErrorMessage
-              retryFunction={loadTeachers}
-              notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingTeachers' })}
-            />
-          ),
-          autoClose: false,
-          icon: () => <ReportRounded fontSize="medium" color="error" />,
-        });
-      }
-    }, 3000);
   };
 
   const loadSubjects = () => {
     setAreSubjectsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL subjects HERE with data selectedClassroom, selectedTeacher
-      if (random() > 5) {
-        const newSubjects: Subject[] = [];
-        setSubjects(newSubjects);
+    getSubjects()
+      .then((subjects) => {
+        setSubjects(subjects);
         setAreSubjectsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingSubjects' }),
@@ -151,45 +148,46 @@ export default function NewTimetable() {
             <ErrorMessage
               retryFunction={loadSubjects}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSubjects' })}
+              message={
+                error?.message || formatMessage({ id: 'failedLoadingSubjects' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const loadWeekdays = () => {
     setAreWeekdaysLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET class weekdays HERE with data selectedClassroom
-      if (random() > 5) {
-        const newWeekdays: Weekday[] = [];
-        setWeekdays(newWeekdays);
-        setAreWeekdaysLoading(false);
-      } else {
-        const notif = new useNotification();
-        notif.notify({
-          render: formatMessage({ id: 'loadingWeekdays' }),
+    if (selectedClassroom)
+      getClassroomWeekdays(selectedClassroom)
+        .then((weekdays) => {
+          setWeekdays(weekdays);
+          setAreWeekdaysLoading(false);
+        })
+        .catch((error) => {
+          const notif = new useNotification();
+          notif.notify({
+            render: formatMessage({ id: 'loadingWeekdays' }),
+          });
+          notif.update({
+            type: 'ERROR',
+            render: (
+              <ErrorMessage
+                retryFunction={loadWeekdays}
+                notification={notif}
+                message={
+                  error?.message ||
+                  formatMessage({ id: 'failedLoadingWeekdays' })
+                }
+              />
+            ),
+            autoClose: false,
+            icon: () => <ReportRounded fontSize="medium" color="error" />,
+          });
         });
-        notif.update({
-          type: 'ERROR',
-          render: (
-            <ErrorMessage
-              retryFunction={loadWeekdays}
-              notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingWeekdays' })}
-            />
-          ),
-          autoClose: false,
-          icon: () => <ReportRounded fontSize="medium" color="error" />,
-        });
-      }
-    }, 3000);
   };
 
   const loadBreakTime = () => {
