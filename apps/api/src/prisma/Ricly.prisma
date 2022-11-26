@@ -53,7 +53,7 @@ model School {
     school_domain            String?   @unique @db.VarChar(50)
     school_code              String    @unique @db.VarChar(45)
     api_key                  String    @db.VarChar(75)
-    api_test_key             String    @db.VarChar(45)
+    api_test_key             String    @db.VarChar(75)
     api_calls_used           Int
     api_calls_left           Int
     test_api_calls_left      Int       @default(30)
