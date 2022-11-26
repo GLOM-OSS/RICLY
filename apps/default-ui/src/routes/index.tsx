@@ -7,6 +7,7 @@ import Buildings from '../pages/buildings';
 import Classrooms from '../pages/classrooms';
 import Dashboard from '../pages/dashboard';
 import Layout from '../pages/layout';
+import Schedules from '../pages/schedules';
 import Students from '../pages/student';
 import Subjects from '../pages/subject';
 import SubjectClassrooms from '../pages/subject/[subject_id]';
@@ -42,7 +43,7 @@ export const routes = [
       { path: 'subjects/:subject_id', element: <SubjectClassrooms /> },
       { path: 'students', element: <Students /> },
       { path: 'availabilities', element: <Availabilities /> },
-      { path: 'schedules', element: <Students /> },
+      { path: 'schedules', element: <Schedules /> },
       { path: 'timetables', element: <Timetables /> },
       { path: 'timetables/new', element: <NewTimetable /> },
       { path: 'timetables/:created_at', element: <TestTimetable /> },
