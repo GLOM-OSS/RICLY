@@ -1,8 +1,5 @@
 import { http } from '@ricly/axios';
-import {
-  CreateSchoolInterface,
-  SchoolInterface
-} from '@ricly/interfaces';
+import { CreateSchoolInterface, SchoolInterface } from '@ricly/interfaces';
 
 export async function findSchools() {
   const { data } = await http.get<SchoolInterface[]>(`/school/all`);
@@ -22,4 +19,11 @@ export async function createNewSchool(newSchool: CreateSchoolInterface) {
 
 export async function removeSchool(school_code: string) {
   return http.delete(`/school/${school_code}/delete`);
+}
+
+export async function updateSchoolData(
+  school_code: string,
+  newSchool: Partial<SchoolInterface>
+) {
+  return http.put(`/schools/${school_code}/edit`, newSchool);
 }
