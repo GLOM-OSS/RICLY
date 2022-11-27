@@ -1,7 +1,7 @@
 import {
   FileDownloadOutlined,
   KeyboardArrowDownOutlined,
-  ReportRounded
+  ReportRounded,
 } from '@mui/icons-material';
 import {
   Box,
@@ -9,7 +9,7 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-  Typography
+  Typography,
 } from '@mui/material';
 import { SchoolInterface } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
@@ -23,11 +23,7 @@ import { findSchools } from '../../services/school.service';
 import NavItem from './navItem';
 
 export default function Navbar({ logout }: { logout: () => void }) {
-  const {
-    selected_school,
-    userDispatch,
-    user: { person_id },
-  } = useUser();
+  const { selected_school, userDispatch } = useUser();
 
   const [isSchoolMenuOpen, setIsSchoolMenuOpen] = useState<boolean>(false);
   const [schools, setSchools] = useState<SchoolInterface[]>([]);
@@ -39,6 +35,10 @@ export default function Navbar({ logout }: { logout: () => void }) {
     findSchools()
       .then((schools) => {
         setSchools(schools);
+        userDispatch({
+          type: 'SELECT_SCHOOL',
+          payload: { selected_school: schools[0] },
+        });
         setAreSchoolsLoading(false);
       })
       .catch((error) => {
