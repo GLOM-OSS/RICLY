@@ -30,7 +30,7 @@ export default function TimetableCard({
         })}`}
       </TableCell>
       <TableCell>
-        {formatDateTimeRange(start_date, end_date, {
+        {formatDateTimeRange(new Date(start_date), new Date(end_date), {
           hour: '2-digit',
           minute: '2-digit',
           hour12: true,

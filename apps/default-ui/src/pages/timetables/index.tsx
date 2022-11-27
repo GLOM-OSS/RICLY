@@ -67,6 +67,7 @@ export default function Timetables() {
     getCoordinatorClassrooms()
       .then((classrooms) => {
         setClassrooms(classrooms);
+        setSelectedClassroom(classrooms[0].classroom_id)
         setAreClassroomsLoading(false);
       })
       .catch((error) => {
@@ -101,7 +102,7 @@ export default function Timetables() {
       loadClassrooms();
     } else {
       const notif = new useNotification();
-      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      // notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
         type: 'ERROR',
         render: formatMessage({
@@ -214,7 +215,7 @@ export default function Timetables() {
                       timetable={timetable}
                       openTimetable={(created_at) =>
                         navigate(
-                          `/timetables/${selectedClassroom}?timestamp=${created_at.getTime()}`
+                          `/-/timetables/${selectedClassroom}/${new Date(created_at).getTime()}`
                         )
                       }
                     />

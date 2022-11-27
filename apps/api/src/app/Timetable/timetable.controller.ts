@@ -7,7 +7,8 @@ import {
   Param,
   Post,
   Query,
-  Req, UseGuards
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -25,7 +26,7 @@ export class TimetableController {
 
   @Get('all')
   async getTimetables(@Query('classroom_id') classroom_id: string) {
-    return this.timetableService.getTimetables(classroom_id);
+    return await this.timetableService.getTimetables(classroom_id);
   }
 
   @Get(':timestamp')
@@ -41,19 +42,23 @@ export class TimetableController {
     const { roles } = request.user as User;
     return this.timetableService.getTimetablePrograms({
       OR: [
-        { created_at: new Date(timestamp) },
-        { start_date: { gte: new Date(timestamp) } },
+        { created_at: new Date(Number(timestamp)) },
+        { start_date: { gte: new Date(Number(timestamp)) } },
       ],
       ClassroomHasSubject: {
         ...(classroom_id
           ? {
-              Teacher: {
-                teacher_id: getRoleId(roles, Role.COORDINATOR),
-                Classrooms: { some: { classroom_id, school_id } },
+            classroom_id,
+            Teacher: {
+              Classrooms: {
+                  some: {
+                    school_id,
+                    // coordinator: getRoleId(roles, Role.COORDINATOR),
+                  },
+                },
               },
             }
           : {
-              Classroom: { school_id },
               teacher_id: getRoleId(roles, Role.TEACHER),
             }),
       },
@@ -66,7 +71,10 @@ export class TimetableController {
     newTimetable: CreateTimetableDto
   ) {
     try {
-      return this.timetableService.generateTimetable(newTimetable);
+      const timestamp = await this.timetableService.generateTimetable(
+        newTimetable
+      );
+      return { timestamp };
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

@@ -16,13 +16,13 @@ export class TimetableService {
   async getTimetables(classroom_id: string) {
     const firstProgram = await this.prismaService.program.findMany({
       distinct: ['created_at'],
-      orderBy: [{ created_at: 'asc' }],
+      orderBy: [{ start_date: 'asc' }],
       select: { is_published: true, start_date: true, created_at: true },
       where: { ClassroomHasSubject: { classroom_id }, is_deleted: false },
     });
     const lastProgram = await this.prismaService.program.findMany({
       distinct: ['created_at'],
-      orderBy: [{ created_at: 'desc' }],
+      orderBy: [{ end_date: 'desc' }],
       select: { end_date: true, created_at: true },
       where: { ClassroomHasSubject: { classroom_id }, is_deleted: false },
     });
@@ -30,7 +30,9 @@ export class TimetableService {
       is_published,
       start_date,
       created_at,
-      ends_at: lastProgram.find((_) => _.created_at === created_at).end_date,
+      end_date: lastProgram.find(
+        (_) => _.created_at.toUTCString() === created_at.toUTCString()
+      )?.end_date,
     }));
   }
 
@@ -120,12 +122,13 @@ export class TimetableService {
         ) {
           let nextPeriodStartTime: Date;
           if (
-            dayPeriodStartTime.toTimeString() === breakStartTime.toTimeString()
+            dayPeriodStartTime.toTimeString() ===
+            new Date(breakStartTime).toTimeString()
           ) {
             nextPeriodStartTime = new Date(
               new Date(dayPeriodStartTime).setUTCHours(
-                breakEndTime.getUTCHours(),
-                breakEndTime.getUTCMinutes()
+                new Date(breakEndTime).getUTCHours(),
+                new Date(breakEndTime).getUTCMinutes()
               )
             );
             continue;
@@ -248,7 +251,9 @@ export class TimetableService {
                 end_time: nextPeriodStartTime,
                 start_time: dayPeriodStartTime,
               },
-              newPrograms
+              newPrograms.map(({ classroom_has_subject_id }) => ({
+                classroom_has_subject_id,
+              }))
             );
             newAvailabilities.push(...new_availabilities);
             usedAvailabilities.push(...used_availabilities);
@@ -283,7 +288,10 @@ export class TimetableService {
     dayPeriod: { availability_date: Date; start_time: Date; end_time: Date },
     unwantedCourse: string[]
   ) {
-    return this.prismaService.teacher.findMany({
+    const availabilityDate = new Date(
+      new Date(dayPeriod.availability_date).toDateString()
+    );
+    const teachers = await this.prismaService.teacher.findMany({
       orderBy: { teacher_type: 'asc' }, //This will prioritize part_time over permanent and permanent.
       select: {
         ClassroomHasSubjects: {
@@ -298,11 +306,11 @@ export class TimetableService {
             },
           },
         },
+        Availabilities: { select: { availability_date: true } },
       },
       where: {
         Availabilities: {
           some: {
-            availability_date: dayPeriod.availability_date,
             start_time: { lte: dayPeriod.start_time },
             end_time: { gte: dayPeriod.end_time },
             is_deleted: false,
@@ -323,6 +331,14 @@ export class TimetableService {
         },
       },
     });
+    const availableTeachers = teachers.filter(({ Availabilities }) => {
+      const index = Availabilities.findIndex(
+        ({ availability_date }) =>
+          availability_date.toDateString() === availabilityDate.toDateString()
+      );
+      return index >= 0;
+    });
+    return availableTeachers;
   }
 
   async searchCommonSubjects(
@@ -443,6 +459,7 @@ export class TimetableService {
     },
     concernedPrograms: { classroom_has_subject_id: string }[]
   ) {
+    console.log(concernedPrograms);
     const usedAvailabilities: string[] = [];
     const newAvailabilities: Prisma.AvailabilityCreateManyInput[] = [];
     const availabilities = await this.prismaService.availability.findMany({

@@ -2,7 +2,7 @@ import {
   KeyboardArrowDownOutlined,
   KeyboardArrowUpOutlined,
   KeyboardBackspaceOutlined,
-  ReportRounded
+  ReportRounded,
 } from '@mui/icons-material';
 import {
   Box,
@@ -17,7 +17,7 @@ import {
   TableRow,
   TextField,
   Tooltip,
-  Typography
+  Typography,
 } from '@mui/material';
 import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
@@ -26,7 +26,7 @@ import {
   CreateTimetable,
   Subject,
   Teacher,
-  Weekday
+  Weekday,
 } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
@@ -40,11 +40,11 @@ import TeacherCard from '../../components/teacher/teacherCard';
 import { useUser } from '../../contexts/UserContextProvider';
 import {
   getAvailableTeachers,
-  getCoordinatorClassrooms
+  getCoordinatorClassrooms,
 } from '../../services/availabilities.service';
 import {
   getClassroomBreak,
-  getClassroomWeekdays
+  getClassroomWeekdays,
 } from '../../services/classroom.service';
 import { getSubjects } from '../../services/subject.service';
 import { generateNewTimetable } from '../../services/timetable.service';
@@ -132,7 +132,7 @@ export default function NewTimetable() {
 
   const loadSubjects = () => {
     setAreSubjectsLoading(true);
-    getSubjects()
+    getSubjects({ classroom_id: selectedClassroom })
       .then((subjects) => {
         setSubjects(subjects);
         setAreSubjectsLoading(false);
@@ -291,7 +291,7 @@ export default function NewTimetable() {
         notif.update({
           render: formatMessage({ id: 'timetableGeneratedSuccessfully' }),
         });
-        navigate(`timetables/${timestamp}`);
+        navigate(`/-/timetables/${selectedClassroom}/${timestamp}`);
         setGenStart(null);
         setGenEnd(null);
         setBreakStart(null);
@@ -331,7 +331,7 @@ export default function NewTimetable() {
       teachers.length === 0
     ) {
       const notif = new useNotification();
-      notif.notify({ render: formatMessage({ id: 'notifying' }) });
+      // notif.notify({ render: formatMessage({ id: 'notifying' }) });
       notif.update({
         type: 'ERROR',
         render: formatMessage({

@@ -46,7 +46,7 @@ export const routes = [
       { path: 'schedules', element: <Schedules /> },
       { path: 'timetables', element: <Timetables /> },
       { path: 'timetables/new', element: <NewTimetable /> },
-      { path: 'timetables/:timestamp', element: <TestTimetable /> },
+      { path: 'timetables/:classroom_id/:timestamp', element: <TestTimetable /> },
     ],
   },
   // {

@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
+import { start } from 'repl';
 import ProgramCard from '../../components/timetables/programCard';
 import { getClassroomBreak } from '../../services/classroom.service';
 import { getTimetablePrograms } from '../../services/timetable.service';
@@ -21,9 +22,7 @@ interface Slot {
 }
 
 export default function TestTimetable() {
-  const { classroom_id } = useParams();
-  const [searchParams] = useSearchParams();
-  const timestamp = searchParams.get('timestamp');
+  const { classroom_id, timestamp } = useParams();
 
   const [breaktime, setBreaktime] = useState<Break>();
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -40,8 +39,12 @@ export default function TestTimetable() {
 
   const loadBreaktime = () => {
     getClassroomBreak(classroom_id as string)
-      .then((classroomBreak) => {
-        setBreaktime(classroomBreak);
+      .then(({ break_id, end_time, start_time }) => {
+        setBreaktime({
+          break_id,
+          end_time: new Date(end_time),
+          start_time: new Date(start_time),
+        });
       })
       .catch((error) => {
         const notif = new useNotification();
@@ -148,7 +151,7 @@ export default function TestTimetable() {
             )
           ),
           fullname: 'default_ui_break',
-          hall_name: 'default_ui_break',
+          hall_code: 'default_ui_break',
           subject_name: 'default_ui_break',
           classroom_code: program.classroom_code,
         };
@@ -163,7 +166,13 @@ export default function TestTimetable() {
     getTimetablePrograms(Number(timestamp), classroom_id as string)
       .then(({ programs, start_date, end_date }) => {
         setTableInterval({ start_date, end_date });
-        setPrograms(programs);
+        setPrograms(
+          programs.map(({ end_date, start_date, ...program }) => ({
+            end_date: new Date(end_date),
+            start_date: new Date(start_date),
+            ...program,
+          }))
+        );
         setAreProgramsLoading(false);
       })
       .catch((error) => {

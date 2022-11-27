@@ -11,8 +11,10 @@ export async function getTimetables() {
 }
 
 export async function generateNewTimetable(newTimetable: CreateTimetable) {
-  const { data } = await http.post<number>(`/timetables/new`, newTimetable);
-  return data;
+  const {
+    data: { timestamp },
+  } = await http.post<{ timestamp: number }>(`/timetables/new`, newTimetable);
+  return timestamp;
 }
 
 export async function getTimetablePrograms(

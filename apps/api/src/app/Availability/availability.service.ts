@@ -58,7 +58,7 @@ export class AvailabilityService {
       },
       where: {
         is_deleted: false,
-        Classrooms: { some: { classroom_id } },
+        ClassroomHasSubjects: { some: { classroom_id } },
         Availabilities: {
           every: { is_used: false, availability_date: { gt: new Date() } },
         },

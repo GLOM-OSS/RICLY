@@ -100,6 +100,7 @@ export default function Schedules() {
     const timestamp = new Date().setDate(new Date().getDate() - 7);
     getTimetablePrograms(timestamp)
       .then(({ programs, start_date, end_date }) => {
+        console.log(programs, timestamp)
         setTableInterval({ start_date, end_date });
         setPrograms(programs);
         setAreProgramsLoading(false);

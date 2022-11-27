@@ -44,7 +44,7 @@ export interface Program {
   program_id: string;
   start_date: Date;
   end_date: Date;
-  hall_name: string; //important. Please add it on the ui
+  hall_code: string; //important. Please add it on the ui
   subject_name: string;
   fullname: string;
   classroom_code: string;
