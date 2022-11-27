@@ -90,21 +90,26 @@ export class TimetableService {
     const usedAvailabilities: string[] = [];
     const newPrograms: Prisma.ProgramCreateManyInput[] = [];
     const newAvailabilities: Prisma.AvailabilityCreateManyInput[] = [];
-    let timetableDate = new Date(start_at);
+    let timetableStartDate = new Date(start_at);
+    //bringing date to UTC
+    const timetableEndDate = new Date(
+      new Date(end_at).setDate(new Date(end_at).getDate() + 1)
+    );
     const weekdays = await this.prismaService.weekday.findMany({
       where: { classroom_id },
     });
+    console.log(timetableEndDate, weekdays);
     //monday < friday
-    while (timetableDate < new Date(end_at)) {
+    while (timetableStartDate < timetableEndDate) {
       //get monday
       const weekday = weekdays.find(
-        (_) => _.weekday === timetableDate.getDay()
+        (_) => _.weekday === timetableStartDate.getDay()
       );
       //if monday if classroom weekday
       if (weekday) {
         const { start_time, end_time } = weekday;
         let dayPeriodStartTime = new Date(
-          new Date(timetableDate).setUTCHours(
+          new Date(timetableStartDate).setUTCHours(
             start_time.getUTCHours(),
             start_time.getUTCMinutes()
           )
@@ -114,17 +119,24 @@ export class TimetableService {
         while (
           dayPeriodStartTime <
           new Date(
-            new Date(timetableDate).setUTCHours(
+            new Date(timetableStartDate).setUTCHours(
               end_time.getUTCHours(),
               end_time.getUTCMinutes()
             )
           )
         ) {
-          let nextPeriodStartTime: Date;
+          const breakStartPeriod = new Date(breakStartTime);
+          const breakEndPeriod = new Date(breakEndTime);
+          let nextPeriodStartTime = new Date(
+            new Date(dayPeriodStartTime).setUTCMinutes(
+              dayPeriodStartTime.getUTCMinutes() + course_duration_in_minutes
+            )
+          );
           if (
-            dayPeriodStartTime.toTimeString() ===
-            new Date(breakStartTime).toTimeString()
+            dayPeriodStartTime > breakStartPeriod &&
+            nextPeriodStartTime < breakEndPeriod
           ) {
+            //TODO split classroom course period containing a break period
             nextPeriodStartTime = new Date(
               new Date(dayPeriodStartTime).setUTCHours(
                 new Date(breakEndTime).getUTCHours(),
@@ -133,16 +145,19 @@ export class TimetableService {
             );
             continue;
           }
-          nextPeriodStartTime = new Date(
-            new Date(dayPeriodStartTime).setUTCMinutes(
-              dayPeriodStartTime.getUTCMinutes() + course_duration_in_minutes
-            )
-          );
           const programs = await this.prismaService.program.findMany({
             where: {
               ClassroomHasSubject: { classroom_id },
-              end_date: nextPeriodStartTime,
-              start_date: dayPeriodStartTime,
+              NOT: {
+                OR: [
+                  {
+                    end_date: { lte: dayPeriodStartTime },
+                  },
+                  {
+                    start_date: { gte: nextPeriodStartTime },
+                  },
+                ],
+              },
               is_published: true,
             },
           });
@@ -159,26 +174,96 @@ export class TimetableService {
             );
             //retrieving implicated classroom subjects (classroom_has_subject_id)
             let classroomHasSubjects: IClassroomHasSubject[] = [];
-            availableTeachers.map(({ ClassroomHasSubjects }) => {
-              ClassroomHasSubjects.map(
-                ({
-                  classroom_has_subject_id,
-                  subject_id,
-                  classroom_id: id,
-                  Classroom: { hall_id },
-                }) => {
-                  if (classroom_id === id)
-                    classroomHasSubjects.push({
-                      hall_id,
-                      subject_id,
-                      classroom_id,
-                      classroom_has_subject_id,
-                    });
-                }
-              );
-            });
+            availableTeachers.forEach(
+              ({ ClassroomHasSubjects, Availabilities }) => {
+                ClassroomHasSubjects.map(
+                  ({
+                    classroom_has_subject_id,
+                    subject_id,
+                    classroom_id: id,
+                    Classroom: { hall_id },
+                  }) => {
+                    if (classroom_id === id)
+                      classroomHasSubjects.push({
+                        hall_id,
+                        subject_id,
+                        classroom_id,
+                        classroom_has_subject_id,
+                      });
+                    Availabilities.forEach(
+                      ({
+                        end_time,
+                        start_time,
+                        teacher_id,
+                        availability_id,
+                        availability_date,
+                      }) => {
+                        usedAvailabilities.push(availability_id);
+                        const endTimeString = new Date(
+                          new Date(timetableStartDate).setHours(
+                            end_time.getHours(),
+                            end_time.getMinutes(),
+                            end_time.getSeconds()
+                          )
+                        );
+                        const startTimeString = new Date(
+                          new Date(timetableStartDate).setHours(
+                            start_time.getHours(),
+                            start_time.getMinutes(),
+                            start_time.getSeconds()
+                          )
+                        );
+                        if (
+                          !(
+                            endTimeString.toUTCString() ===
+                              dayPeriodStartTime.toUTCString() &&
+                            startTimeString.toUTCString() ===
+                              dayPeriodStartTime.toUTCString()
+                          )
+                        ) {
+                          if (
+                            startTimeString > dayPeriodStartTime &&
+                            endTimeString < nextPeriodStartTime
+                          ) {
+                            newAvailabilities.push(
+                              {
+                                availability_date: availability_date,
+                                end_time: dayPeriodStartTime,
+                                teacher_id,
+                                start_time,
+                              },
+                              {
+                                availability_date: availability_date,
+                                start_time: nextPeriodStartTime,
+                                teacher_id,
+                                end_time,
+                              }
+                            );
+                          } else if (startTimeString < dayPeriodStartTime) {
+                            newAvailabilities.push({
+                              availability_date: availability_date,
+                              end_time: dayPeriodStartTime,
+                              teacher_id,
+                              start_time,
+                            });
+                          } else if (endTimeString > nextPeriodStartTime) {
+                            newAvailabilities.push({
+                              availability_date: availability_date,
+                              start_time: nextPeriodStartTime,
+                              teacher_id,
+                              end_time,
+                            });
+                          }
+                        }
+                      }
+                    );
+                  }
+                );
+              }
+            );
+
             //searching for coreSubjects
-            const { commonSubjectHalls, uniqueCoreSubjects } =
+            const { commonSubjectHalls, commonSubjectsClassrooms } =
               await this.searchCommonSubjects(
                 classroom_id,
                 classroomHasSubjects,
@@ -186,7 +271,7 @@ export class TimetableService {
               );
 
             //added coreSubjects to implicated classroom subjects (classroom_has_subject_id)
-            classroomHasSubjects.push(...uniqueCoreSubjects);
+            classroomHasSubjects.push(...commonSubjectsClassrooms);
             const availableHalls = await this.prismaService.hall.findMany({
               select: { hall_id: true },
               where: {
@@ -200,11 +285,25 @@ export class TimetableService {
             classroomHasSubjects = this.attributeHalls(
               availableHalls,
               classroomHasSubjects,
-              uniqueCoreSubjects,
+              commonSubjectsClassrooms,
               commonSubjectHalls
             );
 
-            const programs: IClassroomHasSubject[] = [];
+            // prevent already programmed courses from appearing twice while others have not yet been programmed.
+            //this is done by sending them to the bottom of the priority list
+            classroomHasSubjects = classroomHasSubjects.sort((a, b) => {
+              const aProgram = newPrograms.find(
+                ({ classroom_has_subject_id: chs_id }) =>
+                  chs_id === a.classroom_has_subject_id
+              );
+              const bProgram = newPrograms.find(
+                ({ classroom_has_subject_id: chs_id }) =>
+                  chs_id === b.classroom_has_subject_id
+              );
+              return aProgram && !bProgram ? -1 : 1;
+            });
+
+            //prevent a course from being programmed twice in the same day
             classroomHasSubjects = classroomHasSubjects.length
               ? classroomHasSubjects.filter(
                   ({ classroom_has_subject_id }) =>
@@ -217,41 +316,29 @@ export class TimetableService {
                     subject_id === classroomHasSubjects[0].subject_id
                 )
               : [];
-            programs.push(...commonCores);
+            // programs.push(...commonCores);
             dalyProgrammedSubjects.push(
               ...commonCores.map((_) => _.classroom_has_subject_id)
             );
             newPrograms.push(
-              ...programs.map(({ hall_id, classroom_has_subject_id }) => ({
+              ...commonCores.map(({ hall_id, classroom_has_subject_id }) => ({
                 hall_id,
                 classroom_has_subject_id,
                 end_date: nextPeriodStartTime,
                 start_date: dayPeriodStartTime,
               }))
             );
-            const {
-              newAvailabilities: new_availabilities,
-              usedAvailabilities: used_availabilities,
-            } = await this.updateTeacherAvailabilities(
-              {
-                availability_date: dayPeriodStartTime,
-                end_time: nextPeriodStartTime,
-                start_time: dayPeriodStartTime,
-              },
-              newPrograms.map(({ classroom_has_subject_id }) => ({
-                classroom_has_subject_id,
-              }))
-            );
-            newAvailabilities.push(...new_availabilities);
-            usedAvailabilities.push(...used_availabilities);
           }
           dayPeriodStartTime = nextPeriodStartTime;
         }
       }
-      timetableDate = new Date(
-        timetableDate.setDate(timetableDate.getDate() + 1)
+      timetableStartDate = new Date(
+        new Date(timetableStartDate).setDate(
+          new Date(timetableStartDate).getDate() + 1
+        )
       );
     }
+
     const created_at = new Date();
     await this.prismaService.$transaction([
       this.prismaService.program.createMany({
@@ -260,7 +347,11 @@ export class TimetableService {
       }),
       this.prismaService.availability.updateMany({
         data: { is_used: true },
-        where: { availability_id: { in: usedAvailabilities } },
+        where: {
+          OR: usedAvailabilities.map((availability_id) => ({
+            availability_id,
+          })),
+        },
       }),
       this.prismaService.availability.createMany({
         data: newAvailabilities,
@@ -294,7 +385,15 @@ export class TimetableService {
             },
           },
         },
-        Availabilities: { select: { availability_date: true } },
+        Availabilities: {
+          select: {
+            availability_date: true,
+            availability_id: true,
+            teacher_id: true,
+            end_time: true,
+            start_time: true,
+          },
+        },
       },
       where: {
         Availabilities: {
@@ -325,7 +424,7 @@ export class TimetableService {
       return index >= 0;
     });
     const missionaries = availableTeachers.filter(
-      (_) => _.teacher_type === TeacherTypeEnum.MISSIONARY
+      (_) => _.teacher_type === 'MISSIONARY'
     );
     const otherTeachers = availableTeachers.filter(
       (_) => _.teacher_type !== TeacherTypeEnum.MISSIONARY
@@ -338,7 +437,7 @@ export class TimetableService {
     classroomHasSubjects: IClassroomHasSubject[],
     unwantedCourse: string[]
   ) {
-    const uniqueCoreSubjects: IClassroomHasSubject[] = [];
+    const commonSubjectsClassrooms: IClassroomHasSubject[] = [];
     const commonSubjectHalls: { hall_id: string; subject_id: string }[] = [];
     for (let i = 0; i < classroomHasSubjects.length; i++) {
       const { subject_id } = classroomHasSubjects[i];
@@ -363,7 +462,7 @@ export class TimetableService {
             },
           },
         });
-      uniqueCoreSubjects.push(
+      commonSubjectsClassrooms.push(
         ...coreSubjects.map(
           ({
             subject_id,
@@ -403,40 +502,44 @@ export class TimetableService {
       });
     }
 
-    return { uniqueCoreSubjects, commonSubjectHalls };
+    return { commonSubjectsClassrooms, commonSubjectHalls };
   }
 
   attributeHalls(
     availableHalls: { hall_id: string }[],
     classroomHasSubjects: IClassroomHasSubject[],
-    uniqueCoreSubjects: IClassroomHasSubject[],
+    commonSubjectsClassrooms: IClassroomHasSubject[],
     commonSubjectHalls: { hall_id: string; subject_id: string }[]
   ) {
     let iterateHalls = availableHalls.length;
 
-    return classroomHasSubjects.map((classroomHasSubject) => {
-      --iterateHalls;
-      //getting non core subjects hall_id
-      const hall_id =
-        iterateHalls >= 0 ? availableHalls[iterateHalls].hall_id : null;
-      const coreSubject = uniqueCoreSubjects.find(
-        ({ subject_id: id }) => id === classroomHasSubject.subject_id
-      );
-      return coreSubject
-        ? {
-            ...classroomHasSubject,
-            //setting coreSubject hall_id with capable hall_id,
-            hall_id: commonSubjectHalls.find(
-              ({ subject_id }) => subject_id === classroomHasSubject.subject_id
-            ).hall_id,
-          }
-        : classroomHasSubject.hall_id === null
-        ? {
-            ...classroomHasSubject,
-            hall_id,
-          }
-        : classroomHasSubject;
-    });
+    return classroomHasSubjects
+      .map((classroomHasSubject) => {
+        --iterateHalls;
+        //getting non core subjects hall_id
+        const hall_id =
+          iterateHalls >= 0 ? availableHalls[iterateHalls].hall_id : null;
+        const commonCoreSubject = commonSubjectsClassrooms.find(
+          ({ subject_id: id }) => id === classroomHasSubject.subject_id
+        );
+        return commonCoreSubject
+          ? {
+              ...classroomHasSubject,
+              //setting coreSubject hall_id with capable hall_id,
+              hall_id: commonSubjectHalls.find(
+                ({ subject_id }) =>
+                  subject_id === classroomHasSubject.subject_id
+              ).hall_id,
+            }
+          : classroomHasSubject.hall_id === null
+          ? {
+              //TODO check available halls capacity before attributing it to course
+              ...classroomHasSubject,
+              hall_id,
+            }
+          : classroomHasSubject;
+      })
+      .filter(({ hall_id }) => hall_id);
   }
 
   async updateTeacherAvailabilities(
