@@ -4,7 +4,14 @@ import { theme } from '@ricly/theme';
 import { useIntl } from 'react-intl';
 
 export default function ProgramCard({
-  program: { start_date, end_date, hall_code, fullname, subject_name },
+  program: {
+    start_date,
+    end_date,
+    hall_code,
+    fullname,
+    classroom_code,
+    subject_name,
+  },
   forTeacher,
 }: {
   program: Program;
@@ -55,7 +62,9 @@ export default function ProgramCard({
         {subject_name}
       </Typography>
       <Chip label={`( ${hall_code} )`} color="error" size="small" />
-      <Typography variant="body2">{'IRT3'}</Typography>
+      <Typography variant="body2">
+        {forTeacher ? classroom_code : fullname}
+      </Typography>
     </Box>
   );
 }
