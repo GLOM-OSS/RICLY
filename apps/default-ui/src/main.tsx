@@ -1,13 +1,16 @@
-import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-
-import App from './app/app';
+import { BrowserRouter } from 'react-router-dom';
+import App from './app';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+  <BrowserRouter>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <App />
+    </LocalizationProvider>
+  </BrowserRouter>
 );

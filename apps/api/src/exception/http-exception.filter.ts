@@ -24,8 +24,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     } catch (error) {
       errorMessage = message ?? exception.message;
     }
-    if (statusCode === 400)
-      response.redirect(`${process.env.RICLY_APP_ERR_URL}`);
+    if (request.query.error) response.redirect(request.headers.origin);
     else
       response.status(statusCode ?? HttpStatus.INTERNAL_SERVER_ERROR).json({
         error,

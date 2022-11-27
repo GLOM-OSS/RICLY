@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Lang } from '@prisma/client';
+import { Request } from 'express';
 import { Profile, Strategy } from 'passport-google-oauth20';
 import { AUTH01 } from '../../../exception';
 import { AuthService } from '../auth.service';
@@ -9,14 +10,16 @@ import { AuthService } from '../auth.service';
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private authService: AuthService) {
     super({
-      callbackURL: `${process.env.NX_API_BASE_URL}/auth`,
-      clientSecret: process.env.GOOGLE_SECRET,
-      clientID: process.env.GOOGLE_CLIENT_ID,
+      callbackURL: `${process.env.NX_API_BASE_URL}/auth/callback`,
+      clientSecret: process.env.NX_GOOGLE_SECRET,
+      clientID: process.env.NX_GOOGLE_CLIENT_ID,
       scope: ['email', 'profile'],
+      passReqToCallback: true,
     });
   }
 
   async validate(
+    request: Request,
     _accessToken: string,
     _refreshToken: string,
     profile: Profile
@@ -24,12 +27,21 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const {
       _json: { email_verified, email, locale, given_name, family_name },
     } = profile;
-    if (email_verified)
-      return this.authService.validateUser({
+    if (email_verified) {
+      const user = {
         email,
-        preferred_lang: locale as Lang,
+        preferred_lang: locale.substring(0, 2) as Lang,
         fullname: `${given_name} ${family_name}`,
+      };
+      const clientApiKey = request.get('RICLY-API-KEY');
+      if (!clientApiKey) {
+        return this.authService.validateUser(user);
+      }
+      return this.authService.validateUser(user, {
+        client_api_key: clientApiKey,
+        client_urL: request.headers.origin,
       });
+    }
     throw new UnauthorizedException({
       statusCode: HttpStatus.UNAUTHORIZED,
       error: 'Unauthorized access',

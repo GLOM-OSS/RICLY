@@ -1,14 +1,11 @@
 import { Skeleton } from '@mui/material';
+import { UsageInterface } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { random } from '@ricly/utils';
 import Chart, { ChartItem } from 'chart.js/auto';
 import { useEffect } from 'react';
 import { useIntl } from 'react-intl';
 
-export interface UsageInterface {
-  date: Date;
-  calls: number;
-}
 export default function Graph({
   data,
   isDataLoading,

@@ -31,3 +31,8 @@ export interface SchoolInterface {
   api_calls_left: number;
   test_api_calls_left: number;
 }
+
+export interface UsageInterface {
+  date: Date;
+  calls: number;
+}

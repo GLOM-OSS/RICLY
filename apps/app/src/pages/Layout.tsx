@@ -1,21 +1,41 @@
 import { Box } from '@mui/material';
+import { getUserInfo } from '@ricly/auth';
 import { theme } from '@ricly/theme';
-import { useState } from 'react';
-import { Navigate, Outlet } from 'react-router';
+import { useNotification } from '@ricly/toast';
+import { useEffect, useState } from 'react';
+import { useIntl } from 'react-intl';
+import { Outlet, useNavigate } from 'react-router';
 import LogoutDialog from '../components/logout/logoutDialog';
 import Navbar from '../components/navbar/Navbar';
 import { useUser } from '../contexts/UserContextProvider';
 
 export default function Layout() {
-  const {
-    user: { person_id },
-  } = useUser();
+  const navigate = useNavigate();
+  const { userDispatch } = useUser();
+  const { formatMessage } = useIntl();
 
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState<boolean>(false);
 
-  return person_id === '' ? (
-    <Navigate to="/" />
-  ) : (
+  useEffect(() => {
+    getUserInfo()
+      .then((user) => {
+        userDispatch({ type: 'LOAD_USER', payload: { user } });
+      })
+      .catch((error) => {
+        const notif = new useNotification();
+        notif.notify({
+          render: formatMessage({ id: 'authenticatingUser' }),
+        });
+        notif.update({
+          type: 'ERROR',
+          render: error?.message || formatMessage({ id: 'authenticatingUser' }),
+        });
+        navigate('/');
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
     <>
       <LogoutDialog
         closeDialog={() => setIsLogoutDialogOpen(false)}

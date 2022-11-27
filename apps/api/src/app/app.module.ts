@@ -15,9 +15,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AppController } from './app.controller';
 import { AppInterceptor } from './app.interceptor';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { SchoolModule } from './school/school.module';
-import { SubscriptionModule } from './subscription/subscription.module';
+import { AuthModule } from './Auth/auth.module';
+import { SchoolModule } from './School/school.module';
+import { SubscriptionModule } from './Subscription/subscription.module';
+import { BuildingModule } from './Building/building.module';
+import { TeacherModule } from './Teacher/teacher.module';
+import { ClassroomModule } from './Classroom/classrrom.module';
+import { SubjectModule } from './Subject/subject.module';
+import { StudentModule } from './Student/student.module';
+import { AppMiddleware } from './app.middleware';
+import { AvailabilityModule } from './Availability/availability.module';
+import { TimeTableModule } from './Timetable/timetable.module';
 
 @Module({
   imports: [
@@ -28,7 +36,14 @@ import { SubscriptionModule } from './subscription/subscription.module';
     PrismaModule,
     AuthModule,
     SchoolModule,
-    SubscriptionModule
+    SubscriptionModule,
+    BuildingModule,
+    TeacherModule,
+    ClassroomModule,
+    SubjectModule,
+    StudentModule,
+    AvailabilityModule,
+    TimeTableModule,
   ],
   controllers: [AppController],
   providers: [
@@ -42,7 +57,10 @@ import { SubscriptionModule } from './subscription/subscription.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    const redisClient = createClient({ legacyMode: true });
+    const redisClient = createClient({
+      legacyMode: true,
+      url: `redis://${process.env.REDIS_HOST}`,
+    });
     redisClient.connect().catch((message) => Logger.error(message));
     const RedisStore = connectRedis(session);
 
@@ -52,8 +70,6 @@ export class AppModule implements NestModule {
           name: 'RICLY-5BB35922144F',
           store: new RedisStore({
             client: redisClient,
-            host: process.env.REDIS_HOST,
-            port: Number(process.env.REDIS_PORT),
           }),
           secret: process.env.SESSION_SECRET,
           genid: () => randomUUID(),
@@ -65,7 +81,8 @@ export class AppModule implements NestModule {
           },
         }),
         passport.initialize(),
-        passport.session()
+        passport.session(),
+        AppMiddleware
       )
       .forRoutes('*');
   }

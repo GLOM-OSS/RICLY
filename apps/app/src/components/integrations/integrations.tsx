@@ -11,13 +11,16 @@ import {
 } from '@mui/material';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import { useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate, useParams } from 'react-router';
 import * as Yup from 'yup';
 import { useUser } from '../../contexts/UserContextProvider';
+import {
+  findSchoolData,
+  updateSchoolData,
+} from '../../services/school.service';
 
 export default function Integrations() {
   const { school_code } = useParams();
@@ -31,25 +34,25 @@ export default function Integrations() {
     if (!selected_school) navigate('/-/schools');
     else {
       setIsSchoolLoading(true);
-      setTimeout(() => {
-        // TODO: CALL API TO GET SCHOOL DATA HERE with data school_code
-        if (random() > 5) {
-          const newSchool = {
-            api_calls_left: 20,
-            api_calls_used: 200,
-            api_key: 'kskdksis',
-            api_test_key: 'kdksowkekd',
-            school_acronym: 'IAI',
-            school_code: 'skdk',
-            school_name: 'Universite des montagnes',
-            test_api_calls_left: 10,
-          };
-          userDispatch({
-            type: 'SELECT_SCHOOL',
-            payload: { selected_school: newSchool },
-          });
-          setIsSchoolLoading(false);
-        } else {
+      findSchoolData(school_code as string)
+        .then((school) => {
+          if (school) {
+            const { school_domain, ...schoolData } = school;
+            userDispatch({
+              type: 'SELECT_SCHOOL',
+              payload: {
+                selected_school: {
+                  ...schoolData,
+                  school_domain: school_domain
+                    ? new URL(school_domain).hostname
+                    : '',
+                },
+              },
+            });
+            setIsSchoolLoading(false);
+          } else navigate('/-/schools');
+        })
+        .catch((error) => {
           const notif = new useNotification();
           notif.notify({ render: formatMessage({ id: 'loadingSchoolData' }) });
           notif.update({
@@ -58,15 +61,16 @@ export default function Integrations() {
               <ErrorMessage
                 retryFunction={loadSchoolData}
                 notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'failedLoadingSchoolData' })}
+                message={
+                  error?.message ||
+                  formatMessage({ id: 'failedLoadingSchoolData' })
+                }
               />
             ),
             autoClose: false,
             icon: () => <ReportRounded fontSize="medium" color="error" />,
           });
-        }
-      }, 3000);
+        });
     }
   };
 
@@ -83,7 +87,7 @@ export default function Integrations() {
     notif.update({ render: 'copied' });
   };
   const initialValues: { school_domain: string } = {
-    school_domain: '',
+    school_domain: selected_school?.school_domain || '',
   };
   const validationSchema = Yup.object().shape({
     school_domain: Yup.string(),
@@ -94,27 +98,26 @@ export default function Integrations() {
     setIsChangingDomain(true);
     const notif = new useNotification();
     notif.notify({ render: formatMessage({ id: 'updating' }) });
-    setTimeout(() => {
-      setIsChangingDomain(false);
-      //TODO: CALL API HERE TO CHANGE DOMAIN
-      if (random() > 5) {
+    updateSchoolData(school_code as string, { school_domain: domain })
+      .then(() => {
         notif.update({ render: formatMessage({ id: 'updatedSuccessfully' }) });
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={() => changeDomain(domain)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedToUpdateDomain' })}
+              message={
+                error?.message || formatMessage({ id: 'failedToUpdateDomain' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const formik = useFormik({

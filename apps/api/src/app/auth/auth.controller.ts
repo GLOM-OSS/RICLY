@@ -7,45 +7,55 @@ import {
   Post,
   Req,
   Res,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
+import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AUTH500 } from '../../exception';
-import { IsPublic, Roles } from '../app.decorator';
 import { NewPasswordDto, Role, User } from '../app.dto';
 import { AuthenticatedGuard } from './auth.guard';
 import { AuthService } from './auth.service';
+import { CustomGuard } from './custom/custom.guard';
 import { GoogleGuard } from './google/google.guard';
 import { LocalGuard } from './local/local.guard';
 
 @Controller('auth')
-@Roles(Role.DEVELOPER)
-@UseGuards(AuthenticatedGuard)
+@ApiTags('Authentication')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Get('')
-  @IsPublic()
+  @Get('callback')
   @UseGuards(GoogleGuard)
-  async register(@Res() res: Response) {
-    return res.redirect(`${process.env.RICLY_APP_SUCCESS_URL}`);
+  @ApiExcludeEndpoint(true)
+  async register(@Req() request: Request, @Res() res: Response) {
+    if (request.get('RICLY-API-KEY'))
+      return res.redirect(`${process.env.RICLY_APP_SUCCESS_URL}/dashboard`);
+    return res.redirect(`${process.env.RICLY_APP_SUCCESS_URL}/schools`);
   }
 
-  @IsPublic()
   @Post('signin')
   @UseGuards(LocalGuard)
+  @ApiExcludeEndpoint(true)
   async localSignIn(@Req() request: Request) {
     return request.user;
   }
 
-  @IsPublic()
   @Get('google-signin')
+  @ApiExcludeEndpoint(true)
   @UseGuards(GoogleGuard)
   async signIn() {
     //google authentication
   }
 
+  @Post('app-signin')
+  @UseGuards(CustomGuard)
+  async apiSignin(@Req() request: Request) {
+    return request.user;
+  }
+
   @Post('new-password')
+  @ApiExcludeEndpoint(true)
+  @UseGuards(AuthenticatedGuard)
   async resetPassword(
     @Req() request: Request,
     @Body() newPassword: NewPasswordDto
@@ -65,8 +75,21 @@ export class AuthController {
   }
 
   @Get('/user')
+  @UseGuards(AuthenticatedGuard)
   async getUser(@Req() request: Request) {
-    console.log(request.user);
     return request.user;
+  }
+
+  @Get('/close')
+  @UseGuards(AuthenticatedGuard)
+  async closeSession(@Req() request: Request, @Res() res: Response) {
+    try {
+      request.logOut({ keepSessionInfo: false }, (err) => {
+        if (err) throw new Error(err);
+        res.redirect(request.headers.origin);
+      });
+    } catch (error) {
+      throw new HttpException(error?.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

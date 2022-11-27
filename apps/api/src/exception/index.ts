@@ -96,3 +96,10 @@ export const ERR04 = {
   en: `The number of classes in a specialty cannot differ from the number of years available in its curriculum.`,
   fr: `Le nombre de classes dans une spécialité ne peut différer du nombre d'années disponibles dans son cursus.`,
 };
+export const ERR05 = (
+  value: string | number | boolean,
+  expectedValue: string | number | boolean
+) => ({
+  en: `Provided data are wrong. Expecting ${expectedValue}, found ${value}`,
+  fr: `Les données fournies sont erronées. On attendait ${expectedValue},  on a trouvé ${value}`,
+});

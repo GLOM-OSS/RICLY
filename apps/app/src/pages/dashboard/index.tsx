@@ -1,17 +1,28 @@
 import { FileDownloadOutlined, ReportRounded } from '@mui/icons-material';
 import { Box, Button, Skeleton, Typography } from '@mui/material';
-import { SubscribeInterface, Subscription } from '@ricly/interfaces';
+import {
+  SubscribeInterface,
+  Subscription,
+  UsageInterface
+} from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
 import Scrollbars from 'rc-scrollbars';
 import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useNavigate, useParams } from 'react-router';
-import Graph, { UsageInterface } from '../../components/dashboard/graph';
+import Graph from '../../components/dashboard/graph';
 import SubscriptionCard from '../../components/dashboard/subscriptionCard';
 import SubscriptionDialog from '../../components/dashboard/subscriptionDialog';
 import { useUser } from '../../contexts/UserContextProvider';
+import {
+  findSchoolData,
+  getApiUsageStats
+} from '../../services/school.service';
+import {
+  createBinanceOrder,
+  getSubscriptions
+} from '../../services/subscription.service';
 
 export default function Dashboard() {
   const { formatMessage, formatNumber } = useIntl();
@@ -24,25 +35,15 @@ export default function Dashboard() {
 
   const loadSchoolData = () => {
     setIsSchoolLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL DATA HERE with data school_code
-      if (random() > 5) {
-        const newSchool = {
-          api_calls_left: 20,
-          api_calls_used: 200,
-          api_key: 'kskdksis',
-          api_test_key: 'kdksowkekd',
-          school_acronym: 'IAI',
-          school_code: 'skdk',
-          school_name: 'Universite des montagnes',
-          test_api_calls_left: 10,
-        };
+    findSchoolData(school_code as string)
+      .then((school) => {
         userDispatch({
           type: 'SELECT_SCHOOL',
-          payload: { selected_school: newSchool },
+          payload: { selected_school: school },
         });
         setIsSchoolLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({ render: formatMessage({ id: 'loadingSchoolData' }) });
         notif.update({
@@ -51,28 +52,28 @@ export default function Dashboard() {
             <ErrorMessage
               retryFunction={loadSchoolData}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSchoolData' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingSchoolData' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const [areSubscriptionsLoading, setAreSubscriptionsLoading] =
     useState<boolean>(false);
   const loadSubscriptions = () => {
     setAreSubscriptionsLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL SUBSCRIPTIONS HERE with data school_code
-      if (random() > 5) {
-        const newSubscriptions: Subscription[] = [];
-        setSubscriptions(newSubscriptions);
+    getSubscriptions(school_code as string)
+      .then((subscriptions) => {
+        setSubscriptions(subscriptions);
         setAreSubscriptionsLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingSubscriptions' }),
@@ -83,15 +84,16 @@ export default function Dashboard() {
             <ErrorMessage
               retryFunction={loadSubscriptions}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingSubscriptions' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingSubscriptions' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   const [usageGraphData, setUsageGraphData] = useState<UsageInterface[]>([]);
@@ -100,17 +102,12 @@ export default function Dashboard() {
 
   const loadGraphData = () => {
     setIsGraphDataLoading(true);
-    setTimeout(() => {
-      // TODO: CALL API TO GET SCHOOL SUBSCRIPTIONS HERE with data school_code
-      if (random() > 5) {
-        const newUsageData: UsageInterface[] = [
-          { calls: 15, date: new Date() },
-          { calls: 10, date: new Date('2022/11/12') },
-          { calls: 72, date: new Date('2022/11/15') },
-        ];
-        setUsageGraphData(newUsageData);
+    getApiUsageStats(school_code as string)
+      .then((usageData) => {
+        setUsageGraphData(usageData);
         setIsGraphDataLoading(false);
-      } else {
+      })
+      .catch((error) => {
         const notif = new useNotification();
         notif.notify({
           render: formatMessage({ id: 'loadingGraphData' }),
@@ -121,15 +118,16 @@ export default function Dashboard() {
             <ErrorMessage
               retryFunction={loadGraphData}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'failedLoadingGraphData' })}
+              message={
+                error?.message ||
+                formatMessage({ id: 'failedLoadingGraphData' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 3000);
+      });
   };
 
   useEffect(() => {
@@ -164,10 +162,9 @@ export default function Dashboard() {
     const notif = new useNotification();
     setNotifications([notif]);
     notif.notify({ render: formatMessage({ id: 'subscribing' }) });
-    setTimeout(() => {
-      setIsSubscribing(false);
-      //TODO call api here for binance payment
-      if (random() > 5) {
+    createBinanceOrder()
+      .then((data) => {
+        console.log(data);
         notif.update({
           render: formatMessage({ id: 'subscribedSuccessfully' }),
         });
@@ -179,22 +176,23 @@ export default function Dashboard() {
           transaction_id: 'sring',
         };
         //TODO: call backend api here to register subscription with submitData
-      } else {
+      })
+      .catch((error) => {
         notif.update({
           type: 'ERROR',
           render: (
             <ErrorMessage
               retryFunction={() => handleNewSubscription(total_payable)}
               notification={notif}
-              // TODO: message should come from backend api
-              message={formatMessage({ id: 'subscriptionFailed' })}
+              message={
+                error?.message || formatMessage({ id: 'subscriptionFailed' })
+              }
             />
           ),
           autoClose: false,
           icon: () => <ReportRounded fontSize="medium" color="error" />,
         });
-      }
-    }, 4000);
+      });
   };
 
   return (

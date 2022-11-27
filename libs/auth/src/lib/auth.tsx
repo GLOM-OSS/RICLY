@@ -1,13 +1,14 @@
 import { Google, ReportRounded } from '@mui/icons-material';
 import { Box, Button, lighten, Typography } from '@mui/material';
+import { User } from '@ricly/interfaces';
 import { theme } from '@ricly/theme';
 import { ErrorMessage, useNotification } from '@ricly/toast';
-import { random } from '@ricly/utils';
-import { useState } from 'react';
+import { gapi, loadAuth2 } from 'gapi-script';
+import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import Logo from '../assets/Logo.png';
 import { useNavigate } from 'react-router';
-
+import Logo from '../assets/Logo.png';
+import { customAuthentication } from './auth.service';
 const ExternalLink = ({ children, to }: { to: string; children: string }) => {
   return (
     <Typography
@@ -58,63 +59,111 @@ const ExternalLink = ({ children, to }: { to: string; children: string }) => {
   );
 };
 
-export function Auth({ app = 'app' }: { app?: string }) {
+export function Auth({
+  app = 'app',
+  updateUserContext,
+}: {
+  app?: string;
+  updateUserContext: (user: User) => void;
+}) {
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
-
   const [isAuthenticatingUser, setIsAuthenticatingUser] =
     useState<boolean>(false);
-  const authenticateUser = () => {
-    const notif = new useNotification();
-    setIsAuthenticatingUser(true);
-    notif.notify({
-      render: formatMessage({ id: 'authenticatingUser' }),
-    });
-    setTimeout(() => {
-      if (app === 'app') {
-        // TODO: CALL API TO CONNECT DEVELOPER WITH GOOGLE
-        if (random() > 5) {
-          navigate('/schools');
-          notif.dismiss();
-        } else {
-          notif.update({
-            type: 'ERROR',
-            render: (
-              <ErrorMessage
-                retryFunction={authenticateUser}
-                notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'authenticationFailed' })}
-              />
-            ),
-            autoClose: false,
-            icon: () => <ReportRounded fontSize="medium" color="error" />,
-          });
-          setIsAuthenticatingUser(false);
-        }
+  const [user, setUser] = useState<{ email: string; fullname: string }>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const setAuth2 = async () => {
+      const auth2 = await loadAuth2(
+        gapi,
+        process.env['NX_GOOGLE_CLIENT_ID'] as string,
+        ''
+      );
+      if (auth2.isSignedIn.get()) {
+        authenticateUser(auth2.currentUser.get());
       } else {
-        // TODO: CALL API TO CONNECT SCHOOL PERNNEL WITH GOOGLE HERE.
-        if (random() > 5) {
-          navigate('/dashboard');
+        attachSignin(
+          document.getElementById('google-button') as HTMLElement,
+          auth2
+        );
+      }
+    };
+    setAuth2();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      const setAuth2 = async () => {
+        const auth2 = await loadAuth2(
+          gapi,
+          process.env['NX_GOOGLE_CLIENT_ID'] as string,
+          ''
+        );
+        attachSignin(
+          document.getElementById('google-button') as HTMLElement,
+          auth2
+        );
+      };
+      setAuth2();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const authenticateUser = (currentUser: any) => {
+    const email: string = currentUser.getBasicProfile().getEmail();
+    const familyName: string = currentUser.getBasicProfile().getFamilyName();
+    const givenName: string = currentUser.getBasicProfile().getGivenName();
+    const fullname = `${familyName} ${givenName}`;
+    setUser({ email, fullname });
+    if (email && app !== 'app') {
+      setIsAuthenticatingUser(true);
+      const notif = new useNotification();
+      notif.notify({
+        render: formatMessage({ id: 'authenticatingUser' }),
+      });
+      customAuthentication({ email, fullname })
+        .then((user) => {
+          navigate(app === 'app' ? '/-/schools' : '/-/dashboard');
           notif.dismiss();
-        } else {
+          updateUserContext(user);
+        })
+        .catch((error) => {
           notif.update({
             type: 'ERROR',
             render: (
               <ErrorMessage
-                retryFunction={authenticateUser}
+                retryFunction={() => authenticateUser(currentUser)}
                 notification={notif}
-                // TODO: message should come from backend api
-                message={formatMessage({ id: 'authenticationFailed' })}
+                message={
+                  error?.message ||
+                  formatMessage({ id: 'authenticationFailed' })
+                }
               />
             ),
             autoClose: false,
             icon: () => <ReportRounded fontSize="medium" color="error" />,
           });
           setIsAuthenticatingUser(false);
-        }
+        });
+    }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const attachSignin = (element: HTMLElement, auth2: any) => {
+    auth2.attachClickHandler(
+      element,
+      {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (googleUser: any) => {
+        authenticateUser(googleUser);
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (error: any) => {
+        console.log(JSON.stringify(error));
       }
-    }, 3000);
+    );
   };
 
   return (
@@ -153,19 +202,30 @@ export function Auth({ app = 'app' }: { app?: string }) {
             id: app === 'app' ? 'developerSignInCaption' : 'signInCaption',
           })}
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          sx={{ marginTop: theme.spacing(7), textTransform: 'none' }}
-          startIcon={<Google fontSize="large" sx={{ color: 'white' }} />}
-          onClick={authenticateUser}
-          disabled={isAuthenticatingUser}
+        <Typography
+          component="a"
+          rel="noreferrer"
+          href={
+            app === 'app'
+              ? `${process.env['NX_API_BASE_URL']}/auth/google-signin`
+              : undefined
+          }
         >
-          {formatMessage({
-            id: app === 'app' ? 'authenticateWithGoogle' : 'signInWithGoogle',
-          })}
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            id={app === 'app' ? 'app-signin' : 'google-button'}
+            disabled={isAuthenticatingUser}
+            // onClick={() => setHasSigned(true)}
+            sx={{ marginTop: theme.spacing(7), textTransform: 'none' }}
+            startIcon={<Google fontSize="large" sx={{ color: 'white' }} />}
+          >
+            {formatMessage({
+              id: app === 'app' ? 'authenticateWithGoogle' : 'signInWithGoogle',
+            })}
+          </Button>
+        </Typography>
       </Box>
       <Box
         sx={{
@@ -209,4 +269,5 @@ export function Auth({ app = 'app' }: { app?: string }) {
   );
 }
 
+export { logOut, getUserInfo } from './auth.service';
 export default Auth;
