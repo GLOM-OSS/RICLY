@@ -253,7 +253,7 @@ export default function TestTimetable() {
               month: 'long',
               day: '2-digit',
             }
-          )} ( ${programs[0].classroom_code} )`}
+          )} ( ${programs[0]?.classroom_code} )`}
         </Typography>
       ) : (
         <Skeleton animation="wave" width="40%" />

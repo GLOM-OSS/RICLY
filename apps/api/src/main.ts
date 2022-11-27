@@ -14,7 +14,7 @@ import { HttpExceptionFilter } from './exception/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: {
-      origin: ['http://localhost:4200'],
+      origin: ['http://localhost:4200', 'http://localhost:4201'],
       credentials: true,
     },
   });

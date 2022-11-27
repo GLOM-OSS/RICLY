@@ -217,6 +217,7 @@ export function Auth({
             size="large"
             id={app === 'app' ? 'app-signin' : 'google-button'}
             disabled={isAuthenticatingUser}
+            // onClick={() => setHasSigned(true)}
             sx={{ marginTop: theme.spacing(7), textTransform: 'none' }}
             startIcon={<Google fontSize="large" sx={{ color: 'white' }} />}
           >
