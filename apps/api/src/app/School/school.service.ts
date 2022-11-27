@@ -44,7 +44,7 @@ export class SchoolService {
         school_acronym,
         api_calls_left: 0,
         api_calls_used: 0,
-        test_api_calls_left: 500,
+        test_api_calls_left: Number(process.env.NUMBER_OF_TEST),
         api_key: getRandomString(64),
         api_test_key: getRandomString(58),
         Developer: { connect: { developer_id } },
