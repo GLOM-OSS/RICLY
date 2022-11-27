@@ -1,11 +1,12 @@
 subject_name,subject_code,classroom_code,email
-Introduction a Linux,UN1,MGL2,Ivan.boss@gmail.com
-Programmation Oriente Object,POO,CL2,kuidja@gmail.com
-Base de donnees distubees,BDD,SR1,l.tchakoumi@gmail.com
-Programmation syteme,PS,SR3,Ivan.boss@gmail.com
-Machine Learning,ML,GL3,kuidja@gmail.com
-Introduction a Linux,IL,GL3,kuidja@gmail.com
-Chimie,CHIM,MGL2,Ivan.boss@gmail.com
-Biologie,BIO,CL2,kuidja@gmail.com
-Applied Math,AM,SR1,l.tchakoumi@gmail.com
-Applied Math2,AM2,Gl2,Ivan.boss@gmail.com
+Introduction to Algorithm & DS,ADS,GL1,djembissiearistin@gmail.com
+Algorithm & DS II,ADSII,GL1,djembissiearistin@gmail.com
+Object Oriented Programming,OOP,GL1,kuidjamarco@gmail.com
+Databases,DB,GL1,ltchakoumi@gmail.com
+Database II,DBII,GL1,ltchakoumi@gmail.com
+Machine Learning,ML,GL1,kuidjamarco@gmail.com
+Operating Systems,OS,GL1,djembissiearistin@gmail.com
+Geographical Information Systems,GIS,GL1,djembissiearistin@gmail.com
+Introduction to Python,IP,GL1,kuidjamarco@gmail.com
+Advanced Python,AP,GL1,kuidjamarco@gmail.com
+Engineering Mathematics,EM,GL1,ltchakoumi@gmail.com
