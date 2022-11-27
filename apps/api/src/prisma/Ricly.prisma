@@ -135,7 +135,7 @@ model Availability {
     teacher_id        String   @db.VarChar(36)
     Teacher           Teacher  @relation(fields: [teacher_id], references: [teacher_id], onDelete: Cascade, onUpdate: Cascade)
 
-    @@unique([availability_date, teacher_id])
+    @@unique([availability_date, teacher_id, start_time, end_time])
 }
 
 model Building {
