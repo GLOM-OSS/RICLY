@@ -100,9 +100,14 @@ export default function Schedules() {
     const timestamp = new Date().setDate(new Date().getDate() - 7);
     getTimetablePrograms(timestamp)
       .then(({ programs, start_date, end_date }) => {
-        console.log(programs, timestamp)
         setTableInterval({ start_date, end_date });
-        setPrograms(programs);
+        setPrograms(
+          programs.map(({ start_date, end_date, ...program }) => ({
+            ...program,
+            start_date: new Date(start_date),
+            end_date: new Date(end_date),
+          }))
+        );
         setAreProgramsLoading(false);
       })
       .catch((error) => {
@@ -157,8 +162,8 @@ export default function Schedules() {
           sx={{ textAlign: 'center', borderBottom: '1px solid black' }}
         >
           {`${formatDateTimeRange(
-            tableInterval.start_date,
-            tableInterval.end_date,
+            new Date(tableInterval.start_date),
+            new Date(tableInterval.end_date),
             {
               year: 'numeric',
               month: 'long',

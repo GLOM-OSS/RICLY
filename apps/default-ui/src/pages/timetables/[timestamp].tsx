@@ -70,7 +70,7 @@ export default function TestTimetable() {
   };
 
   const getSlots = (programs: Program[]): Slot[] => {
-    const newSlots: Slot[] = slots;
+    const newSlots: Slot[] = [];
     programs.forEach(({ start_date: sd, end_date: ed }) => {
       const start = new Date(
         new Date().setUTCHours(
@@ -116,10 +116,6 @@ export default function TestTimetable() {
       );
       //if program's day family does exist, push it into it's family and update displayPrograms
       if (programList) {
-        console.log({
-          sd: program.start_date.getUTCHours(),
-          ed: program.end_date.getUTCHours(),
-        });
         //look for the programDayFamily and swap it with a new one containing this program
         displayPrograms = displayPrograms.map((programDayFamily) => {
           if (
@@ -225,7 +221,6 @@ export default function TestTimetable() {
         ),
         usage: 'break',
       };
-      //   console.log(programs)
       setSlots(
         [breakSlot, ...getSlots(programs)].sort((a, b) =>
           a.start_time > b.start_time ? -1 : 1
@@ -251,8 +246,8 @@ export default function TestTimetable() {
           sx={{ textAlign: 'center', borderBottom: '1px solid black' }}
         >
           {`${formatDateTimeRange(
-            tableInterval.start_date,
-            tableInterval.end_date,
+            new Date(tableInterval.start_date),
+            new Date(tableInterval.end_date),
             {
               year: 'numeric',
               month: 'long',
