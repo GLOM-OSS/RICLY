@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, TeacherTypeEnum } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateTimetableDto } from '../app.dto';
 
@@ -155,9 +155,7 @@ export class TimetableService {
                 end_time: nextPeriodStartTime,
                 availability_date: dayPeriodStartTime,
               },
-              dalyProgrammedSubjects.map(
-                (classroom_has_subject_id) => classroom_has_subject_id
-              )
+              dalyProgrammedSubjects
             );
             //retrieving implicated classroom subjects (classroom_has_subject_id)
             let classroomHasSubjects: IClassroomHasSubject[] = [];
@@ -184,7 +182,7 @@ export class TimetableService {
               await this.searchCommonSubjects(
                 classroom_id,
                 classroomHasSubjects,
-                dalyProgrammedSubjects.map((id) => id)
+                dalyProgrammedSubjects
               );
 
             //added coreSubjects to implicated classroom subjects (classroom_has_subject_id)
@@ -207,32 +205,21 @@ export class TimetableService {
             );
 
             const programs: IClassroomHasSubject[] = [];
-            classroomHasSubjects.forEach(
-              ({
-                hall_id,
-                classroom_has_subject_id,
-                classroom_id: id,
-                subject_id,
-              }) => {
-                if (
-                  !programs.find(
-                    (_) => _.subject_id !== subject_id && _.classroom_id === id
-                  ) ||
-                  id === classroom_id
+            classroomHasSubjects = classroomHasSubjects.length
+              ? classroomHasSubjects.filter(
+                  ({ classroom_has_subject_id }) =>
+                    !dalyProgrammedSubjects.includes(classroom_has_subject_id)
                 )
-                  programs.push({
-                    hall_id,
-                    subject_id,
-                    classroom_id,
-                    classroom_has_subject_id,
-                  });
-                if (
-                  !dalyProgrammedSubjects.find(
-                    (id) => id === classroom_has_subject_id
-                  )
+              : [];
+            const commonCores = classroomHasSubjects.length
+              ? classroomHasSubjects.filter(
+                  ({ subject_id }) =>
+                    subject_id === classroomHasSubjects[0].subject_id
                 )
-                  dalyProgrammedSubjects.push(classroom_has_subject_id);
-              }
+              : [];
+            programs.push(...commonCores);
+            dalyProgrammedSubjects.push(
+              ...commonCores.map((_) => _.classroom_has_subject_id)
             );
             newPrograms.push(
               ...programs.map(({ hall_id, classroom_has_subject_id }) => ({
@@ -294,6 +281,7 @@ export class TimetableService {
     const teachers = await this.prismaService.teacher.findMany({
       orderBy: { teacher_type: 'asc' }, //This will prioritize part_time over permanent and permanent.
       select: {
+        teacher_type: true,
         ClassroomHasSubjects: {
           select: {
             classroom_has_subject_id: true,
@@ -318,12 +306,10 @@ export class TimetableService {
           },
         },
         ClassroomHasSubjects: {
-          none: {
-            classroom_has_subject_id: {
-              in: unwantedCourse,
-            },
-          },
           some: {
+            classroom_has_subject_id: {
+              notIn: unwantedCourse,
+            },
             Classroom: {
               classroom_id,
             },
@@ -338,7 +324,13 @@ export class TimetableService {
       );
       return index >= 0;
     });
-    return availableTeachers;
+    const missionaries = availableTeachers.filter(
+      (_) => _.teacher_type === TeacherTypeEnum.MISSIONARY
+    );
+    const otherTeachers = availableTeachers.filter(
+      (_) => _.teacher_type !== TeacherTypeEnum.MISSIONARY
+    );
+    return [...missionaries, ...otherTeachers];
   }
 
   async searchCommonSubjects(
@@ -459,7 +451,6 @@ export class TimetableService {
     },
     concernedPrograms: { classroom_has_subject_id: string }[]
   ) {
-    console.log(concernedPrograms);
     const usedAvailabilities: string[] = [];
     const newAvailabilities: Prisma.AvailabilityCreateManyInput[] = [];
     const availabilities = await this.prismaService.availability.findMany({
